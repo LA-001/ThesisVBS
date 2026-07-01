@@ -1,0 +1,20 @@
+executable              = $(directory)/batchScript.sh
+arguments               = /afs/cern.ch/user/g/gmarozzo/CMSSW_14_0_9/src/Run3VBSWithTaus/submissions/$(directory) $(ClusterId)$(ProcId) a b  
+output                  = log/$(ClusterId).$(ProcId).out
+error                   = log/$(ClusterId).$(ProcId).err
+log                     = log/$(ClusterId).log
+Initialdir              = $(directory)
+
+
+
+#Possible values: https://batchdocs.web.cern.ch/local/submit.html
++JobFlavour             = "longlunch"
+
+x509userproxy           = /afs/cern.ch/user/g/gmarozzo/x509up_u136841 
+
+#https://www-auth.cs.wisc.edu/lists/htcondor-users/2010-September/msg00009.shtml
+periodic_remove         = JobStatus == 5
+
+ShouldTransferFiles     = NO
+
+requirements = (OpSysAndVer =?= "AlmaLinux9")
