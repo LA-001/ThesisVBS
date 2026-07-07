@@ -1,3 +1,3 @@
 rm -r *Chunk*
 rm -r AAAOK
-rm -r /eos/user/g/gmarozzo/JobOutput/*
+rm -r /eos/user/l/lallasia/JobOutput/*

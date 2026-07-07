@@ -61,7 +61,7 @@ if $runninglocally; then
   cp testoutput.root* *.txt *.gz $SUBMIT_DIR
 fi
 
-echo "Copy to /eos/user/g/gmarozzo/JobOutput/"$dir_name
-mv testoutput.root /eos/user/g/gmarozzo/JobOutput/$dir_name
+echo "Copy to /eos/user/l/lallasia/JobOutput/"$dir_name
+mv testoutput.root /eos/user/l/lallasia/JobOutput/$dir_name
 
 exit $cmsRunStatus

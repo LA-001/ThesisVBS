@@ -27,7 +27,7 @@ foreach chunk ( *Chunk* )
 
 
  # Check that root file is existing and not empty
- set filename=/eos/user/g/gmarozzo/JobOutput/${chunk}/testoutput.root
+ set filename=/eos/user/l/lallasia/JobOutput/${chunk}/testoutput.root
  if ( ! -e $filename ) then
 #   echo "Missing root file in " ${chunk}
    set fail="true"

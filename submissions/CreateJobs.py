@@ -20,7 +20,7 @@ def createdirs(num,dataset,identifier,macro):
 macro = sys.argv[1].strip("macros/")
 samplelist = sys.argv[2]
 
-outputdir = "/eos/user/g/gmarozzo/JobOutput/" #TO BE CHANGED TO YOUR AREA
+outputdir = "/eos/user/l/lallasia/JobOutput/" #TO BE CHANGED TO YOUR AREA
 
 if not os.path.exists(outputdir):
   os.mkdir(outputdir)

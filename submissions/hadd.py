@@ -141,5 +141,5 @@ if __name__ == '__main__':
     # odir = args[1]
     # idirs = args[2:]
     # haddRec(odir, idirs)
-    odir = "/eos/user/g/gmarozzo/JobOutput"
+    odir = "/eos/user/l/lallasia/JobOutput"
     haddChunks(odir)
