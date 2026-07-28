@@ -22,6 +22,28 @@ using correction::CorrectionSet;
 
 #include "Utils.C"
 
+bool JetIdTightLepVeto(float eta, float neHEF, float neEmEF, float chEmEF, float muEF, int neMultiplicity, int chMultiplicity){
+    bool tight = false;
+    float abseta = TMath::Abs(eta);
+
+    if(abseta <= 2.6)
+        tight = (neHEF < 0.99) && (neEmEF < 0.9) && (chMultiplicity+neMultiplicity > 1) && (chMultiplicity > 0) && (chEmEF < 0.8);
+    else if(abseta <= 2.7)
+        tight = (neHEF < 0.90) && (neEmEF < 0.99);
+    else if(abseta <= 3.0)
+        tight = (neHEF < 0.99);
+    else
+        tight = (neMultiplicity >= 2) && (neEmEF < 0.4);
+
+    bool tightLepVeto = false;
+    if(abseta <= 2.7)
+        tightLepVeto = tight && (muEF < 0.8) && (chEmEF < 0.8);
+    else
+        tightLepVeto = tight;
+
+    return tightLepVeto;
+}
+
 void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   //TString filename = "root://cms-xrd-global.cern.ch/" + srcfile;
   TString filename = "root://xrootd-cms.infn.it/" + srcfile;
@@ -335,6 +357,30 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Int_t nGenJet_;
   tree->SetBranchAddress("nGenJet",&nGenJet_);
 
+tree->SetBranchStatus("Jet_neHEF", 1);
+Float_t jet_neHEF_[128];
+tree->SetBranchAddress("Jet_neHEF", &jet_neHEF_);
+
+tree->SetBranchStatus("Jet_neEmEF", 1);
+Float_t jet_neEmEF_[128];
+tree->SetBranchAddress("Jet_neEmEF", &jet_neEmEF_);
+
+tree->SetBranchStatus("Jet_chEmEF", 1);
+Float_t jet_chEmEF_[128];
+tree->SetBranchAddress("Jet_chEmEF", &jet_chEmEF_);
+
+tree->SetBranchStatus("Jet_muEF", 1);
+Float_t jet_muEF_[128];
+tree->SetBranchAddress("Jet_muEF", &jet_muEF_);
+
+tree->SetBranchStatus("Jet_neMultiplicity", 1);
+UChar_t jet_neMultiplicity_[128];
+tree->SetBranchAddress("Jet_neMultiplicity", &jet_neMultiplicity_);
+
+tree->SetBranchStatus("Jet_chMultiplicity", 1);
+UChar_t jet_chMultiplicity_[128];
+tree->SetBranchAddress("Jet_chMultiplicity", &jet_chMultiplicity_);
+
   runtree->GetEntry(0);
 
   float weightscale_=1/sumgenw_;
@@ -441,6 +487,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 			if(deltaR(p4jet,p4lep)<0.4) { // Reject jets that overlap with the other lepton
 	  			continue;
 			}
+
+			// Jet ID TightLepVeto
+			if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
+
 			Float_t jetpt = jet_pt_[j];
 			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
 			if(pass) {
