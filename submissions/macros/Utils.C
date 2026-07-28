@@ -111,6 +111,11 @@ string DY_ptfile = "jsons/DY_pTll_weights_2023postBPix.json.gz";
 auto DY_c_set = CorrectionSet::from_file(DY_ptfile);
 auto DY_SF= DY_c_set->at("DY_pTll_reweighting");
 
+Float_t WP_L = 0.0246; 
+Float_t WP_M = 0.1272;
+Float_t WP_T = 0.4648;
+Float_t WP_XT = 0.6298;
+Float_t WP_XXT = 0.9739;
 
 //Practical functions for some computations
 

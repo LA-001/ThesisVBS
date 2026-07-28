@@ -8,7 +8,6 @@
 #include "TH2F.h"
 #include "TF1.h"
 #include "TRandom3.h"
-#include "TMath.h"
 #include <chrono>
 #include <cmath>
 #include "Math/Vector4D.h"
@@ -33,34 +32,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   TTree *outtree = new TTree("outtree", "outtree");
 
-  Int_t O_njets, O_sample;
-  Float_t O_mvis, O_taupt, O_taueta, O_leppt, O_mjj, O_deltaRjj;
-  Float_t O_tauphi, O_lepeta, O_lepphi, O_metpt, O_metphi;
-  Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
+  Int_t O_num_WP_L, O_num_WP_M, O_num_WP_T, O_num_WP_XT, O_num_WP_XXT;
+  Float_t O_btagjet1, O_btagjet2;
   Float_t O_weight;
   
-  bool O_ismuon;
+  Bool_t O_ismuon;
 
   outtree->Branch("weight",&O_weight,"weight/F");
-  outtree->Branch("mvis",&O_mvis,"mvis/F");
-  outtree->Branch("taupt",&O_taupt,"taupt/F");
-  outtree->Branch("leppt",&O_leppt,"leppt/F");
-  outtree->Branch("njets",&O_njets,"njets/I");
-  outtree->Branch("mjj",&O_mjj,"mjj/F");
-  outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
-  outtree->Branch("sample",&O_sample,"sample/I");
-  outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
-
-  outtree->Branch("taueta",  &O_taueta,  "taueta/F");
-  outtree->Branch("tauphi",  &O_tauphi,  "tauphi/F");
-  outtree->Branch("lepeta",  &O_lepeta,  "lepeta/F");
-  outtree->Branch("lepphi",  &O_lepphi,  "lepphi/F");
-  outtree->Branch("jet1eta", &O_jet1eta, "jet1eta/F");
-  outtree->Branch("jet1phi", &O_jet1phi, "jet1phi/F");
-  outtree->Branch("jet2eta", &O_jet2eta, "jet2eta/F");
-  outtree->Branch("jet2phi", &O_jet2phi, "jet2phi/F");
-  outtree->Branch("metpt",   &O_metpt,   "metpt/F");
-  outtree->Branch("metphi",  &O_metphi,  "metphi/F");
+  outtree->Branch("num_WP_L", &O_num_WP_L, "num_WP_L/I");
+  outtree->Branch("num_WP_M", &O_num_WP_M, "num_WP_M/I");
+  outtree->Branch("num_WP_T", &O_num_WP_T, "num_WP_T/I");
+  outtree->Branch("num_WP_XT", &O_num_WP_XT, "num_WP_XT/I");
+  outtree->Branch("num_WP_XXT", &O_num_WP_XXT, "num_WP_XXT/I");
+  outtree->Branch("btagjet1", &O_btagjet1, "btagjet1/F");
+  outtree->Branch("btagjet2", &O_btagjet2, "btagjet2/F");
+  outtree->Branch("imuon",	&O_ismuon,	"ismuon/O");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -375,7 +361,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     tree->GetEntry(i);
 
     bool excflag=0;
-	bool btagflag=0;
 
     Bool_t METfilters= (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
     if(!METfilters) excflag=1;
@@ -387,8 +372,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Int_t lepton=0, jets;
 
     Int_t ntaus=0, nbtags=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
+	  Int_t nbjet_L=0, nbjet_M=0, nbjet_T=0, nbjet_XT=0, nbjet_XXT=0;
     Float_t selectedtaupt=0., selectedleppt=0.;
-	int jet1index = -1, jet2index = -1;
+	  Int_t jet1index = -1, jet2index = -1;
+	  Bool_t ismuon = true;
 
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
     
@@ -397,11 +384,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Float_t taupt = tau_pt_[j];
       Bool_t pass = TauSelector(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], weight_);
       if(pass){
-		ntaus++;
+		    ntaus++;
         //if(ntaus>1) excflag=1;
         tauindex=j;
-		taucharge=tau_charge_[j];
-		p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
+		    taucharge=tau_charge_[j];
+	    	p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
       }
     }
         
@@ -439,12 +426,16 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     //For the moment no veto on additional leptons
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-    		if(nmuons==1) typeevent=1; //Mu-tauh events
-			else typeevent=2; //E-tauh events
+    		if(nmuons==1){ 
+				typeevent=1; //Mu-tauh events
+				ismuon = true;
+			}else{ 
+				typeevent=2; //E-tauh events
+				ismuon = false;
+			}
     	}
       
     	for(int j=0; j<njets_; j++){
-			
 			ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 			if(deltaR(p4jet,p4tau)<0.4) { // Reject jets that overlap with the tau
 	  			continue;
@@ -456,21 +447,30 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
 			if(pass) {
 	  			njets++;
-				if(jet_btag_[j] > WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
 	  			if(njets==1){
 					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+					jet1index = j;
 				}else if(njets==2){
 					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+					jet2index = j;
 				}
-			}
-    	}
+
+			  if(abs(jet_eta_[j])<2.5){
+				  if(jet_btag_[j]>WP_L) nbjet_L += 1;
+				  if(jet_btag_[j]>WP_M) nbjet_M += 1;
+				  if(jet_btag_[j]>WP_T) nbjet_T += 1;
+				  if(jet_btag_[j]>WP_XT) nbjet_XT += 1;
+				  if(jet_btag_[j]>WP_XXT) nbjet_XXT += 1;
+			  }
+      }
+    }
 	}
     
     bool trigpath=false; 
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
     
-    if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
+    if(trigpath and typeevent>0 and !excflag and njets>=2){
 
       float puweight=pu_SF->evaluate({npu2_,"nominal"});
 
@@ -480,31 +480,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       ROOT::Math::PtEtaPhiMVector p4jets=p4jet1+p4jet2;
       float mjj_ = p4jets.M(); // Invariant mass of the dijet system
       float deltaRjj_ = deltaR(p4jet1,p4jet2);
-	
-      O_weight=weight_;
-      O_sample=sample;
-      O_mvis=mvis_;
-      O_njets=njets;
-      O_taupt=p4tau.Pt();
-      O_leppt=p4lep.Pt();
-      O_mjj = mjj_;
-      O_deltaRjj = deltaRjj_;
 
-	  O_taueta  = p4tau.Eta();
-	  O_tauphi  = p4tau.Phi();
-	  O_lepeta  = p4lep.Eta();
-	  O_lepphi  = p4lep.Phi();
-	  O_metpt   = met_pt_;
-	  O_metphi  = met_phi_;
-	  O_jet1eta = p4jet1.Eta();
-      O_jet1phi = p4jet1.Phi();
-      O_jet2eta = p4jet2.Eta();
-      O_jet2phi = p4jet2.Phi();
+        O_weight = weight_;	
+	    O_num_WP_L = nbjet_L;
+	    O_num_WP_M = nbjet_M;
+	    O_num_WP_T = nbjet_T;
+	    O_num_WP_XT = nbjet_XT;
+	    O_num_WP_XXT = nbjet_XXT;
+	    O_btagjet1 = jet_btag_[jet1index];
+	    O_btagjet2 = jet_btag_[jet2index];
+	    O_ismuon = ismuon;
       
       outtree->Fill();
 
     }
- }
+  }
   
   outtree->Write();
   auto endTime = std::chrono::high_resolution_clock::now();
