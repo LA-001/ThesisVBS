@@ -450,7 +450,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         O_jeteta[k]  = jet_eta_[j];
         O_jetphi[k]  = jet_phi_[j];
         O_jetpt[k]   = jetpt;
-        O_jetflav[k] = jet_flav_[j];
         O_jetbtag[k] = jet_btag_[j];
         k++;
             
