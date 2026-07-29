@@ -22,12 +22,12 @@ using correction::CorrectionSet;
 
 #include "Utils.C"
 
-bool JetIdTightLepVeto(float eta, float neHEF, float neEmEF, float chEmEF, float muEF, int neMultiplicity, int chMultiplicity){
+bool JetIdTightLepVeto(float eta, float neHEF, float neEmEF, float chEmEF, float muEF, float chHEF, int neMultiplicity, int chMultiplicity){
     bool tight = false;
     float abseta = TMath::Abs(eta);
 
     if(abseta <= 2.6)
-        tight = (neHEF < 0.99) && (neEmEF < 0.9) && (chMultiplicity+neMultiplicity > 1) && (chMultiplicity > 0) && (chEmEF < 0.8);
+        tight = (neHEF < 0.99) && (neEmEF < 0.9) && (chMultiplicity+neMultiplicity > 1) && (chHEF > 0.01) && (chMultiplicity > 0);
     else if(abseta <= 2.7)
         tight = (neHEF < 0.90) && (neEmEF < 0.99);
     else if(abseta <= 3.0)
@@ -357,29 +357,33 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Int_t nGenJet_;
   tree->SetBranchAddress("nGenJet",&nGenJet_);
 
-tree->SetBranchStatus("Jet_neHEF", 1);
-Float_t jet_neHEF_[128];
-tree->SetBranchAddress("Jet_neHEF", &jet_neHEF_);
+  tree->SetBranchStatus("Jet_neHEF", 1);
+  Float_t jet_neHEF_[128];
+  tree->SetBranchAddress("Jet_neHEF", &jet_neHEF_);
 
-tree->SetBranchStatus("Jet_neEmEF", 1);
-Float_t jet_neEmEF_[128];
-tree->SetBranchAddress("Jet_neEmEF", &jet_neEmEF_);
+  tree->SetBranchStatus("Jet_neEmEF", 1);
+  Float_t jet_neEmEF_[128];
+  tree->SetBranchAddress("Jet_neEmEF", &jet_neEmEF_);
 
-tree->SetBranchStatus("Jet_chEmEF", 1);
-Float_t jet_chEmEF_[128];
-tree->SetBranchAddress("Jet_chEmEF", &jet_chEmEF_);
+  tree->SetBranchStatus("Jet_chEmEF", 1);
+  Float_t jet_chEmEF_[128];
+  tree->SetBranchAddress("Jet_chEmEF", &jet_chEmEF_);
 
-tree->SetBranchStatus("Jet_muEF", 1);
-Float_t jet_muEF_[128];
-tree->SetBranchAddress("Jet_muEF", &jet_muEF_);
+  tree->SetBranchStatus("Jet_muEF", 1);
+  Float_t jet_muEF_[128];
+  tree->SetBranchAddress("Jet_muEF", &jet_muEF_);
 
-tree->SetBranchStatus("Jet_neMultiplicity", 1);
-UChar_t jet_neMultiplicity_[128];
-tree->SetBranchAddress("Jet_neMultiplicity", &jet_neMultiplicity_);
+  tree->SetBranchStatus("Jet_neMultiplicity", 1);
+  UChar_t jet_neMultiplicity_[128];
+  tree->SetBranchAddress("Jet_neMultiplicity", &jet_neMultiplicity_);
 
-tree->SetBranchStatus("Jet_chMultiplicity", 1);
-UChar_t jet_chMultiplicity_[128];
-tree->SetBranchAddress("Jet_chMultiplicity", &jet_chMultiplicity_);
+  tree->SetBranchStatus("Jet_chMultiplicity", 1);
+  UChar_t jet_chMultiplicity_[128];
+  tree->SetBranchAddress("Jet_chMultiplicity", &jet_chMultiplicity_);
+
+  tree->SetBranchStatus("Jet_chHEF", 1);
+  Float_t jet_chHEF_[128];
+  tree->SetBranchAddress("Jet_chHEF", &jet_chHEF_);
 
   runtree->GetEntry(0);
 
@@ -481,28 +485,29 @@ tree->SetBranchAddress("Jet_chMultiplicity", &jet_chMultiplicity_);
     	for(int j=0; j<njets_; j++){
 			
 			ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-			if(deltaR(p4jet,p4tau)<0.4) { // Reject jets that overlap with the tau
-	  			continue;
-			}
-			if(deltaR(p4jet,p4lep)<0.4) { // Reject jets that overlap with the other lepton
-	  			continue;
-			}
-
-			// Jet ID TightLepVeto
-			if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
+			if(deltaR(p4jet,p4tau)<0.4)	continue;
+			if(deltaR(p4jet,p4lep)<0.4)	continue;
 
 			Float_t jetpt = jet_pt_[j];
 			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
 			if(pass) {
-	  		njets++;
-			  if(jet_btag_[j] > WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
+				if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
 
-        O_jeteta[k]  = jet_eta_[j];
-        O_jetphi[k]  = jet_phi_[j];
-        O_jetpt[k]   = jetpt;
-        O_jetbtag[k] = jet_btag_[j];
-        k++;
-            
+	  			njets++;
+
+				if(jet_btag_[j] > WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
+
+        		O_jeteta[k]  = jet_eta_[j];
+        		O_jetphi[k]  = jet_phi_[j];
+        		O_jetpt[k]   = jetpt;
+        		O_jetbtag[k] = jet_btag_[j];
+        		k++;
+
+	  			if(njets==1){
+					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+				}else if(njets==2){
+					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+				}
 			}
     	}
 	}
