@@ -266,3 +266,27 @@ Bool_t JetSelector(Float_t &pt, Float_t eta, Float_t &phi, Float_t rawfactor, Fl
   }
   else return false;
 }
+
+Bool_t JetIdTightLepVeto(float eta, float neHEF, float neEmEF, float chEmEF, float muEF, float chHEF, int neMultiplicity, int chMultiplicity){
+    bool tight = false;
+    float abseta = TMath::Abs(eta);
+
+    if(abseta <= 2.6){
+        tight = (neHEF < 0.99) && (neEmEF < 0.9) && (chMultiplicity+neMultiplicity > 1) && (chHEF > 0.01) && (chMultiplicity > 0);
+    }else if(abseta > 2.6 && abseta <= 2.7){
+        tight = (neHEF < 0.90) && (neEmEF < 0.99);
+    }else if(abseta > 2.7 && abseta <= 3.0){
+        tight = (neHEF < 0.99);
+    }else if(abseta > 3.0){
+        tight = (neMultiplicity >= 2) && (neEmEF < 0.4);
+    }
+
+    bool tightLepVeto = false;
+    if(abseta <= 2.7){
+        tightLepVeto = tight && (muEF < 0.8) && (chEmEF < 0.8);
+    }else{
+        tightLepVeto = tight;
+    }
+
+    return tightLepVeto;
+}
