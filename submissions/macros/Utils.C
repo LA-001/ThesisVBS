@@ -260,7 +260,7 @@ Bool_t JetSelector(Float_t &pt, Float_t eta, Float_t &phi, Float_t rawfactor, Fl
     float ran=gRandom->Gaus(0,JER->evaluate({eta,pt,rhocalo}));
     float JERSF = JER_SF->evaluate({eta,pt,"nom"});
     pt*=1+ran*sqrt(JERSF*JERSF-1);
-    if(pt<=50 && abs(eta)>2.5 && abs(eta)<3) return false;
+    if(pt<=50 && abs(eta)>2.5 && abs(eta)<3) return false;    // spikes in that abs(eta) range
     if(pt>30) return true;
     else return false;
   }
