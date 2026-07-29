@@ -485,8 +485,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     //For the moment no veto on additional leptons
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-    		if(nmuons==1) typeevent=1; //Mu-tauh events
-			else typeevent=2; //E-tauh events
+    		if(nmuons==1){ 
+				typeevent=1; //Mu-tauh events
+				ismuon = true;
+			}else{ 
+				typeevent=2; //E-tauh events
+				ismuon = false;
+			}
     	}
       
     	for(int j=0; j<njets_; j++){
