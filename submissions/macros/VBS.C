@@ -80,6 +80,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   UInt_t ls_;
   tree->SetBranchAddress("luminosityBlock",&ls_);
 
+//-------------------------- ELECTRONS ------------------------------------------------------------------------------------
+
   tree->SetBranchStatus("Electron_pt", 1);
   Float_t ele_pt_[128];
   tree->SetBranchAddress("Electron_pt",&ele_pt_);
@@ -127,6 +129,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Electron_seedGain", 1);
   UChar_t ele_gain_[128];
   tree->SetBranchAddress("Electron_seedGain",&ele_gain_);
+
+  tree->SetBranchStatus("nElectron", 1);
+  Int_t nelectrons_;
+  tree->SetBranchAddress("nElectron",&nelectrons_);
+
+//-------------------------- MUONS ----------------------------------------------------------------------------------------
   
   tree->SetBranchStatus("Muon_pt", 1);
   Float_t muon_pt_[128];
@@ -171,6 +179,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Muon_nTrackerLayers", 1);
   UChar_t muon_ntracklayers_[128];
   tree->SetBranchAddress("Muon_nTrackerLayers", &muon_ntracklayers_);
+
+  tree->SetBranchStatus("nMuon", 1);
+  Int_t nmuons_;
+  tree->SetBranchAddress("nMuon",&nmuons_);
+
+//-------------------------- TAUS -----------------------------------------------------------------------------------------
   
   tree->SetBranchStatus("Tau_pt", 1);
   Float_t tau_pt_[128];
@@ -216,6 +230,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t tau_dz_[128];
   tree->SetBranchAddress("Tau_dz",&tau_dz_);
 
+  tree->SetBranchStatus("nTau", 1);
+  Int_t ntaus_;
+  tree->SetBranchAddress("nTau",&ntaus_);
+
+//-------------------------- MC TRUTH -------------------------------------------------------------------------------------
+
   tree->SetBranchStatus("Tau_genPartFlav", 1);
   UChar_t tau_source_[128];
   tree->SetBranchAddress("Tau_genPartFlav",&tau_source_);
@@ -227,6 +247,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Muon_genPartFlav", 1);
   UChar_t muon_source_[128];
   tree->SetBranchAddress("Muon_genPartFlav",&muon_source_);
+
+//-------------------------- JETS -----------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Jet_pt", 1);
   Float_t jet_pt_[128];
@@ -263,6 +285,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("GenJet_partonFlavour", 1);
   Short_t genjet_flav_[128];
   tree->SetBranchAddress("GenJet_partonFlavour",&genjet_flav_);
+
+  tree->SetBranchStatus("nJet", 1);
+  Int_t njets_;
+  tree->SetBranchAddress("nJet",&njets_);
+
+//-------------------------- HIGH LEVEL TRIGGER ---------------------------------------------------------------------------
   
   tree->SetBranchStatus("HLT_IsoMu24", 1);
   Bool_t mutri_;
@@ -279,6 +307,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("HLT_Ele32_WPTight_Gsf", 1);
   Bool_t eletri2_;
   tree->SetBranchAddress("HLT_Ele32_WPTight_Gsf",&eletri2_);
+
+//-------------------------- FLAGS ----------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Flag_goodVertices", 1);
   Bool_t flag1_;
@@ -311,22 +341,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Flag_ecalBadCalibFilter", 1);
   Bool_t flag8_;
   tree->SetBranchAddress("Flag_ecalBadCalibFilter",&flag8_);
-  
-  tree->SetBranchStatus("nElectron", 1);
-  Int_t nelectrons_;
-  tree->SetBranchAddress("nElectron",&nelectrons_);
 
-  tree->SetBranchStatus("nMuon", 1);
-  Int_t nmuons_;
-  tree->SetBranchAddress("nMuon",&nmuons_);
-
-  tree->SetBranchStatus("nTau", 1);
-  Int_t ntaus_;
-  tree->SetBranchAddress("nTau",&ntaus_);
-
-  tree->SetBranchStatus("nJet", 1);
-  Int_t njets_;
-  tree->SetBranchAddress("nJet",&njets_);
+//-------------------------- RANDOM STUFF ---------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Rho_fixedGridRhoFastjetCentralCalo", 1);
   Float_t rho_calo_;
@@ -347,6 +363,36 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("PuppiMET_phi",  1);
   Float_t met_phi_;
   tree->SetBranchAddress("PuppiMET_phi", &met_phi_);
+
+//-------------------------- JET ID ---------------------------------------------------------------------------------------
+
+  tree->SetBranchStatus("Jet_neHEF", 1);
+  Float_t jet_neHEF_[128];
+  tree->SetBranchAddress("Jet_neHEF", &jet_neHEF_);
+
+  tree->SetBranchStatus("Jet_chHEF", 1);
+  Float_t Jet_chHEF_[128];
+  tree->SetBranchAddress("Jet_chHEF", &Jet_chHEF_);
+
+  tree->SetBranchStatus("Jet_neEmEF", 1);
+  Float_t jet_neEmEF_[128];
+  tree->SetBranchAddress("Jet_neEmEF", &jet_neEmEF_);
+
+  tree->SetBranchStatus("Jet_chEmEF", 1);
+  Float_t jet_chEmEF_[128];
+  tree->SetBranchAddress("Jet_chEmEF", &jet_chEmEF_);
+
+  tree->SetBranchStatus("Jet_muEF", 1);
+  Float_t jet_muEF_[128];
+  tree->SetBranchAddress("Jet_muEF", &jet_muEF_);
+
+  tree->SetBranchStatus("Jet_neMultiplicity", 1);
+  UChar_t jet_neMultiplicity_[128];
+  tree->SetBranchAddress("Jet_neMultiplicity", &jet_neMultiplicity_);
+
+  tree->SetBranchStatus("Jet_chMultiplicity", 1);
+  UChar_t jet_chMultiplicity_[128];
+  tree->SetBranchAddress("Jet_chMultiplicity", &jet_chMultiplicity_);
 
   runtree->GetEntry(0);
 
@@ -455,13 +501,18 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 			Float_t jetpt = jet_pt_[j];
 			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
 			if(pass) {
+				if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
+
 	  			njets++;
+
 				if(jet_btag_[j] > WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
+
 	  			if(njets==1){
 					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 				}else if(njets==2){
 					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 				}
+
 			}
     	}
 	}
