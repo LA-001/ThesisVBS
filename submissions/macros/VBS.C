@@ -372,7 +372,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   tree->SetBranchStatus("Jet_chHEF", 1);
   Float_t jet_chHEF_[128];
-  tree->SetBranchAddress("Jet_chHEF", &Jet_chHEF_);
+  tree->SetBranchAddress("Jet_chHEF", &jet_chHEF_);
 
   tree->SetBranchStatus("Jet_neEmEF", 1);
   Float_t jet_neEmEF_[128];
