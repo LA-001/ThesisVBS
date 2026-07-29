@@ -537,25 +537,26 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       float mjj_ = p4jets.M(); // Invariant mass of the dijet system
       float deltaRjj_ = deltaR(p4jet1,p4jet2);
 	
-      O_weight=weight_;
-      O_sample=sample;
-      O_mvis=mvis_;
-      O_njets=njets;
-      O_taupt=p4tau.Pt();
-      O_leppt=p4lep.Pt();
-      O_mjj = mjj_;
+      O_weight   = weight_;
+      O_sample   = sample;
+      O_mvis     = mvis_;
+      O_njets    = njets;
+      O_taupt    = p4tau.Pt();
+      O_leppt    = p4lep.Pt();
+      O_mjj      = mjj_;
       O_deltaRjj = deltaRjj_;
+	  O_ismuon   = ismuon;
 
-	  O_taueta  = p4tau.Eta();
-	  O_tauphi  = p4tau.Phi();
-	  O_lepeta  = p4lep.Eta();
-	  O_lepphi  = p4lep.Phi();
-	  O_metpt   = met_pt_;
-	  O_metphi  = met_phi_;
-	  O_jet1eta = p4jet1.Eta();
-      O_jet1phi = p4jet1.Phi();
-      O_jet2eta = p4jet2.Eta();
-      O_jet2phi = p4jet2.Phi();
+	  O_taueta   = p4tau.Eta();
+	  O_tauphi   = p4tau.Phi();
+	  O_lepeta   = p4lep.Eta();
+	  O_lepphi   = p4lep.Phi();
+	  O_metpt    = met_pt_;
+	  O_metphi   = met_phi_;
+	  O_jet1eta  = p4jet1.Eta();
+      O_jet1phi  = p4jet1.Phi();
+      O_jet2eta  = p4jet2.Eta();
+      O_jet2phi  = p4jet2.Phi();
       
       outtree->Fill();
 
