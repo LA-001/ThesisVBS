@@ -186,7 +186,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   tree->SetBranchStatus("Muon_looseId", 1);
   Bool_t muon_looseid_[128];
-  tree->SetBranchAddress("Muon_looseId",&muon_looseid_)
+  tree->SetBranchAddress("Muon_looseId",&muon_looseid_);
 
 //-------------------------- TAUS -----------------------------------------------------------------------------------------
   
