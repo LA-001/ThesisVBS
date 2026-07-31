@@ -483,6 +483,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         	}
     	}
 
+		//----------------------- Veto on additional Loose leptons -------------------------------------
+
 		for(int i=0; i<nelectrons_; i++){
   			if(i==eleindex) continue;
   			if(ele_pt_[i] > 10 && abs(ele_eta_[i]) < 2.4 && static_cast<int>(ele_id_[i])>=1) excflag=1;
@@ -492,6 +494,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   			if(i==muindex) continue;
   			if(muon_pt_[i] > 10 && abs(muon_eta_[i]) < 2.4 && muon_looseid_[i]) excflag=1;
  		}
+
+		//----------------------------------------------------------------------------------------------
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
     		if(nmuons==1){ 
