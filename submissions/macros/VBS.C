@@ -452,8 +452,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
         
     int typeevent=0; //1=mutauh, 2=eletauh
-    int eleindex=100;
-    int muindex=100;
+    int eleindex=200;
+    int muindex=200;
       
     if(ntaus == 1){
 
