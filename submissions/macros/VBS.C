@@ -445,7 +445,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = TauSelector(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], weight_);
       if(pass){
 		ntaus++;
-        //if(ntaus>1) excflag=1;
         tauindex=j;
 		taucharge=tau_charge_[j];
 		p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
@@ -463,7 +462,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 			Bool_t pass = ElectronSelector(elept, ele_eta_[j], ele_phi_[j], ele_mvaid_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
 			if(pass){
 	  			nelectrons++;
-	  			//if(nelectrons>1) excflag=1;
 	  			eleindex=j;
 	  			lepcharge=ele_charge_[j];
 	  			p4lep = ROOT::Math::PtEtaPhiMVector(elept,ele_eta_[eleindex],ele_phi_[eleindex],ele_mass_[eleindex]);
@@ -471,19 +469,25 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     	}
       
     	for(int j=0; j<nmuons_; j++){
-			//Float_t muonpt = tau_pt_[j];
 			Float_t muonpt = muon_pt_[j];
 			Bool_t pass = MuonSelector(muonpt,muon_eta_[j],muon_phi_[j],muon_mediumid_[j],muon_dxy_[j],muon_dz_[j],muon_isoscore_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, weight_);
         	if(pass){
         		nmuons++;
-        		//if(nmuons>1) excflag=1;
 	  			muindex=j;
 	  			lepcharge=muon_charge_[j];
 	  			p4lep = ROOT::Math::PtEtaPhiMVector(muonpt,muon_eta_[muindex],muon_phi_[muindex],muon_mass_[muindex]);
         	}
     	}
 
-    //For the moment no veto on additional leptons
+		for(int i=0; i<nelectrons_; i++){
+  			if(i==eleindex) continue;
+  			if(ele_pt_[i] > 10 && abs(ele_eta_[i]) < 2.4 && static_cast<int>(ele_id_[i])>=1) excflag=1;
+ 		}
+
+		for(int i=0; i<nmuons_; i++){
+  			if(i==muindex) continue;
+  			if(muon_pt_[i] > 10 && abs(muon_eta_[i]) < 2.4 && muon_looseid_[i]) excflag=1;
+ 		}
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
     		if(nmuons==1){ 
