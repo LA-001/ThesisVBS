@@ -38,6 +38,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_tauphi, O_lepeta, O_lepphi, O_metpt, O_metphi;
   Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
   Float_t O_weight;
+  UChar_t O_tau_genflav, O_lep_genflav;
   
   bool O_ismuon;
 
@@ -61,6 +62,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("jet2phi", &O_jet2phi, "jet2phi/F");
   outtree->Branch("metpt",   &O_metpt,   "metpt/F");
   outtree->Branch("metphi",  &O_metphi,  "metphi/F");
+  outtree->Branch("tau_genflav", &O_tau_genflav, "tau_genflav/b");
+  outtree->Branch("lep_genflav", &O_lep_genflav, "lep_genflav/b");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -498,12 +501,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		//----------------------------------------------------------------------------------------------
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
+			O_tau_genflav = tau_genflav_[tauindex];
     		if(nmuons==1){ 
 				typeevent=1; //Mu-tauh events
 				ismuon = true;
+				O_lep_genflav = muon_genflav_[muindex];
 			}else{ 
 				typeevent=2; //E-tauh events
 				ismuon = false;
+				O_lep_genflav = ele_genflav_[eleindex];
 			}
     	}
       
