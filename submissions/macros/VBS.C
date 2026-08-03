@@ -501,15 +501,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		//----------------------------------------------------------------------------------------------
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-			O_tau_genflav = tau_genflav_[tauindex];
+			O_tau_genflav = tau_source_[tauindex];
     		if(nmuons==1){ 
 				typeevent=1; //Mu-tauh events
 				ismuon = true;
-				O_lep_genflav = muon_genflav_[muindex];
+				O_lep_genflav = muon_source_[muindex];
 			}else{ 
 				typeevent=2; //E-tauh events
 				ismuon = false;
-				O_lep_genflav = ele_genflav_[eleindex];
+				O_lep_genflav = ele_source_[eleindex];
 			}
     	}
       
