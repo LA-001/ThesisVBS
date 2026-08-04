@@ -57,6 +57,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Int_t   O_nmuon;
   Float_t O_muon_pt_arr[20], O_muon_eta_arr[20];
   Bool_t  O_muon_id_arr[20];
+  Int_t O_eleindex, O_muindex;
 
   outtree->Branch("nele",   &O_nele, "nele/I");
   outtree->Branch("ele_pt_arr",       O_ele_pt_arr,     "ele_pt_arr[nele]/F");
@@ -66,6 +67,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("muon_pt_arr",       O_muon_pt_arr,     "muon_pt_arr[nmuon]/F");
   outtree->Branch("muon_eta_arr",      O_muon_eta_arr,    "muon_eta_arr[nmuon]/F");
   outtree->Branch("muon_id_arr",       O_muon_id_arr,     "muon_id_arr[nmuon]/O");
+  outtree->Branch("eleindex", &O_eleindex, "eleindex/I");
+  outtree->Branch("muindex",  &O_muindex,  "muindex/I");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -515,10 +518,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 				typeevent=1; //Mu-tauh events
 				ismuon = true;
 				O_lep_genflav = muon_source_[muindex];
+				O_muindex = muindex;
 			}else{ 
 				typeevent=2; //E-tauh events
 				ismuon = false;
 				O_lep_genflav = ele_source_[eleindex];
+				O_eleindex = eleindex;
 			}
     	}
       
