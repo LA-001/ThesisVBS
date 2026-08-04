@@ -59,13 +59,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t  O_muon_id_arr[20];
 
   outtree->Branch("nele",   &O_nele, "nele/I");
-  outtree->Branch("ele_pt_arr",       O_ele_pt_arr,     "ele_pt_arr[nleps]/F");
-  outtree->Branch("ele_eta_arr",      O_ele_eta_arr,    "ele_eta_arr[nleps]/F");
-  outtree->Branch("ele_id_arr",       O_ele_id_arr,     "ele_id_arr[nleps]/I");
+  outtree->Branch("ele_pt_arr",       O_ele_pt_arr,     "ele_pt_arr[nele]/F");
+  outtree->Branch("ele_eta_arr",      O_ele_eta_arr,    "ele_eta_arr[nele]/F");
+  outtree->Branch("ele_id_arr",       O_ele_id_arr,     "ele_id_arr[nele]/I");
   outtree->Branch("nmuon",   &O_nmuon, "nmuon/I");
-  outtree->Branch("muon_pt_arr",       O_muon_pt_arr,     "muon_pt_arr[nleps]/F");
-  outtree->Branch("muon_eta_arr",      O_muon_eta_arr,    "muon_eta_arr[nleps]/F");
-  outtree->Branch("muon_id_arr",       O_muon_id_arr,     "muon_id_arr[nleps]/O");
+  outtree->Branch("muon_pt_arr",       O_muon_pt_arr,     "muon_pt_arr[nmuon]/F");
+  outtree->Branch("muon_eta_arr",      O_muon_eta_arr,    "muon_eta_arr[nmuon]/F");
+  outtree->Branch("muon_id_arr",       O_muon_id_arr,     "muon_id_arr[nmuon]/O");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
