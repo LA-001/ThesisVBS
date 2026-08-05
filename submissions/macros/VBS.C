@@ -40,7 +40,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_weight;
   UChar_t O_tau_genflav, O_lep_genflav;
   
-  bool O_ismuon;
+  bool O_ismuon, O_excflag;
 
   outtree->Branch("weight",&O_weight,"weight/F");
   outtree->Branch("mvis",&O_mvis,"mvis/F");
@@ -64,6 +64,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("metphi",  &O_metphi,  "metphi/F");
   outtree->Branch("tau_genflav", &O_tau_genflav, "tau_genflav/b");
   outtree->Branch("lep_genflav", &O_lep_genflav, "lep_genflav/b");
+  outtree->Branch("excflag", &O_excflag, "excflag/O");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -540,12 +541,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 			}
     	}
 	}
+
+	O_excflag = excflag;
     
     bool trigpath=false; 
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
     
-    if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
+    //if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
+	if(trigpath and typeevent>0 and njets>=2 and !btagflag){
 
       float puweight=pu_SF->evaluate({npu2_,"nominal"});
 
