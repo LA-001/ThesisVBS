@@ -39,26 +39,27 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
   Float_t O_weight;
   UChar_t O_tau_genflav, O_lep_genflav;
-  
+ 
   bool O_ismuon;
-
+ 
   outtree->Branch("weight",&O_weight,"weight/F");
   outtree->Branch("taupt",&O_taupt,"taupt/F");
   outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
-
+ 
   outtree->Branch("taueta",  &O_taueta,  "taueta/F");
   outtree->Branch("tauphi",  &O_tauphi,  "tauphi/F");
   outtree->Branch("tau_genflav", &O_tau_genflav, "tau_genflav/b");
   outtree->Branch("lep_genflav", &O_lep_genflav, "lep_genflav/b");
-
+ 
   Int_t   O_nele;
   Float_t O_ele_pt_arr[20], O_ele_eta_arr[20];
   Int_t  O_ele_id_arr[20];
   Int_t   O_nmuon;
   Float_t O_muon_pt_arr[20], O_muon_eta_arr[20];
   Bool_t  O_muon_id_arr[20];
+ 
   Int_t O_eleindex, O_muindex;
-
+ 
   outtree->Branch("nele",   &O_nele, "nele/I");
   outtree->Branch("ele_pt_arr",       O_ele_pt_arr,     "ele_pt_arr[nele]/F");
   outtree->Branch("ele_eta_arr",      O_ele_eta_arr,    "ele_eta_arr[nele]/F");
@@ -67,8 +68,29 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("muon_pt_arr",       O_muon_pt_arr,     "muon_pt_arr[nmuon]/F");
   outtree->Branch("muon_eta_arr",      O_muon_eta_arr,    "muon_eta_arr[nmuon]/F");
   outtree->Branch("muon_id_arr",       O_muon_id_arr,     "muon_id_arr[nmuon]/O");
+ 
   outtree->Branch("eleindex", &O_eleindex, "eleindex/I");
   outtree->Branch("muindex",  &O_muindex,  "muindex/I");
+ 
+  //-------------------------- NEW: GenPart / GenJet matching for fake tau study --------------------
+ 
+  Bool_t  O_tau_matched_genpart;   // se Tau_genPartIdx >= 0
+  Int_t   O_tau_genpart_pdgid;     // pdgId della particella matchata (se esiste)
+  Bool_t  O_tau_matched_genjet;    // se esiste un GenJet vicino (dR<0.4)
+  Float_t O_tau_genjet_dr;         // dR tra tau ricostruito e GenJet piu' vicino
+  Float_t O_tau_genjet_pt;         // pt del GenJet piu' vicino
+  Float_t O_tau_genjet_eta;        // eta del GenJet piu' vicino
+  Short_t O_tau_genjet_partonflav; // sapore del parton del GenJet (utile per capire se e' ISR da gluone/quark)
+ 
+  outtree->Branch("tau_matched_genpart",   &O_tau_matched_genpart,   "tau_matched_genpart/O");
+  outtree->Branch("tau_genpart_pdgid",     &O_tau_genpart_pdgid,     "tau_genpart_pdgid/I");
+  outtree->Branch("tau_matched_genjet",    &O_tau_matched_genjet,    "tau_matched_genjet/O");
+  outtree->Branch("tau_genjet_dr",         &O_tau_genjet_dr,         "tau_genjet_dr/F");
+  outtree->Branch("tau_genjet_pt",         &O_tau_genjet_pt,         "tau_genjet_pt/F");
+  outtree->Branch("tau_genjet_eta",        &O_tau_genjet_eta,        "tau_genjet_eta/F");
+  outtree->Branch("tau_genjet_partonflav", &O_tau_genjet_partonflav, "tau_genjet_partonflav/S");
+
+  //-------------------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -259,6 +281,41 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Muon_genPartFlav", 1);
   UChar_t muon_source_[128];
   tree->SetBranchAddress("Muon_genPartFlav",&muon_source_);
+
+ // -- NUOVO: Tau_genPartIdx per il matching diretto --
+  tree->SetBranchStatus("Tau_genPartIdx", 1);
+  Short_t tau_genpartidx_[128];
+  tree->SetBranchAddress("Tau_genPartIdx", &tau_genpartidx_);
+ 
+  // -- NUOVO: GenPart per identificare la particella matchata --
+  tree->SetBranchStatus("GenPart_pdgId", 1);
+  Int_t genpart_pdgid_[1024];
+  tree->SetBranchAddress("GenPart_pdgId", &genpart_pdgid_);
+ 
+  tree->SetBranchStatus("nGenPart", 1);
+  Int_t ngenpart_;
+  tree->SetBranchAddress("nGenPart", &ngenpart_);
+ 
+  // -- NUOVO: GenJet per il matching spaziale (ISR check) --
+  tree->SetBranchStatus("GenJet_pt", 1);
+  Float_t genjet_pt_[128];
+  tree->SetBranchAddress("GenJet_pt", &genjet_pt_);
+ 
+  tree->SetBranchStatus("GenJet_eta", 1);
+  Float_t genjet_eta_[128];
+  tree->SetBranchAddress("GenJet_eta", &genjet_eta_);
+ 
+  tree->SetBranchStatus("GenJet_phi", 1);
+  Float_t genjet_phi_[128];
+  tree->SetBranchAddress("GenJet_phi", &genjet_phi_);
+ 
+  tree->SetBranchStatus("GenJet_partonFlavour", 1);
+  Short_t genjet_partonflav_[128];
+  tree->SetBranchAddress("GenJet_partonFlavour", &genjet_partonflav_);
+ 
+  tree->SetBranchStatus("nGenJet", 1);
+  Int_t ngenjet_;
+  tree->SetBranchAddress("nGenJet", &ngenjet_);
 
 //-------------------------- JETS -----------------------------------------------------------------------------------------
 
@@ -492,8 +549,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         	}
     	}
 
-		//----------------------- Veto on additional Loose leptons -------------------------------------
-
 		if(nelectrons_>0){
 			for(int l=0; l<nelectrons_; l++){
   			    O_ele_pt_arr[l]  = ele_pt_[l];
@@ -510,6 +565,18 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
  			}
 		}
 
+		//----------------------- Veto on additional Loose leptons -------------------------------------
+
+		for(int i=0; i<nelectrons_; i++){
+  			if(i==eleindex) continue;
+  			if(ele_pt_[i] > 10 && abs(ele_eta_[i]) < 2.4 && static_cast<int>(ele_id_[i])>=1) excflag=1;
+ 		}
+
+		for(int i=0; i<nmuons_; i++){
+  			if(i==muindex) continue;
+  			if(muon_pt_[i] > 10 && abs(muon_eta_[i]) < 2.4 && muon_looseid_[i]) excflag=1;
+ 		}
+
 		//----------------------------------------------------------------------------------------------
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
@@ -525,6 +592,41 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 				O_lep_genflav = ele_source_[eleindex];
 				O_eleindex = eleindex;
 			}
+
+          //--------------- NUOVO: GenPart / GenJet matching per il tau ---------------
+ 
+            O_tau_matched_genpart = false;
+            O_tau_genpart_pdgid = 0;
+            O_tau_matched_genjet = false;
+        	O_tau_genjet_dr = -1;
+        	O_tau_genjet_pt = -1;
+        	O_tau_genjet_eta = -99;
+        	O_tau_genjet_partonflav = -99;
+ 
+        	Short_t genidx = tau_genpartidx_[tauindex];
+        	if(genidx >= 0 && genidx < ngenpart_){
+          		O_tau_matched_genpart = true;
+          		O_tau_genpart_pdgid = genpart_pdgid_[genidx];
+        	}
+ 
+        	// Cerca il GenJet piu' vicino al tau ricostruito (utile soprattutto se unmatched a livello di GenPart)
+        	float min_dr = 999;
+        	int best_genjet = -1;
+        	for(int g=0; g<ngenjet_ && g<128; g++){
+          		ROOT::Math::PtEtaPhiMVector p4genjet(genjet_pt_[g], genjet_eta_[g], genjet_phi_[g], 0);
+          		float dr = deltaR(p4tau, p4genjet);
+          		if(dr < min_dr){
+            		min_dr = dr;
+            		best_genjet = g;
+          		}
+        	}
+        	if(best_genjet >= 0 && min_dr < 0.4){
+          		O_tau_matched_genjet = true;
+          		O_tau_genjet_dr = min_dr;
+          		O_tau_genjet_pt = genjet_pt_[best_genjet];
+          		O_tau_genjet_eta = genjet_eta_[best_genjet];
+          		O_tau_genjet_partonflav = genjet_partonflav_[best_genjet];
+        	}
     	}
       
     	for(int j=0; j<njets_; j++){
