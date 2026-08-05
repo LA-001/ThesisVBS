@@ -585,12 +585,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 				typeevent=1; //Mu-tauh events
 				ismuon = true;
 				O_lep_genflav = muon_source_[muindex];
-				O_muindex = muindex;
 			}else{ 
 				typeevent=2; //E-tauh events
 				ismuon = false;
 				O_lep_genflav = ele_source_[eleindex];
-				O_eleindex = eleindex;
 			}
 
           //--------------- NUOVO: GenPart / GenJet matching per il tau ---------------
@@ -680,6 +678,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 	  O_nele     = nelectrons_;
 	  O_nmuon    = nmuons_;
+	  O_eleindex = eleindex;
+      O_muindex  = muindex;
       outtree->Fill();
 
     }
