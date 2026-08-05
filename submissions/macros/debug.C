@@ -351,10 +351,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t jet_raw_[128];
   tree->SetBranchAddress("Jet_rawFactor",&jet_raw_);
 
-  tree->SetBranchStatus("GenJet_partonFlavour", 1);
-  Short_t genjet_flav_[128];
-  tree->SetBranchAddress("GenJet_partonFlavour",&genjet_flav_);
-
   tree->SetBranchStatus("nJet", 1);
   Int_t njets_;
   tree->SetBranchAddress("nJet",&njets_);
