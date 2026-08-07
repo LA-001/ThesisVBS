@@ -42,6 +42,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   bool O_ismuon, O_excflag;
   Bool_t O_lep_charge_flip;
   Int_t  O_lep_gen_charge;
+  Int_t  O_nGenJet;
 
   outtree->Branch("weight",&O_weight,"weight/F");
   outtree->Branch("mvis",&O_mvis,"mvis/F");
@@ -482,13 +483,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
 
-    Int_t lepton=0, jets;
-
     Int_t ntaus=0, nbtags=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
     Float_t selectedtaupt=0., selectedleppt=0.;
 	Int_t jet1index = -1, jet2index = -1;
 	Bool_t ismuon = true;
-	Int_t   nleps=0;
 
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
     
