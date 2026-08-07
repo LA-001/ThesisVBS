@@ -529,7 +529,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 	  			njets++;
 
-				if(jet_btag_[j] > WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
+				if(jet_btag_[j] >= WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
 
 	  			if(njets==1){
 					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
@@ -545,7 +545,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
     
-    if(trigpath and typeevent>0 and !excflag and njets==2 and !btagflag){
+    if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
 
       float puweight=pu_SF->evaluate({npu2_,"nominal"});
 
