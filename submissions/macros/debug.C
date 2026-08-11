@@ -72,6 +72,18 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("lep_gen_charge",  &O_lep_gen_charge,  "lep_gen_charge/I");
   outtree->Branch("minor_deltaR",    O_minor_deltaR, "minor_deltaR[njets]/F");
 
+Int_t   O_nGenLep;
+Int_t   O_genlep_pdgid[20];
+Float_t O_genlep_pt[20];
+Float_t O_genlep_eta[20];
+Float_t O_genlep_phi[20];
+
+outtree->Branch("nGenLep",      &O_nGenLep,      "nGenLep/I");
+outtree->Branch("genlep_pdgid",  O_genlep_pdgid, "genlep_pdgid[nGenLep]/I");
+outtree->Branch("genlep_pt",     O_genlep_pt,    "genlep_pt[nGenLep]/F");
+outtree->Branch("genlep_eta",    O_genlep_eta,   "genlep_eta[nGenLep]/F");
+outtree->Branch("genlep_phi",    O_genlep_phi,   "genlep_phi[nGenLep]/F");
+
   //-------------------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
@@ -604,7 +616,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 				if(ismuon){
 					for(int k=0; k<nmuons_; k++){
   						if(k==muindex) continue;
-  						if(muon_pt_[k] > 10 && abs(muon_eta_[k]) < 2.4 && muon_looseid_[k]) continue;
+  						if(!(muon_pt_[k] > 10 && abs(muon_eta_[k]) < 2.4 && muon_looseid_[k])) continue;
 						p4lep_deltaR = ROOT::Math::PtEtaPhiMVector(muon_pt_[k],muon_eta_[k],muon_phi_[k],muon_mass_[k]);
 						DeltaR_lep_j = deltaR(p4lep_deltaR,p4jet_deltaR);
 						if(DeltaR_lep_j < best_min) best_min = DeltaR_lep_j;
@@ -613,7 +625,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 				}else{
 					for(int k=0; k<nelectrons_; k++){
         				if(k==eleindex) continue;
-  						if(ele_pt_[k] > 10 && abs(ele_eta_[k]) < 2.4 && static_cast<int>(ele_id_[k])>=1) continue;
+  						if(!(ele_pt_[k] > 10 && abs(ele_eta_[k]) < 2.4 && static_cast<int>(ele_id_[k])>=1)) continue;
         				p4lep_deltaR = ROOT::Math::PtEtaPhiMVector(ele_pt_[k],ele_eta_[k],ele_phi_[k],ele_mass_[k]);
         				DeltaR_lep_j = deltaR(p4lep_deltaR,p4jet_deltaR);
         				if(DeltaR_lep_j < best_min) best_min = DeltaR_lep_j;
