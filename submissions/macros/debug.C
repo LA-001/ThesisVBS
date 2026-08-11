@@ -319,6 +319,22 @@ outtree->Branch("genlep_phi",    O_genlep_phi,   "genlep_phi[nGenLep]/F");
 	Short_t muon_genpartidx_[128];
 	tree->SetBranchAddress("Muon_genPartIdx", &muon_genpartidx_);
 
+tree->SetBranchStatus("GenPart_pt", 1);
+Float_t genpart_pt_[1024];
+tree->SetBranchAddress("GenPart_pt", &genpart_pt_);
+
+tree->SetBranchStatus("GenPart_eta", 1);
+Float_t genpart_eta_[1024];
+tree->SetBranchAddress("GenPart_eta", &genpart_eta_);
+
+tree->SetBranchStatus("GenPart_phi", 1);
+Float_t genpart_phi_[1024];
+tree->SetBranchAddress("GenPart_phi", &genpart_phi_);
+
+tree->SetBranchStatus("GenPart_statusFlags", 1);
+Int_t genpart_statusflags_[1024];
+tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
+
 //-------------------------- JETS -----------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Jet_pt", 1);
@@ -634,6 +650,19 @@ outtree->Branch("genlep_phi",    O_genlep_phi,   "genlep_phi[nGenLep]/F");
 				}
 			}
     	}
+
+		O_nGenLep = 0;
+	for(int g=0; g<ngenpart_ && O_nGenLep<20; g++){
+    int abspdg = abs(genpart_pdgid_[g]);
+    bool isPrompt = (genpart_statusflags_[g] & (1<<0));  // bit 0 = isPrompt
+    if((abspdg==11 || abspdg==13) && isPrompt){
+        O_genlep_pdgid[O_nGenLep] = genpart_pdgid_[g];
+        O_genlep_pt[O_nGenLep]    = genpart_pt_[g];
+        O_genlep_eta[O_nGenLep]   = genpart_eta_[g];
+        O_genlep_phi[O_nGenLep]   = genpart_phi_[g];
+        O_nGenLep++;
+    }
+}
 	}
     
     bool trigpath=false; 
