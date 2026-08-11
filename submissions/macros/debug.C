@@ -43,14 +43,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t O_lep_charge_flip;
   Int_t  O_lep_gen_charge;
   Int_t  O_nGenJet;
+  Float_t O_minor_deltaR[128];
 
   outtree->Branch("weight",&O_weight,"weight/F");
-  outtree->Branch("mvis",&O_mvis,"mvis/F");
+  //outtree->Branch("mvis",&O_mvis,"mvis/F");
   outtree->Branch("taupt",&O_taupt,"taupt/F");
   outtree->Branch("leppt",&O_leppt,"leppt/F");
   outtree->Branch("njets",&O_njets,"njets/I");
-  outtree->Branch("mjj",&O_mjj,"mjj/F");
-  outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
+  //outtree->Branch("mjj",&O_mjj,"mjj/F");
+  //outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
   outtree->Branch("sample",&O_sample,"sample/I");
   outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
 
@@ -62,13 +63,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("jet1phi", &O_jet1phi, "jet1phi/F");
   outtree->Branch("jet2eta", &O_jet2eta, "jet2eta/F");
   outtree->Branch("jet2phi", &O_jet2phi, "jet2phi/F");
-  outtree->Branch("metpt",   &O_metpt,   "metpt/F");
-  outtree->Branch("metphi",  &O_metphi,  "metphi/F");
+  //outtree->Branch("metpt",   &O_metpt,   "metpt/F");
+  //outtree->Branch("metphi",  &O_metphi,  "metphi/F");
   outtree->Branch("tau_genflav", &O_tau_genflav, "tau_genflav/b");
   outtree->Branch("lep_genflav", &O_lep_genflav, "lep_genflav/b");
   outtree->Branch("nGenJet", &O_nGenJet, "nGenJet/I");
   outtree->Branch("lep_charge_flip", &O_lep_charge_flip, "lep_charge_flip/O");
   outtree->Branch("lep_gen_charge",  &O_lep_gen_charge,  "lep_gen_charge/I");
+  outtree->Branch("minor_deltaR",    O_minor_deltaR, "minor_deltaR[njets]/F");
 
   //-------------------------------------------------------------------------------------------------
 
@@ -488,7 +490,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	Int_t jet1index = -1, jet2index = -1;
 	Bool_t ismuon = true;
 
-    ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
+    ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2, p4lep_deltaR, p4jet_deltaR;
     
     int tauindex=0;
     for(int j=0; j<ntaus_; j++){
@@ -532,14 +534,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 		//----------------------- Veto on additional Loose leptons -------------------------------------
 
-		for(int i=0; i<nelectrons_; i++){
-  			if(i==eleindex) continue;
-  			if(ele_pt_[i] > 10 && abs(ele_eta_[i]) < 2.4 && static_cast<int>(ele_id_[i])>=1) excflag=1;
+		for(int k=0; k<nelectrons_; k++){
+  			if(k==eleindex) continue;
+  			if(ele_pt_[k] > 10 && abs(ele_eta_[k]) < 2.4 && static_cast<int>(ele_id_[k])>=1) excflag=1;
  		}
 
-		for(int i=0; i<nmuons_; i++){
-  			if(i==muindex) continue;
-  			if(muon_pt_[i] > 10 && abs(muon_eta_[i]) < 2.4 && muon_looseid_[i]) excflag=1;
+		for(int k=0; k<nmuons_; k++){
+  			if(k==muindex) continue;
+  			if(muon_pt_[k] > 10 && abs(muon_eta_[k]) < 2.4 && muon_looseid_[k]) excflag=1;
  		}
 
 		//----------------------------------------------------------------------------------------------
@@ -595,6 +597,27 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 				}
 
+				float DeltaR_lep_j = 0.;
+				float best_min = 10.;
+				p4jet_deltaR = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+
+				if(ismuon){
+					for(int k=0; k<nmuons_; k++){
+  						if(k==muindex) continue;
+						p4lep_deltaR = ROOT::Math::PtEtaPhiMVector(muon_pt_[k],muon_eta_[k],muon_phi_[k],muon_mass_[k]);
+						DeltaR_lep_j = deltaR(p4lep_deltaR,p4jet_deltaR);
+						if(DeltaR_lep_j < best_min) best_min = DeltaR_lep_j;
+ 					}
+					O_minor_deltaR[njets-1] = best_min;
+				}else{
+					for(int k=0; k<nelectrons_; k++){
+        				if(k==eleindex) continue;
+        				p4lep_deltaR = ROOT::Math::PtEtaPhiMVector(ele_pt_[k],ele_eta_[k],ele_phi_[k],ele_mass_[k]);
+        				DeltaR_lep_j = deltaR(p4lep_deltaR,p4jet_deltaR);
+        				if(DeltaR_lep_j < best_min) best_min = DeltaR_lep_j;
+ 					}		
+					O_minor_deltaR[njets-1] = best_min;
+				}
 			}
     	}
 	}
@@ -616,20 +639,20 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
       O_weight   = weight_;
       O_sample   = sample;
-      O_mvis     = mvis_;
+      //O_mvis     = mvis_;
       O_njets    = njets;
       O_taupt    = p4tau.Pt();
       O_leppt    = p4lep.Pt();
-      O_mjj      = mjj_;
-      O_deltaRjj = deltaRjj_;
+      //O_mjj      = mjj_;
+      //O_deltaRjj = deltaRjj_;
 	  	O_ismuon   = ismuon;
 
 	  	O_taueta   = p4tau.Eta();
 	  	O_tauphi   = p4tau.Phi();
 	  	O_lepeta   = p4lep.Eta();
 	  	O_lepphi   = p4lep.Phi();
-	  	O_metpt    = met_pt_;
-	  	O_metphi   = met_phi_;
+	  	//O_metpt    = met_pt_;
+	  	//O_metphi   = met_phi_;
 	  	O_jet1eta  = p4jet1.Eta();
       O_jet1phi  = p4jet1.Phi();
       O_jet2eta  = p4jet2.Eta();
