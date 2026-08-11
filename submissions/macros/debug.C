@@ -604,6 +604,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 				if(ismuon){
 					for(int k=0; k<nmuons_; k++){
   						if(k==muindex) continue;
+  						if(muon_pt_[k] > 10 && abs(muon_eta_[k]) < 2.4 && muon_looseid_[k]) continue;
 						p4lep_deltaR = ROOT::Math::PtEtaPhiMVector(muon_pt_[k],muon_eta_[k],muon_phi_[k],muon_mass_[k]);
 						DeltaR_lep_j = deltaR(p4lep_deltaR,p4jet_deltaR);
 						if(DeltaR_lep_j < best_min) best_min = DeltaR_lep_j;
@@ -612,6 +613,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 				}else{
 					for(int k=0; k<nelectrons_; k++){
         				if(k==eleindex) continue;
+  						if(ele_pt_[k] > 10 && abs(ele_eta_[k]) < 2.4 && static_cast<int>(ele_id_[k])>=1) continue;
         				p4lep_deltaR = ROOT::Math::PtEtaPhiMVector(ele_pt_[k],ele_eta_[k],ele_phi_[k],ele_mass_[k]);
         				DeltaR_lep_j = deltaR(p4lep_deltaR,p4jet_deltaR);
         				if(DeltaR_lep_j < best_min) best_min = DeltaR_lep_j;
