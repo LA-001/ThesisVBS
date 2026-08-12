@@ -36,7 +36,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Int_t O_njets, O_sample;
   Float_t O_mvis, O_taupt, O_taueta, O_leppt, O_mjj, O_deltaRjj;
   Float_t O_tauphi, O_lepeta, O_lepphi, O_metpt, O_metphi;
-  Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
+  Float_t O_jeteta[20], O_jetphi[20], O_jetpt[20];
   Float_t O_weight;
   UChar_t O_tau_genflav, O_lep_genflav;
   bool O_ismuon, O_excflag;
@@ -44,48 +44,41 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Int_t  O_lep_gen_charge;
   Int_t  O_nGenJet;
   Float_t O_minor_deltaR[128];
-  Float_t O_jet1pt, O_jet2pt;
 
   outtree->Branch("weight",&O_weight,"weight/F");
   //outtree->Branch("mvis",&O_mvis,"mvis/F");
   outtree->Branch("taupt",&O_taupt,"taupt/F");
-  outtree->Branch("leppt",&O_leppt,"leppt/F");
+  outtree->Branch("taueta",  &O_taueta,  "taueta/F");
+  outtree->Branch("tauphi",  &O_tauphi,  "tauphi/F");
   outtree->Branch("njets",&O_njets,"njets/I");
   //outtree->Branch("mjj",&O_mjj,"mjj/F");
   //outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
   outtree->Branch("sample",&O_sample,"sample/I");
   outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
 
-  outtree->Branch("taueta",  &O_taueta,  "taueta/F");
-  outtree->Branch("tauphi",  &O_tauphi,  "tauphi/F");
-  outtree->Branch("lepeta",  &O_lepeta,  "lepeta/F");
-  outtree->Branch("lepphi",  &O_lepphi,  "lepphi/F");
-  outtree->Branch("jet1pt",  &O_jet1pt,  "jet1pt/F");
-  outtree->Branch("jet2pt",  &O_jet2pt,  "jet2pt/F");
-  outtree->Branch("jet1eta", &O_jet1eta, "jet1eta/F");
-  outtree->Branch("jet1phi", &O_jet1phi, "jet1phi/F");
-  outtree->Branch("jet2eta", &O_jet2eta, "jet2eta/F");
-  outtree->Branch("jet2phi", &O_jet2phi, "jet2phi/F");
-  //outtree->Branch("metpt",   &O_metpt,   "metpt/F");
-  //outtree->Branch("metphi",  &O_metphi,  "metphi/F");
-  outtree->Branch("tau_genflav", &O_tau_genflav, "tau_genflav/b");
-  outtree->Branch("lep_genflav", &O_lep_genflav, "lep_genflav/b");
-  outtree->Branch("nGenJet", &O_nGenJet, "nGenJet/I");
-  outtree->Branch("lep_charge_flip", &O_lep_charge_flip, "lep_charge_flip/O");
-  outtree->Branch("lep_gen_charge",  &O_lep_gen_charge,  "lep_gen_charge/I");
-  outtree->Branch("minor_deltaR",    O_minor_deltaR, "minor_deltaR[njets]/F");
 
-Int_t   O_nGenLep;
-Int_t   O_genlep_pdgid[20];
-Float_t O_genlep_pt[20];
-Float_t O_genlep_eta[20];
-Float_t O_genlep_phi[20];
+  //outtree->Branch("metpt",         &O_metpt,           "metpt/F");
+  //outtree->Branch("metphi",        &O_metphi,          "metphi/F");
+  outtree->Branch("tau_genflav",     &O_tau_genflav,     "tau_genflav/b");
+  outtree->Branch("lep_genflav",     &O_lep_genflav,     "lep_genflav/b");
+  outtree->Branch("nGenJet",         &O_nGenJet,         "nGenJet/I");
+  //outtree->Branch("lep_charge_flip", &O_lep_charge_flip, "lep_charge_flip/O");
+  //outtree->Branch("lep_gen_charge",  &O_lep_gen_charge,  "lep_gen_charge/I");
+  outtree->Branch("jetpt",           O_jetpt,            "jetpt[njets]/F");
+  outtree->Branch("jeteta",          O_jeteta,           "jeteta[njets]/F");
+  outtree->Branch("jetptphi",        O_jetphi,           "jetphi[njets]/F");
 
-outtree->Branch("nGenLep",      &O_nGenLep,      "nGenLep/I");
-outtree->Branch("genlep_pdgid",  O_genlep_pdgid, "genlep_pdgid[nGenLep]/I");
-outtree->Branch("genlep_pt",     O_genlep_pt,    "genlep_pt[nGenLep]/F");
-outtree->Branch("genlep_eta",    O_genlep_eta,   "genlep_eta[nGenLep]/F");
-outtree->Branch("genlep_phi",    O_genlep_phi,   "genlep_phi[nGenLep]/F");
+  Int_t   O_nGenLep;
+  Int_t   O_genlep_pdgid[20];
+  Float_t O_genlep_pt[20];
+  Float_t O_genlep_eta[20];
+  Float_t O_genlep_phi[20];
+
+ outtree->Branch("nGenLep",       &O_nGenLep,      "nGenLep/I"); 
+ outtree->Branch("genlep_pdgid",  O_genlep_pdgid,  "genlep_pdgid[nGenLep]/I");
+ outtree->Branch("genlep_pt",     O_genlep_pt,     "genlep_pt[nGenLep]/F");
+ outtree->Branch("genlep_eta",    O_genlep_eta,    "genlep_eta[nGenLep]/F");
+ outtree->Branch("genlep_phi",    O_genlep_phi,    "genlep_phi[nGenLep]/F");
 
   //-------------------------------------------------------------------------------------------------
 
@@ -588,6 +581,7 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
 					ismuon = false;
 					O_lep_genflav = ele_source_[eleindex];
 				}
+				/*
 				O_lep_charge_flip = false;
 				O_lep_gen_charge = -99;
 
@@ -602,6 +596,7 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
     			O_lep_gen_charge = gen_charge;
     			if(gen_charge != 0 && gen_charge != lepcharge) O_lep_charge_flip = true;
 				}
+				*/
     	}
       
     	for(int j=0; j<njets_; j++){
@@ -628,45 +623,25 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
 					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 				}
 
-				float DeltaR_lep_j = 0.;
-				float best_min = 10.;
-				p4jet_deltaR = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-
-				if(ismuon){
-					for(int k=0; k<nmuons_; k++){
-  						if(k==muindex) continue;
-  						if(!(muon_pt_[k] > 10 && abs(muon_eta_[k]) < 2.4 && muon_looseid_[k])) continue;
-						p4lep_deltaR = ROOT::Math::PtEtaPhiMVector(muon_pt_[k],muon_eta_[k],muon_phi_[k],muon_mass_[k]);
-						DeltaR_lep_j = deltaR(p4lep_deltaR,p4jet_deltaR);
-						if(DeltaR_lep_j < best_min) best_min = DeltaR_lep_j;
- 					}
-					O_minor_deltaR[njets-1] = best_min;
-				}else{
-					for(int k=0; k<nelectrons_; k++){
-        				if(k==eleindex) continue;
-  						if(!(ele_pt_[k] > 10 && abs(ele_eta_[k]) < 2.4 && static_cast<int>(ele_id_[k])>=1)) continue;
-        				p4lep_deltaR = ROOT::Math::PtEtaPhiMVector(ele_pt_[k],ele_eta_[k],ele_phi_[k],ele_mass_[k]);
-        				DeltaR_lep_j = deltaR(p4lep_deltaR,p4jet_deltaR);
-        				if(DeltaR_lep_j < best_min) best_min = DeltaR_lep_j;
- 					}		
-					O_minor_deltaR[njets-1] = best_min;
-				}
+				O_jetpt[njets--] = jetpt;
+				O_jeteta[njets--] = jet_eta_[j];
+				O_jetphi[njets--] = jet_phi_[j];
 			}
     	}
 
 		O_nGenLep = 0;
-	for(int g=0; g<ngenpart_ && O_nGenLep<20; g++){
-    int abspdg = abs(genpart_pdgid_[g]);
-	bool isPrompt   = (genpart_statusflags_[g] & (1<<0));   // bit 0: isPrompt
-	bool isLastCopy = (genpart_statusflags_[g] & (1<<13));  // bit 13: isLastCopy
-	if((abspdg==11 || abspdg==13) && isPrompt && isLastCopy){
-        O_genlep_pdgid[O_nGenLep] = genpart_pdgid_[g];
-        O_genlep_pt[O_nGenLep]    = genpart_pt_[g];
-        O_genlep_eta[O_nGenLep]   = genpart_eta_[g];
-        O_genlep_phi[O_nGenLep]   = genpart_phi_[g];
-        O_nGenLep++;
-    }
-}
+		for(int g=0; g<ngenpart_ && O_nGenLep<20; g++){
+    		int abspdg = abs(genpart_pdgid_[g]);
+			bool isPrompt   = (genpart_statusflags_[g] & (1U << 0)) != 0;   // bit 0
+			bool isLastCopy = (genpart_statusflags_[g] & (1U << 13)) != 0;  // bit 13
+			if((abspdg==11 || abspdg==13) && isPrompt && isLastCopy){
+        		O_genlep_pdgid[O_nGenLep] = genpart_pdgid_[g];
+        		O_genlep_pt[O_nGenLep]    = genpart_pt_[g];
+        		O_genlep_eta[O_nGenLep]   = genpart_eta_[g];
+        		O_genlep_phi[O_nGenLep]   = genpart_phi_[g];
+        		O_nGenLep++;
+    		}
+		}
 	}
     
     bool trigpath=false; 
@@ -700,12 +675,7 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
 	  	O_lepphi   = p4lep.Phi();
 	  	//O_metpt    = met_pt_;
 	  	//O_metphi   = met_phi_;
-	  	O_jet1eta  = p4jet1.Eta();
-      O_jet1phi  = p4jet1.Phi();
-      O_jet2eta  = p4jet2.Eta();
-      O_jet2phi  = p4jet2.Phi();
-	  O_jet1pt  =  p4jet1.Pt();
-	  O_jet2pt  =  p4jet2.Pt();
+
 
 			O_njets = njets;
 			O_nGenJet = ngenjet_;
