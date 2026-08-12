@@ -654,8 +654,9 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
 		O_nGenLep = 0;
 	for(int g=0; g<ngenpart_ && O_nGenLep<20; g++){
     int abspdg = abs(genpart_pdgid_[g]);
-    bool isPrompt = (genpart_statusflags_[g] & (1<<0));  // bit 0 = isPrompt
-    if((abspdg==11 || abspdg==13) && isPrompt){
+	bool isPrompt   = (genpart_statusflags_[g] & (1<<0));   // bit 0: isPrompt
+	bool isLastCopy = (genpart_statusflags_[g] & (1<<13));  // bit 13: isLastCopy
+	if((abspdg==11 || abspdg==13) && isPrompt && isLastCopy){
         O_genlep_pdgid[O_nGenLep] = genpart_pdgid_[g];
         O_genlep_pt[O_nGenLep]    = genpart_pt_[g];
         O_genlep_eta[O_nGenLep]   = genpart_eta_[g];
