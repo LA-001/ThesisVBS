@@ -44,6 +44,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Int_t  O_lep_gen_charge;
   Int_t  O_nGenJet;
   Float_t O_minor_deltaR[128];
+  Float_t O_jet1pt, O_jet2pt;
 
   outtree->Branch("weight",&O_weight,"weight/F");
   //outtree->Branch("mvis",&O_mvis,"mvis/F");
@@ -59,6 +60,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("tauphi",  &O_tauphi,  "tauphi/F");
   outtree->Branch("lepeta",  &O_lepeta,  "lepeta/F");
   outtree->Branch("lepphi",  &O_lepphi,  "lepphi/F");
+  outtree->Branch("jet1pt",  &O_jet1pt,  "jet1pt/F");
+  outtree->Branch("jet2pt",  &O_jet2pt,  "jet2pt/F");
   outtree->Branch("jet1eta", &O_jet1eta, "jet1eta/F");
   outtree->Branch("jet1phi", &O_jet1phi, "jet1phi/F");
   outtree->Branch("jet2eta", &O_jet2eta, "jet2eta/F");
@@ -701,6 +704,8 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
       O_jet1phi  = p4jet1.Phi();
       O_jet2eta  = p4jet2.Eta();
       O_jet2phi  = p4jet2.Phi();
+	  O_jet1pt  =  p4jet1.Pt();
+	  O_jet1pt  =  p4jet2.Pt();
 
 			O_njets = njets;
 			O_nGenJet = ngenjet_;
