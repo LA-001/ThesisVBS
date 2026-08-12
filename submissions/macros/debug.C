@@ -705,7 +705,7 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
       O_jet2eta  = p4jet2.Eta();
       O_jet2phi  = p4jet2.Phi();
 	  O_jet1pt  =  p4jet1.Pt();
-	  O_jet1pt  =  p4jet2.Pt();
+	  O_jet2pt  =  p4jet2.Pt();
 
 			O_njets = njets;
 			O_nGenJet = ngenjet_;
