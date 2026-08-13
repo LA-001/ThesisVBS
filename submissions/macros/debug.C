@@ -59,7 +59,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("nGenJet",         &O_nGenJet,         "nGenJet/I");
   outtree->Branch("jetpt",           O_jetpt,            "jetpt[njets]/F");
   outtree->Branch("jeteta",          O_jeteta,           "jeteta[njets]/F");
-  outtree->Branch("jetptphi",        O_jetphi,           "jetphi[njets]/F");
+  outtree->Branch("jetphi",          O_jetphi,           "jetphi[njets]/F");
 
   Int_t   O_nGenLep;
   Int_t   O_genlep_pdgid[20];
@@ -616,9 +616,9 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
 					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 				}
 
-				O_jetpt[njets--] = jetpt;
-				O_jeteta[njets--] = jet_eta_[j];
-				O_jetphi[njets--] = jet_phi_[j];
+				O_jetpt[njets-1] = jetpt;
+				O_jeteta[njets-1] = jet_eta_[j];
+				O_jetphi[njets-1] = jet_phi_[j];
 			}
     	}
 
