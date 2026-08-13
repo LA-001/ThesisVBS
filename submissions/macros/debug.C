@@ -46,24 +46,17 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_minor_deltaR[128];
 
   outtree->Branch("weight",&O_weight,"weight/F");
-  //outtree->Branch("mvis",&O_mvis,"mvis/F");
   outtree->Branch("taupt",&O_taupt,"taupt/F");
   outtree->Branch("taueta",  &O_taueta,  "taueta/F");
   outtree->Branch("tauphi",  &O_tauphi,  "tauphi/F");
+  outtree->Branch("lepeta",  &O_lepeta,  "lepeta/F");
+  outtree->Branch("lepphi",  &O_lepphi,  "lepphi/F");
   outtree->Branch("njets",&O_njets,"njets/I");
-  //outtree->Branch("mjj",&O_mjj,"mjj/F");
-  //outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
   outtree->Branch("sample",&O_sample,"sample/I");
   outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
-
-
-  //outtree->Branch("metpt",         &O_metpt,           "metpt/F");
-  //outtree->Branch("metphi",        &O_metphi,          "metphi/F");
   outtree->Branch("tau_genflav",     &O_tau_genflav,     "tau_genflav/b");
   outtree->Branch("lep_genflav",     &O_lep_genflav,     "lep_genflav/b");
   outtree->Branch("nGenJet",         &O_nGenJet,         "nGenJet/I");
-  //outtree->Branch("lep_charge_flip", &O_lep_charge_flip, "lep_charge_flip/O");
-  //outtree->Branch("lep_gen_charge",  &O_lep_gen_charge,  "lep_gen_charge/I");
   outtree->Branch("jetpt",           O_jetpt,            "jetpt[njets]/F");
   outtree->Branch("jeteta",          O_jeteta,           "jeteta[njets]/F");
   outtree->Branch("jetptphi",        O_jetphi,           "jetphi[njets]/F");
@@ -659,26 +652,21 @@ tree->SetBranchAddress("GenPart_statusFlags", &genpart_statusflags_);
       float mjj_ = p4jets.M(); // Invariant mass of the dijet system
       float deltaRjj_ = deltaR(p4jet1,p4jet2);
 	
-      O_weight   = weight_;
-      O_sample   = sample;
-      //O_mvis     = mvis_;
-      O_njets    = njets;
-      O_taupt    = p4tau.Pt();
-      O_leppt    = p4lep.Pt();
-      //O_mjj      = mjj_;
-      //O_deltaRjj = deltaRjj_;
+      	O_weight   = weight_;
+      	O_sample   = sample;
+      	O_njets    = njets;
+      	O_taupt    = p4tau.Pt();
+      	O_leppt    = p4lep.Pt();
 	  	O_ismuon   = ismuon;
 
 	  	O_taueta   = p4tau.Eta();
 	  	O_tauphi   = p4tau.Phi();
 	  	O_lepeta   = p4lep.Eta();
 	  	O_lepphi   = p4lep.Phi();
-	  	//O_metpt    = met_pt_;
-	  	//O_metphi   = met_phi_;
 
 
-			O_njets = njets;
-			O_nGenJet = ngenjet_;
+		O_njets = njets;
+		O_nGenJet = ngenjet_;
       
       outtree->Fill();
 
