@@ -300,7 +300,8 @@ Bool_t JetIdTightLepVeto(float eta, float neHEF, float neEmEF, float chEmEF, flo
 }
 
 map<UInt_t, vector<pair<UInt_t,UInt_t>>> loadGoldenJSON(string filename){
-    json data = json::parse(filename);
+    ifstream f(filename); 
+    json data = json::parse(f);
     map<UInt_t, vector<pair<UInt_t,UInt_t>>> goldenMap;
 
     for (auto& [key, ranges] : data.items()) {
