@@ -1,3 +1,9 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <nlohmann/json.hpp>
+
 //Definition of corrections
 
 string JEC_json = "jsons/jet_jerc_2023BPix.json.gz";
@@ -110,6 +116,8 @@ auto tau_energyscale= tau_c_set->at("tau_energy_scale");
 string DY_ptfile = "jsons/DY_pTll_weights_2023postBPix.json.gz";
 auto DY_c_set = CorrectionSet::from_file(DY_ptfile);
 auto DY_SF= DY_c_set->at("DY_pTll_reweighting");
+
+string Goldenjson_2024 = "jsons/Cert_Collisions2024_378981_386951_Golden.json";
 
 Float_t WP_L = 0.0246; 
 Float_t WP_M = 0.1272;
@@ -289,4 +297,28 @@ Bool_t JetIdTightLepVeto(float eta, float neHEF, float neEmEF, float chEmEF, flo
     }
 
     return tightLepVeto;
+}
+
+map<UInt_t, vector<pair<UInt_t,UInt_t>>> loadGoldenJSON(string filename){
+    json data = json::parse(filename);
+    map<UInt_t, vector<pair<UInt_t,UInt_t>>> goldenMap;
+
+    for (auto& [key, ranges] : data.items()) {
+        UInt_t run = stoi(key);
+        for (auto& ls : ranges) goldenMap[run].push_back({ls[0], ls[1]});
+    }
+
+    return goldenMap;
+}
+
+Bool_t is_valid_event(const std::map<UInt_t, std::vector<std::pair<UInt_t, UInt_t>>>& goldenMap, UInt_t run, UInt_t lumi) {
+    auto it = goldenMap.find(run);
+    if (it == goldenMap.end()) return false; // La run non esiste
+
+    for (const auto& [in, fin] : it->second) {
+        if (lumi >= in && lumi <= fin) {
+            return true; // L'evento cade in un intervallo valido
+        }
+    }
+    return false;
 }
