@@ -1,0 +1,8 @@
+# Database of samples to run jobs on. Lines that start with "-" or "#" are ignored
+# Format:
+# ERA,SAMPLENAME,FULLNAME,IDENTIFIER,X-SEC
+#
+### JetMET0
+-
+Run2024, F, /JetMET0/Run2024F-PromptReco-v1/NANOAOD, 1, 1.
+-
