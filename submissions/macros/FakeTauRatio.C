@@ -377,10 +377,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     vector<int> taupt_medium;
     
     for(int j=0; j<ntaus_; j++){ 
-      int vse = static_cast<int>(vse_);
-      int vsmu = static_cast<int>(vsmu_);
-      int vsjet = static_cast<int>(vsjet_);
-      if(vse>=6 && vsmu>=4 && tau_pt[j]>20 && abs(tau_eta_[j])<2.3){
+      int vse = static_cast<int>(tauidvse_[j]);
+      int vsmu = static_cast<int>(tauidvsmu_[j]);
+      int vsjet = static_cast<int>(tauidvsjet_[j]);
+      if(vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3){
         if(vsjet>=4) taupt_loose.push_back(tau_pt_[j]);       //Loose
         if(vsjet>=5) taupt_medium.push_back(tau_pt_[j]);      //Medium
       } 
