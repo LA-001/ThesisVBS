@@ -383,11 +383,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       } 
     }
 
-    //======================================================================
-    //        AGGIUNGERE TUTTI I HLT_PFJet
-    //======================================================================
-    
-    Bool_t trigpath = (HLT_ || HLT_ .....)
+    Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
 
     if(excflag && trigpath){
       for(int j=0; j<taupt_loose.size(); j++) h_taupt_loose->Fill(taupt_loose[j]);
