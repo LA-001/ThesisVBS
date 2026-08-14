@@ -362,11 +362,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TH1F *h_taupt_loose = new TH1F("h_taupt_loose","h_taupt_loose",60,0.,200.); 
   TH1F *h_taupt_medium = new TH1F("h_taupt_medium","h_taupt_medium",60,0.,200.);
   TH1F *h_taueta_loose = new TH1F("h_taueta_loose","h_taueta_loose",35,-5.,5.); 
-  TH1F *h_taueta_medium = new TH1F("h_taueta_medium","h_taueta_medium",35,-5.,5.);
+  TH1F *h_taueta_medium = new TH1F("h_taueta_medium","h_taueta_medium",35,-2.5,2.5);
   TH1F *h_tauphi_loose = new TH1F("h_tauphi_loose","h_tauphi_loose",35,-3.2,3.2); 
   TH1F *h_tauphi_medium = new TH1F("h_tauphi_medium","h_tauphi_medium",35,-3.2,3.2);
-  TH1I *h_tauDM_loose = new TH1I("h_tauDM_loose","h_taupt_loose",60,0.,200.); 
-  TH1I *h_tauDM_medium = new TH1I("h_tauDM_medium","h_taupt_medium",60,0.,200.);
+  TH1I *h_tauDM_loose = new TH1I("h_tauDM_loose","h_tauDM_loose",60,0.,200.); 
+  TH1I *h_tauDM_medium = new TH1I("h_tauDM_medium","h_tauDM_medium",60,0.,200.);
   auto goldenMap = loadGoldenJSON(Goldenjson_2024);
 
   for (Long64_t i = 0; i < numEntries; ++i) {
