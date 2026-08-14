@@ -21,8 +21,8 @@ using correction::CorrectionSet;
 #include "Utils.C"
 
 void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
-  //TString filename = "root://cms-xrd-global.cern.ch/" + srcfile;
-  TString filename = "root://xrootd-cms.infn.it/" + srcfile;
+  TString filename = "root://cms-xrd-global.cern.ch/" + srcfile;
+  //TString filename = "root://xrootd-cms.infn.it/" + srcfile;
   TFile *f = TFile::Open(filename);
   TFile *output= new TFile("testoutput.root","RECREATE");
   TTree* tree = (TTree*)f->Get("Events");
