@@ -374,18 +374,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(!METfilters) excflag = 1;
 
     vector<int> taupt_loose;
-    vector<int> ntaupt_medium;
+    vector<int> taupt_medium;
     
-    for(int j=0; j<ntaus_; j++){
-      if(tauidvse_>=6 && tauidvsmu_>=4 && pt>20 && abs(eta)<2.3){
-        if(tauidvsjet_>=4) taupt_loose.push_back(tau_pt_[j]);       //Loose
-        if(tauidvsjet_>=5) taupt_medium.push_back(tau_pt_[j]);      //Medium
+    for(int j=0; j<ntaus_; j++){ 
+      int vse = static_cast<int>(vse_);
+      int vsmu = static_cast<int>(vsmu_);
+      int vsjet = static_cast<int>(vsjet_);
+      if(vse>=6 && vsmu>=4 && tau_pt[j]>20 && abs(tau_eta_[j])<2.3){
+        if(vsjet>=4) taupt_loose.push_back(tau_pt_[j]);       //Loose
+        if(vsjet>=5) taupt_medium.push_back(tau_pt_[j]);      //Medium
       } 
     }
 
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
 
-    if(excflag && trigpath){
+    if(!excflag && trigpath){
       for(int j=0; j<taupt_loose.size(); j++) h_taupt_loose->Fill(taupt_loose[j]);
       for(int j=0; j<taupt_medium.size(); j++) h_taupt_medium->Fill(taupt_medium[j]);
     }
