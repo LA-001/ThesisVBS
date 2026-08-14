@@ -360,14 +360,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   TH1F *h_taupt_loose = new TH1F("h_taupt_loose","h_taupt_loose",60,0.,200.); 
   TH1F *h_taupt_medium = new TH1F("h_taupt_medium","h_taupt_medium",60,0.,200.);
+  auto goldenMap = loadGoldenJSON(Goldenjson_2024);
 
   for (Long64_t i = 0; i < numEntries; ++i) {
     tree->GetEntry(i);
 
-    //======================================================================
-    //        AGGIUNGERE CONTROLLO RUN E LUMISECTION
-    //======================================================================
-
+    Bool_t golden_event = is_valid_event(goldenMap, run_, ls_);
+    if(!golden_event) continue;
+    
     Bool_t excflag = 0;
 
     Bool_t METfilters = (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
