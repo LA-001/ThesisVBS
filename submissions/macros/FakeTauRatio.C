@@ -5,6 +5,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
+#include "TH1I.h"
 #include "TRandom3.h"
 #include "TMath.h"
 #include <chrono>
@@ -360,6 +361,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   TH1F *h_taupt_loose = new TH1F("h_taupt_loose","h_taupt_loose",60,0.,200.); 
   TH1F *h_taupt_medium = new TH1F("h_taupt_medium","h_taupt_medium",60,0.,200.);
+  TH1F *h_taueta_loose = new TH1F("h_taueta_loose","h_taueta_loose",35,-5.,5.); 
+  TH1F *h_taueta_medium = new TH1F("h_taueta_medium","h_taueta_medium",35,-5.,5.);
+  TH1F *h_tauphi_loose = new TH1F("h_tauphi_loose","h_tauphi_loose",35,-3.2,3.2); 
+  TH1F *h_tauphi_medium = new TH1F("h_tauphi_medium","h_tauphi_medium",35,-3.2,3.2);
+  TH1I *h_tauDM_loose = new TH1I("h_tauDM_loose","h_taupt_loose",60,0.,200.); 
+  TH1I *h_tauDM_medium = new TH1I("h_tauDM_medium","h_taupt_medium",60,0.,200.);
   auto goldenMap = loadGoldenJSON(Goldenjson_2024);
 
   for (Long64_t i = 0; i < numEntries; ++i) {
@@ -373,29 +380,49 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Bool_t METfilters = (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
     if(!METfilters) excflag = 1;
 
-    vector<int> taupt_loose;
-    vector<int> taupt_medium;
+    vector<int> idx_loose;
+    vector<int> idx_medium;
     
     for(int j=0; j<ntaus_; j++){ 
       int vse = static_cast<int>(tauidvse_[j]);
       int vsmu = static_cast<int>(tauidvsmu_[j]);
       int vsjet = static_cast<int>(tauidvsjet_[j]);
-      if(vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3){
-        if(vsjet>=4) taupt_loose.push_back(tau_pt_[j]);       //Loose
-        if(vsjet>=5) taupt_medium.push_back(tau_pt_[j]);      //Medium
+
+      int DM = static_cast<int>(tau_decay_[j]);
+      if(DM==2 or DM==5 or DM==6) continue;
+
+      if(vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
+        if(vsjet>=4) idx_loose.push_back(j);       //Loose
+        if(vsjet>=5) idx_medium.push_back(j);      //Medium
       } 
     }
 
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
 
     if(!excflag && trigpath){
-      for(int j=0; j<taupt_loose.size(); j++) h_taupt_loose->Fill(taupt_loose[j]);
-      for(int j=0; j<taupt_medium.size(); j++) h_taupt_medium->Fill(taupt_medium[j]);
+      for(int j : idx_loose){
+        h_taupt_loose->Fill(tau_pt_[j]);
+        h_taueta_loose->Fill(tau_eta_[j]);
+        h_tauphi_loose->Fill(tau_phi_[j]);
+        h_tauDM_loose->Fill(tau_decay_[j]);
+      }
+      for(int j : idx_medium){
+        h_taupt_medium->Fill(tau_pt_[j]);
+        h_taueta_medium->Fill(tau_eta_[j]);
+        h_tauphi_medium->Fill(tau_phi_[j]);
+        h_tauDM_medium->Fill(tau_decay_[j]);
+      }
     }
   }
   
   h_taupt_loose->Write();
   h_taupt_medium->Write();
+  h_taueta_loose->Write();
+  h_taueta_medium->Write();
+  h_tauphi_loose->Write();
+  h_tauphi_medium->Write();
+  h_tauDM_loose->Write();
+  h_tauDM_medium->Write();
 
   f->Close();
   output->Close();
