@@ -364,8 +364,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   auto goldenMap = loadGoldenJSON(Goldenjson_2024);
   Int_t O_ntaus_den, O_ntaus_num, O_njets;
-  Float_t O_taupt_den[20], O_taueta_den[20], O_tauphi_den[20],O_tauDM_den[20];
-  Float_t O_taupt_num[20], O_taueta_num[20], O_tauphi_num[20],O_tauDM_num[20];
+  Float_t O_taupt_den[20], O_taueta_den[20], O_tauphi_den[20];
+  Float_t O_taupt_num[20], O_taueta_num[20], O_tauphi_num[20];
+  Int_t O_tauDM_den[20],O_tauDM_num[20];
 
   outtree->Branch("ntaus_den",      &O_ntaus_den,   "ntaus_den/I");
   outtree->Branch("taupt_den",       O_taupt_den,   "taupt_den[ntaus_den]/F");
