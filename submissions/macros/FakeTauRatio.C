@@ -233,6 +233,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t jet_raw_[128];
   tree->SetBranchAddress("Jet_rawFactor",&jet_raw_);
   */
+
   tree->SetBranchStatus("nJet", 1);
   Int_t njets_;
   tree->SetBranchAddress("nJet",&njets_);
@@ -368,15 +369,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   outtree->Branch("ntaus_den",      &O_ntaus_den,   "ntaus_den/I");
   outtree->Branch("taupt_den",       O_taupt_den,   "taupt_den[ntaus_den]/F");
-  outtree->Branch("taueta_den",      O_taueta_den,  "taupeta_den[ntaus_den]/F");
+  outtree->Branch("taueta_den",      O_taueta_den,  "taueta_den[ntaus_den]/F");
   outtree->Branch("tauphi_den",      O_tauphi_den,  "tauphi_den[ntaus_den]/F");
-  outtree->Branch("tauDM_den",       O_tauDM_den,   "tauDM_den[ntaus_den]/F");
+  outtree->Branch("tauDM_den",       O_tauDM_den,   "tauDM_den[ntaus_den]/I");
 
   outtree->Branch("ntaus_num",      &O_ntaus_num,   "ntaus_num/I");
-  outtree->Branch("taupt_num",       O_taupt_num,   "taupt_num[ntaus_den]/F");
-  outtree->Branch("taueta_num",      O_taueta_num,  "taupeta_num[ntaus_den]/F");
-  outtree->Branch("tauphi_num",      O_tauphi_num,  "tauphi_num[ntaus_den]/F");
-  outtree->Branch("tauDM_num",       O_tauDM_num,   "tauDM_num[ntaus_den]/F");
+  outtree->Branch("taupt_num",       O_taupt_num,   "taupt_num[ntaus_num]/F");
+  outtree->Branch("taueta_num",      O_taueta_num,  "taueta_num[ntaus_num]/F");
+  outtree->Branch("tauphi_num",      O_tauphi_num,  "tauphi_num[ntaus_num]/F");
+  outtree->Branch("tauDM_num",       O_tauDM_num,   "tauDM_num[ntaus_num]/I");
 
   outtree->Branch("njets",          &O_njets,       "njets/I");
 
