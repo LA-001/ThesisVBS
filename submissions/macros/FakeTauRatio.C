@@ -29,6 +29,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TTree* tree = (TTree*)f->Get("Events");
   TTree* runtree = (TTree*)f->Get("Runs");
 
+  TTree *outtree = new TTree("outtree", "outtree");
+
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
   tree->SetBranchStatus("run", 1);
@@ -230,11 +232,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Jet_rawFactor", 1);
   Float_t jet_raw_[128];
   tree->SetBranchAddress("Jet_rawFactor",&jet_raw_);
-
+  */
   tree->SetBranchStatus("nJet", 1);
   Int_t njets_;
   tree->SetBranchAddress("nJet",&njets_);
-  */
+
 //-------------------------- HIGH LEVEL TRIGGER (HLT)---------------------------------------------------------------------------
   
   tree->SetBranchStatus("HLT_IsoMu24", 1);
@@ -359,15 +361,24 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   Long64_t numEntries = tree->GetEntries();
 
-  TH1F *h_taupt_loose = new TH1F("h_taupt_loose","h_taupt_loose",60,0.,200.); 
-  TH1F *h_taupt_medium = new TH1F("h_taupt_medium","h_taupt_medium",60,0.,200.);
-  TH1F *h_taueta_loose = new TH1F("h_taueta_loose","h_taueta_loose",35,-2.5,2.5); 
-  TH1F *h_taueta_medium = new TH1F("h_taueta_medium","h_taueta_medium",35,-2.5,2.5);
-  TH1F *h_tauphi_loose = new TH1F("h_tauphi_loose","h_tauphi_loose",35,-3.2,3.2); 
-  TH1F *h_tauphi_medium = new TH1F("h_tauphi_medium","h_tauphi_medium",35,-3.2,3.2);
-  TH1I *h_tauDM_loose = new TH1I("h_tauDM_loose","h_tauDM_loose",16,-0.5,15.); 
-  TH1I *h_tauDM_medium = new TH1I("h_tauDM_medium","h_tauDM_medium",16,-0.5,15.);
   auto goldenMap = loadGoldenJSON(Goldenjson_2024);
+  Int_t O_ntaus_den, O_ntaus_num, O_njets;
+  Float_t O_taupt_den[20], O_taueta_den[20], O_tauphi_den[20],O_tauDM_den[20];
+  Float_t O_taupt_num[20], O_taueta_num[20], O_tauphi_num[20],O_tauDM_num[20];
+
+  outtree->Branch("ntaus_den",      &O_ntaus_den,   "ntaus_den/I");
+  outtree->Branch("taupt_den",       O_taupt_den,   "taupt_den[ntaus_den]/F");
+  outtree->Branch("taueta_den",      O_taueta_den,  "taupeta_den[ntaus_den]/F");
+  outtree->Branch("tauphi_den",      O_tauphi_den,  "tauphi_den[ntaus_den]/F");
+  outtree->Branch("tauDM_den",       O_tauDM_den,   "tauDM_den[ntaus_den]/F");
+
+  outtree->Branch("ntaus_num",      &O_ntaus_num,   "ntaus_num/I");
+  outtree->Branch("taupt_num",       O_taupt_num,   "taupt_num[ntaus_den]/F");
+  outtree->Branch("taueta_num",      O_taueta_num,  "taupeta_num[ntaus_den]/F");
+  outtree->Branch("tauphi_num",      O_tauphi_num,  "tauphi_num[ntaus_den]/F");
+  outtree->Branch("tauDM_num",       O_tauDM_num,   "tauDM_num[ntaus_den]/F");
+
+  outtree->Branch("njets",          &O_njets,       "njets/I");
 
   for (Long64_t i = 0; i < numEntries; ++i) {
     tree->GetEntry(i);
@@ -380,8 +391,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Bool_t METfilters = (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
     if(!METfilters) excflag = 1;
 
-    vector<int> idx_loose;
-    vector<int> idx_medium;
+    vector<int> idx_den;
+    vector<int> idx_num;
+    Int_t ntaus_den_=0, ntaus_num_=0; 
     
     for(int j=0; j<ntaus_; j++){ 
       int vse = static_cast<int>(tauidvse_[j]);
@@ -392,37 +404,47 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(DM==2 or DM==5 or DM==6) continue;
 
       if(vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
-        if(vsjet>=4) idx_loose.push_back(j);       //Loose
-        if(vsjet>=5) idx_medium.push_back(j);      //Medium
+        if(vsjet>=4){
+          ntaus_den++;
+          idx_den.push_back(j);       //Loose
+        }
+        if(vsjet>=5){
+          ntaus_num++;
+          idx_num.push_back(j);      //Medium
+        }
       } 
     }
 
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
 
+    int idx_arr = 0;
     if(!excflag && trigpath){
-      for(int j : idx_loose){
-        h_taupt_loose->Fill(tau_pt_[j]);
-        h_taueta_loose->Fill(tau_eta_[j]);
-        h_tauphi_loose->Fill(tau_phi_[j]);
-        h_tauDM_loose->Fill(tau_decay_[j]);
+      for(int j : idx_den){
+        O_taupt_den[idx_arr] = tau_pt_[j];
+        O_taueta_den[idx_arr] = tau_eta_[j];
+        O_tauphi_den[idx_arr] = tau_phi_[j];
+        O_tauDM_den[idx_arr] = static_cast<int>(tau_decay_[j]);
+        idx_arr++;
       }
-      for(int j : idx_medium){
-        h_taupt_medium->Fill(tau_pt_[j]);
-        h_taueta_medium->Fill(tau_eta_[j]);
-        h_tauphi_medium->Fill(tau_phi_[j]);
-        h_tauDM_medium->Fill(tau_decay_[j]);
+
+      idx_arr = 0;
+      for(int j : idx_num){
+        O_taupt_num[idx_arr] = tau_pt_[j];
+        O_taueta_num[idx_arr] = tau_eta_[j];
+        O_tauphi_num[idx_arr] = tau_phi_[j];
+        O_tauDM_num[idx_arr] = static_cast<int>(tau_decay_[j]);
+        idx_arr++;
       }
+
+      O_ntaus_den = ntaus_den_;
+      O_ntaus_num = ntaus_num_;
+      O_njets = njets_;
+
+      outtree->Fill();
     }
   }
-  
-  h_taupt_loose->Write();
-  h_taupt_medium->Write();
-  h_taueta_loose->Write();
-  h_taueta_medium->Write();
-  h_tauphi_loose->Write();
-  h_tauphi_medium->Write();
-  h_tauDM_loose->Write();
-  h_tauDM_medium->Write();
+
+  outtree->Write();
 
   f->Close();
   output->Close();
