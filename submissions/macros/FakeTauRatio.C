@@ -405,11 +405,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
       if(vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
         if(vsjet>=4){
-          ntaus_den++;
+          ntaus_den_++;
           idx_den.push_back(j);       //Loose
         }
         if(vsjet>=5){
-          ntaus_num++;
+          ntaus_num_++;
           idx_num.push_back(j);      //Medium
         }
       } 
