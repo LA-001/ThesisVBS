@@ -369,14 +369,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t edges_eta[] = {-2.3,-1.2,0.,1.2,2.3};
   Int_t nbins_eta = sizeof(edges_eta) / sizeof(edges_eta[0]) - 1;
 
-  TH1F *h_taupt_den = new TH1F("h_taupt_loose","h_taupt_loose",60,0.,250.); 
-  TH1F *h_taupt_num = new TH1F("h_taupt_medium","h_taupt_medium",60,0.,250.);
-  TH1F *h_taueta_den = new TH1F("h_taueta_loose","h_taueta_loose",35,-2.5,2.5); 
-  TH1F *h_taueta_num = new TH1F("h_taueta_medium","h_taueta_medium",35,-2.5,2.5);
-  TH1F *h_tauphi_den = new TH1F("h_tauphi_loose","h_tauphi_loose",35,-3.2,3.2); 
-  TH1F *h_tauphi_num = new TH1F("h_tauphi_medium","h_tauphi_medium",35,-3.2,3.2);
-  TH1I *h_tauDM_den = new TH1I("h_tauDM_loose","h_taupt_loose",16,-0.5,15.5); 
-  TH1I *h_tauDM_num = new TH1I("h_tauDM_medium","h_taupt_medium",16,-0.5,15.5);
+  TH1F *h_taupt_den = new TH1F("h_taupt_den","h_taupt_den",60,0.,250.); 
+  TH1F *h_taupt_num = new TH1F("h_taupt_num","h_taupt_num",60,0.,250.);
+  TH1F *h_taueta_den = new TH1F("h_taueta_den","h_taueta_den",35,-2.5,2.5); 
+  TH1F *h_taueta_num = new TH1F("h_taueta_num","h_taueta_num",35,-2.5,2.5);
+  TH1F *h_tauphi_den = new TH1F("h_tauphi_den","h_tauphi_den",35,-3.2,3.2); 
+  TH1F *h_tauphi_num = new TH1F("h_tauphi_num","h_tauphi_num",35,-3.2,3.2);
+  TH1I *h_tauDM_den = new TH1I("h_tauDM_den","h_tauDM_den",16,-0.5,15.5); 
+  TH1I *h_tauDM_num = new TH1I("h_tauDM_num","h_tauDM_num",16,-0.5,15.5);
   TH2F *h2D_ptVSeta_den = new TH2F("h2D_ptVSeta_den","h2D_ptVSeta_den",nbins_pt,edges_pt,nbins_eta,edges_eta);
   TH2F *h2D_ptVSeta_num = new TH2F("h2D_ptVSeta_num","h2D_ptVSeta_num",nbins_pt,edges_pt,nbins_eta,edges_eta);
 
@@ -429,16 +429,16 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
   }
 
-  h_taupt_loose->Write();
-  h_taupt_medium->Write();
-  h_taueta_loose->Write();
-  h_taueta_medium->Write();
-  h_tauphi_loose->Write();
-  h_tauphi_medium->Write();
-  h_tauDM_loose->Write();
-  h_tauDM_medium->Write();
+  h_taupt_den->Write();
+  h_taupt_num->Write();
+  h_taueta_den->Write();
+  h_taueta_num->Write();
+  h_tauphi_den->Write();
+  h_tauphi_num->Write();
+  h_tauDM_den->Write();
+  h_tauDM_num->Write();
   h2D_ptVSeta_den->Write();
-  h2D_ptVSeta_den->Write();
+  h2D_ptVSeta_num->Write();
 
   f->Close();
   output->Close();
