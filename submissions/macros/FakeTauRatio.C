@@ -420,7 +420,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
 
     int idx_arr = 0;
-    if(!excflag && trigpath){
+    if(!excflag && trigpath && ntaus_den_>0){
       for(int j : idx_den){
         O_taupt_den[idx_arr] = tau_pt_[j];
         O_taueta_den[idx_arr] = tau_eta_[j];
@@ -438,8 +438,19 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         idx_arr++;
       }
 
+      if(ntaus_num_ == 0){
+	      ntaus_num_ = 5;
+        for(int j=0; j<5; j++){
+	        O_taupt_num[j] = -200.;
+	        O_taueta_num[j] = -200.;
+	        O_tauphi_num[j] = -200.;
+	        O_tauDM_num[j] = -200;
+        }
+      }
+
       O_ntaus_den = ntaus_den_;
       O_ntaus_num = ntaus_num_;
+
       O_njets = njets_;
 
       outtree->Fill();
