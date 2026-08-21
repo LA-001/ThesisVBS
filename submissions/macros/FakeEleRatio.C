@@ -84,8 +84,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("Electron_convVeto",&ele_conv_);
   
   tree->SetBranchStatus("Electron_mvaIso_WP80", 1);
-  Bool_t ele_mvaid_[128];
-  tree->SetBranchAddress("Electron_mvaIso_WP80", &ele_mvaid_);
+  Bool_t ele_mvaid80_[128];
+  tree->SetBranchAddress("Electron_mvaIso_WP80", &ele_mvaid80_);
+
+  tree->SetBranchStatus("Electron_mvaIso_WP90", 1);
+  Bool_t ele_mvaid90_[128];
+  tree->SetBranchAddress("Electron_mvaIso_WP90", &ele_mvaid90_);
 
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
@@ -395,7 +399,16 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Int_t nleps_den_=0, nleps_num_=0; 
     
     for(int j=0; j<nelectrons_; j++){ 
-
+		if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j]){
+			if(ele_mvaid90_[j]){
+				nleps_den_++;
+				idx_den.push_back(j);		//Looser than WP80 (maybe not the loosest)
+			}
+			if(ele_mvaid80_[j]){
+				nleps_num_++;
+				idx_num.push_back(j);		//Tighter than WP90
+			}
+		}
     }
 
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
@@ -418,9 +431,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       }
 
       if(nleps_num_ == 0){
-	      nleps_num_ = 5;
+	    nleps_num_ = 5;
         for(int j=0; j<5; j++){
-	        O_leppt_num[j] = -200.;
+	    	O_leppt_num[j] = -200.;
 	        O_lepeta_num[j] = -200.;
 	        O_lepphi_num[j] = -200.;
         }
