@@ -46,7 +46,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("luminosityBlock",&ls_);
 
 //-------------------------- ELECTRONS ------------------------------------------------------------------------------------
-  /*
+
   tree->SetBranchStatus("Electron_pt", 1);
   Float_t ele_pt_[128];
   tree->SetBranchAddress("Electron_pt",&ele_pt_);
@@ -98,7 +98,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("nElectron", 1);
   Int_t nelectrons_;
   tree->SetBranchAddress("nElectron",&nelectrons_);
-  */
+
 //-------------------------- MUONS ----------------------------------------------------------------------------------------
   /*
   tree->SetBranchStatus("Muon_pt", 1);
@@ -154,7 +154,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("Muon_looseId",&muon_looseid_);
   */
 //-------------------------- TAUS -----------------------------------------------------------------------------------------
-  
+  /*
   tree->SetBranchStatus("Tau_pt", 1);
   Float_t tau_pt_[128];
   tree->SetBranchAddress("Tau_pt",&tau_pt_);
@@ -202,7 +202,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("nTau", 1);
   Int_t ntaus_;
   tree->SetBranchAddress("nTau",&ntaus_);
-
+  */
 //-------------------------- JETS -----------------------------------------------------------------------------------------
   /*
   tree->SetBranchStatus("Jet_pt", 1);
@@ -363,22 +363,19 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Long64_t numEntries = tree->GetEntries();
 
   auto goldenMap = loadGoldenJSON(Goldenjson_2024);
-  Int_t O_ntaus_den, O_ntaus_num, O_njets;
-  Float_t O_taupt_den[20], O_taueta_den[20], O_tauphi_den[20];
-  Float_t O_taupt_num[20], O_taueta_num[20], O_tauphi_num[20];
-  Int_t O_tauDM_den[20],O_tauDM_num[20];
+  Int_t O_nleps_den, O_nleps_num, O_njets;
+  Float_t O_leppt_den[20], O_lepeta_den[20], O_lepphi_den[20];
+  Float_t O_leppt_num[20], O_lepeta_num[20], O_lepphi_num[20];
 
-  outtree->Branch("ntaus_den",      &O_ntaus_den,   "ntaus_den/I");
-  outtree->Branch("taupt_den",       O_taupt_den,   "taupt_den[ntaus_den]/F");
-  outtree->Branch("taueta_den",      O_taueta_den,  "taueta_den[ntaus_den]/F");
-  outtree->Branch("tauphi_den",      O_tauphi_den,  "tauphi_den[ntaus_den]/F");
-  outtree->Branch("tauDM_den",       O_tauDM_den,   "tauDM_den[ntaus_den]/I");
+  outtree->Branch("nleps_den",      &O_nleps_den,   "nleps_den/I");
+  outtree->Branch("leppt_den",       O_leppt_den,   "leppt_den[nleps_den]/F");
+  outtree->Branch("lepeta_den",      O_lepeta_den,  "lepeta_den[nleps_den]/F");
+  outtree->Branch("lepphi_den",      O_lepphi_den,  "lepphi_den[nleps_den]/F");
 
-  outtree->Branch("ntaus_num",      &O_ntaus_num,   "ntaus_num/I");
-  outtree->Branch("taupt_num",       O_taupt_num,   "taupt_num[ntaus_num]/F");
-  outtree->Branch("taueta_num",      O_taueta_num,  "taueta_num[ntaus_num]/F");
-  outtree->Branch("tauphi_num",      O_tauphi_num,  "tauphi_num[ntaus_num]/F");
-  outtree->Branch("tauDM_num",       O_tauDM_num,   "tauDM_num[ntaus_num]/I");
+  outtree->Branch("nleps_num",      &O_nleps_num,   "nleps_num/I");
+  outtree->Branch("leppt_num",       O_leppt_num,   "leppt_num[nleps_num]/F");
+  outtree->Branch("lepeta_num",      O_lepeta_num,  "lepeta_num[nleps_num]/F");
+  outtree->Branch("lepphi_num",      O_lepphi_num,  "lepphi_num[nleps_num]/F");
 
   outtree->Branch("njets",          &O_njets,       "njets/I");
 
@@ -395,61 +392,42 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     vector<int> idx_den;
     vector<int> idx_num;
-    Int_t ntaus_den_=0, ntaus_num_=0; 
+    Int_t nleps_den_=0, nleps_num_=0; 
     
-    for(int j=0; j<ntaus_; j++){ 
-      int vse = static_cast<int>(tauidvse_[j]);
-      int vsmu = static_cast<int>(tauidvsmu_[j]);
-      int vsjet = static_cast<int>(tauidvsjet_[j]);
+    for(int j=0; j<nelectrons_; j++){ 
 
-      int DM = static_cast<int>(tau_decay_[j]);
-      if(DM==2 or DM==5 or DM==6) continue;
-
-      if(vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
-        if(vsjet>=4){
-          ntaus_den_++;
-          idx_den.push_back(j);       //Loose
-        }
-        if(vsjet>=5){
-          ntaus_num_++;
-          idx_num.push_back(j);      //Medium
-        }
-      } 
     }
 
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
 
     int idx_arr = 0;
-    if(!excflag && trigpath && ntaus_den_>0){
+    if(!excflag && trigpath && nleps_den_>0){
       for(int j : idx_den){
-        O_taupt_den[idx_arr] = tau_pt_[j];
-        O_taueta_den[idx_arr] = tau_eta_[j];
-        O_tauphi_den[idx_arr] = tau_phi_[j];
-        O_tauDM_den[idx_arr] = static_cast<int>(tau_decay_[j]);
+        O_leppt_den[idx_arr] = ele_pt_[j];
+        O_lepeta_den[idx_arr] = ele_eta_[j];
+        O_lepphi_den[idx_arr] = ele_phi_[j];
         idx_arr++;
       }
 
       idx_arr = 0;
       for(int j : idx_num){
-        O_taupt_num[idx_arr] = tau_pt_[j];
-        O_taueta_num[idx_arr] = tau_eta_[j];
-        O_tauphi_num[idx_arr] = tau_phi_[j];
-        O_tauDM_num[idx_arr] = static_cast<int>(tau_decay_[j]);
+        O_leppt_num[idx_arr] = ele_pt_[j];
+        O_lepeta_num[idx_arr] = ele_eta_[j];
+        O_lepphi_num[idx_arr] = ele_phi_[j];
         idx_arr++;
       }
 
-      if(ntaus_num_ == 0){
-	      ntaus_num_ = 5;
+      if(nleps_num_ == 0){
+	      nleps_num_ = 5;
         for(int j=0; j<5; j++){
-	        O_taupt_num[j] = -200.;
-	        O_taueta_num[j] = -200.;
-	        O_tauphi_num[j] = -200.;
-	        O_tauDM_num[j] = -200;
+	        O_leppt_num[j] = -200.;
+	        O_lepeta_num[j] = -200.;
+	        O_lepphi_num[j] = -200.;
         }
       }
 
-      O_ntaus_den = ntaus_den_;
-      O_ntaus_num = ntaus_num_;
+      O_nleps_den = nleps_den_;
+      O_nleps_num = nleps_num_;
 
       O_njets = njets_;
 
