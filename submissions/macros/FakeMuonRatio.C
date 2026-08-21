@@ -104,7 +104,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("nElectron",&nelectrons_);
   */
 //-------------------------- MUONS ----------------------------------------------------------------------------------------
-  /*
+
   tree->SetBranchStatus("Muon_pt", 1);
   Float_t muon_pt_[128];
   tree->SetBranchAddress("Muon_pt",&muon_pt_);
@@ -399,7 +399,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Int_t nleps_den_=0, nleps_num_=0; 
     
     for(int j=0; j<nmuons_; j++){ 
-
+ 		if(muon_pt_[j] > 30 && abs(muon_eta_[j]) < 2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2 && muon_isoscore_<0.15){
+		if(muon_looseid_[j]){
+			nleps_den_++;
+			idx_den.push_back(j);
+		}
+		if(muon_mediumid_[j]){
+			nleps_num_++;
+			idx_num.push_back(j);
+		}
     }
 
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
@@ -407,17 +415,17 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     int idx_arr = 0;
     if(!excflag && trigpath && nleps_den_>0){
       for(int j : idx_den){
-        O_leppt_den[idx_arr] = ele_pt_[j];
-        O_lepeta_den[idx_arr] = ele_eta_[j];
-        O_lepphi_den[idx_arr] = ele_phi_[j];
+        O_leppt_den[idx_arr] = muon_pt_[j];
+        O_lepeta_den[idx_arr] = muon_eta_[j];
+        O_lepphi_den[idx_arr] = muon_phi_[j];
         idx_arr++;
       }
 
       idx_arr = 0;
       for(int j : idx_num){
-        O_leppt_num[idx_arr] = ele_pt_[j];
-        O_lepeta_num[idx_arr] = ele_eta_[j];
-        O_lepphi_num[idx_arr] = ele_phi_[j];
+        O_leppt_num[idx_arr] = muon_pt_[j];
+        O_lepeta_num[idx_arr] = muon_eta_[j];
+        O_lepphi_num[idx_arr] = muon_phi_[j];
         idx_arr++;
       }
 
