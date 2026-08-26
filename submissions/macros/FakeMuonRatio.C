@@ -409,6 +409,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 				idx_num.push_back(j);
 			}
     	}
+	}
 
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
 
@@ -446,7 +447,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       outtree->Fill();
     }
   }
-}
   outtree->Write();
 
   f->Close();
