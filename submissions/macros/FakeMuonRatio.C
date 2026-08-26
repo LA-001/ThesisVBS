@@ -399,7 +399,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Int_t nleps_den_=0, nleps_num_=0; 
     
     for(int j=0; j<nmuons_; j++){ 
- 		if(muon_pt_[j] > 30 && abs(muon_eta_[j]) < 2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2 && muon_isoscore_<0.15){
+ 		if(muon_pt_[j] > 30 && abs(muon_eta_[j]) < 2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2 && muon_isoscore_[j]<0.15){
 		if(muon_looseid_[j]){
 			nleps_den_++;
 			idx_den.push_back(j);
