@@ -485,7 +485,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     vector<int> muonidx_num;
 
     for(int j=0; j<ntaus_; j++){
-      if(tau_source[j] == 0) continue;
+      if(tau_source[j] != 5) continue;
       Float_t taupt = tau_pt[j];
       Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight_);
       if(pass){
@@ -502,7 +502,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
 
     for(int j=0; j<nelectrons_; j++){
-      if(ele_source[j] == 0) continue;
+      if(ele_source[j] != 1) continue;
       Float_t elept = ele_pt_[j];
       Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, eleweight_);
       if(pass){
@@ -518,7 +518,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
 
     for(int j=0; j<nmuons_; j++){
-      if(muon_source_[j] != 1 && muon_source_[j] != 15) continue;
+      if(muon_source_[j] != 1) continue;
       Float_t muonpt = muon_pt_[j];
       Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, muonweight_);
       if(pass){
