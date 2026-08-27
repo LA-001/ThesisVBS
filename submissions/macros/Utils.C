@@ -327,16 +327,15 @@ Bool_t is_valid_event(const std::map<UInt_t, std::vector<std::pair<UInt_t, UInt_
 }
 
 double trigpath_Jet(const Bool_t HLT_PFJet40_, const Bool_t HLT_PFJet60_, const Bool_t HLT_PFJet80_, const Bool_t HLT_PFJet110_, const Bool_t HLT_PFJet140_, const Bool_t HLT_PFJet200_, const Bool_t HLT_PFJet260_){
-    Float_t Lumi_eff = -200.;
-    if(HLT_PFJet40_)  Lumi_eff = 0.00022;
-    if(HLT_PFJet60_)  Lumi_eff = 0.00166;
-    if(HLT_PFJet80_)  Lumi_eff = 0.00640;
-    if(HLT_PFJet110_) Lumi_eff = 0.02428;
-    if(HLT_PFJet140_) Lumi_eff = 0.07285;
-    if(HLT_PFJet200_) Lumi_eff = 0.31211;
-    if(HLT_PFJet260_) Lumi_eff = 0.85371;
+    if(HLT_PFJet40_)  return 0.00022;
+    if(HLT_PFJet60_)  return 0.00166;
+    if(HLT_PFJet80_)  return 0.00640;
+    if(HLT_PFJet110_) return 0.02428;
+    if(HLT_PFJet140_) return 0.07285;
+    if(HLT_PFJet200_) return 0.31211;
+    if(HLT_PFJet260_) return 0.85371;
 
-    return Lumi_eff;
+    return -200.;
 }
 
 Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight){
