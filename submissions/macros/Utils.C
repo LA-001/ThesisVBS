@@ -339,13 +339,12 @@ double trigpath_Jet(const Bool_t HLT_PFJet40_, const Bool_t HLT_PFJet60_, const 
     return Lumi_eff;
 }
 
-Bool_t TauSelector_prompt(const Int_t idx,Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t vsjet_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight,vector<float> &tauidx_den, vector<float> &tauidx_num){
+Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight){
   
   int DM = static_cast<int>(DM_);
   if(DM==2 or DM==5 or DM==6) return false;
   int vse = static_cast<int>(vse_);
   int vsmu = static_cast<int>(vsmu_);
-  int vsjet = static_cast<int>(vsjet_);
   
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
@@ -362,16 +361,12 @@ Bool_t TauSelector_prompt(const Int_t idx,Float_t &pt, Float_t eta, UChar_t vse_
     else if(source==5){
       pt*=tau_TES->evaluate({pt,DM,source,"VTight","Tight","default","dm"});
     }
-
-    if(vsjet>=4)    tauidx_den.push_back(idx);
-    if(vsjet>=5)    tauidx_num.push_back(idx);
-
     return true;
   }
   else return false;
 }
 
-Bool_t ElectronSelector_prompt(const Int_t idx, Float_t &pt, Float_t eta, Float_t phi, Bool_t id90, Bool_t id80, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight,vector<float> &eleidx_den, vector<float> &eleidx_num){
+Bool_t ElectronSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight){
   if(pt>30 and abs(eta)<2.5 and abs(dxy)<0.1 and abs(dz)<0.2 and convveto){
     weight*=ele_HLT->evaluate({"2023PromptD","sf","HLT_SF_Ele30_MVAiso80ID",eta,pt}); //Trigger SF
     weight*=ele_SF->evaluate({"2023PromptD","sf","wp80iso",eta,pt,phi}); //ID SF
@@ -386,14 +381,12 @@ Bool_t ElectronSelector_prompt(const Int_t idx, Float_t &pt, Float_t eta, Float_
     float ran=gRandom->Gaus(1.,sig_smear);                                                                                                                                          
     pt*=ran; //Momentum smearing correction
 
-    if(id90)    eleidx_den.push_back(idx);
-    if(id80)    eleidx_num.push_back(idx);
     return true;
   }
   else return false;  
 }
 
-Bool_t MuonSelector_prompt(Const Int_t idx, Float_t &pt, Float_t eta, Float_t phi, Bool_t mediumid, Bool_t looseid, Float_t dxy, Float_t dz, Float_t isoscore, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight, ,vector<float> &muonidx_den, vector<float> &muonidx_num){
+Bool_t MuonSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight){
   if(pt > 30 && abs(eta) < 2.4 && abs(dxy)<0.1 && abs(dz)<0.2){
     weight *= muon_SF1->evaluate({abs(eta),pt,"nominal"}); // ID SF
     weight *= muon_SF2->evaluate({abs(eta),pt,"nominal"}); // ISO SF
@@ -416,9 +409,6 @@ Bool_t MuonSelector_prompt(Const Int_t idx, Float_t &pt, Float_t eta, Float_t ph
     if(kDATA>kMC) kfactor=sqrt(kDATA*kDATA-kMC*kMC);
     float rndm = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
     pt*=(1+kfactor*std*rndm); // Momentum smearing correction
-
-    if(looseid && isoscore<0.4)    muonidx_den.push_back(idx);
-    if(mediumid && isoscore<0.15)  muonidx_num.push_back(idx);  
 
     return true;
   }
