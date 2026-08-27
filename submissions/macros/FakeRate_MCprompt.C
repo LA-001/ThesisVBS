@@ -353,12 +353,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 //-------------------------- OUTPUT NTUPLES ------------------------------------------------------------------------------
 
-  TNtuple *tau_den  = new TNtuple("tree","tau_den", "ev:taupt:taueta:tauphi:tauDM:njets:weight");
-  TNtuple *tau_num  = new TNtuple("tree","tau_num", "ev:taupt:taueta:tauphi:tauDM:njets:weight");
-  TNtuple *ele_den  = new TNtuple("tree","ele_den", "ev:elept:eleeta:elephi:njets:weight");
-  TNtuple *ele_num  = new TNtuple("tree","ele_num", "ev:elept:eleeta:elephi:njets:weight");
-  TNtuple *muon_den = new TNtuple("tree","muon_den","ev:muonpt:muoneta:muonphi:njets:weight");
-  TNtuple *muon_num = new TNtuple("tree","muon_den","ev:muonpt:muoneta:muonphi:njets:weight");
+  TNtuple *tau_den  = new TNtuple("tau_den","tau_den", "ev:taupt:taueta:tauphi:tauDM:njets:weight");
+  TNtuple *tau_num  = new TNtuple("tau_num","tau_num", "ev:taupt:taueta:tauphi:tauDM:njets:weight");
+  TNtuple *ele_den  = new TNtuple("ele_den","ele_den", "ev:elept:eleeta:elephi:njets:weight");
+  TNtuple *ele_num  = new TNtuple("ele_num","ele_num", "ev:elept:eleeta:elephi:njets:weight");
+  TNtuple *muon_den = new TNtuple("muon_den","muon_den","ev:muonpt:muoneta:muonphi:njets:weight");
+  TNtuple *muon_num = new TNtuple("muon_num","muon_num","ev:muonpt:muoneta:muonphi:njets:weight");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -381,50 +381,57 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t weight_=genweight_*weightscale_*lumi_eff*xsec_*1000;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
 
-    Float_t tauweight_  = weight_;
-    Float_t eleweight_  = weight_;
-    Float_t muonweight_ = weight_;
+    Float_t O_tauweight  = weight_;
+    Float_t O_eleweight  = weight_;
+    Float_t O_muonweigh_ = weight_;
+    Int_t O_njets = 0;
+
+    for(int j=0; j<njets_; j++){
+			Float_t jetpt = jet_pt_[j];
+			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
+      if(pass) O_njets++;
+    }
 
     for(int j=0; j<ntaus_; j++){
       if(static_cast<int>(tau_source_[j]) != 5) continue;
-      Float_t taupt = tau_pt[j];
-      Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight_);
+      Float_t taupt = tau_pt_[j];
+      Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight);
       int DM_ = static_cast<int>(tau_decay_[j]);
       if(pass){
         int vsjet = static_cast<int>(tauidvsjet_[j]);
         if(vsjet >= 4){
-          tau_den->Fill(i,taupt,tau_eta_[j],tau_phi_[j],DM_,njets,tauweight_);
+          tau_den->Fill(i,taupt,tau_eta_[j], tau_phi_[j], DM_, O_njets, O_tauweight);
         }
         if(vsjet >= 5){
-          tau_num->Fill(i,taupt,tau_eta_[j],tau_phi_[j],DM_,njets,tauweight_);
+          tau_num->Fill(i,taupt,tau_eta_[j], tau_phi_[j], DM_, O_njets, O_tauweight);
         }
       }
     }
 
     for(int j=0; j<nelectrons_; j++){
-      if(ele_source[j] != 1) continue;
+      if(static_cast<int>(ele_source_[j]) != 1) continue;
       Float_t elept = ele_pt_[j];
-      Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, eleweight_);
+      Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
       if(pass){
         if(ele_mvaid90_[j]){
-          ele_dem->Fill(i, elept, ele_eta_[j], ele_phi_[j], njets, eleweight_);
+          ele_dem->Fill(i, elept, ele_eta_[j], ele_phi_[j], O_njets, O_eleweight);
         }
         if(ele_mvaid80_[j]){
-          ele_num->Fill(i, elept, ele_eta_[j], ele_phi_[j], njets, eleweight_);
+          ele_num->Fill(i, elept, ele_eta_[j], ele_phi_[j], O_njets, O_eleweight);
         }
       }
     }
 
     for(int j=0; j<nmuons_; j++){
-      if(muon_source_[j] != 1) continue;
+      if(static_cast<int>(muon_source_[j]) != 1) continue;
       Float_t muonpt = muon_pt_[j];
-      Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, muonweight_);
+      Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, O_muonweight);
       if(pass){
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-          muon_den->Fill(i, muonpt, muon_eta_[j], muon_phi_[j], njets, muonweight_);
+          muon_den->Fill(i, muonpt, muon_eta_[j], muon_phi_[j], O_njets, O_muonweight);
         }
         if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-          muon_num->Fill(i, muonpt, muon_eta_[j], muon_phi_[j], njets, muonweight_);
+          muon_num->Fill(i, muonpt, muon_eta_[j], muon_phi_[j], O_njets, O_muonweight);
         }
       }
     }
