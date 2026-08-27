@@ -3,13 +3,9 @@
 #include <vector>
 #include "TString.h"
 #include "TFile.h"
-#include "TTree.h"
-#include "TH1F.h"
-#include "TH2F.h"
-#include "TF1.h"
+#include "TNtuple.h"
 #include "TRandom3.h"
 #include "TMath.h"
-#include <chrono>
 #include <cmath>
 #include "Math/Vector4D.h"
 
@@ -30,48 +26,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TFile *output= new TFile("testoutput.root","RECREATE");
   TTree* tree = (TTree*)f->Get("Events");
   TTree* runtree = (TTree*)f->Get("Runs");
-
-  TTree *outtree = new TTree("outtree", "outtree");
-
-  Int_t O_njets, O_sample;
-  Float_t O_mvis, O_taupt, O_taueta, O_leppt, O_mjj, O_deltaRjj;
-  Float_t O_tauphi, O_lepeta, O_lepphi, O_metpt, O_metphi;
-  Float_t O_jeteta[20], O_jetphi[20], O_jetpt[20];
-  Float_t O_weight;
-  UChar_t O_tau_genflav, O_lep_genflav;
-  bool O_ismuon, O_excflag;
-  Bool_t O_lep_charge_flip;
-  Int_t  O_lep_gen_charge;
-  Int_t  O_nGenJet;
-  Float_t O_minor_deltaR[128];
-
-  outtree->Branch("weight",&O_weight,"weight/F");
-  outtree->Branch("taupt",&O_taupt,"taupt/F");
-  outtree->Branch("taueta",  &O_taueta,  "taueta/F");
-  outtree->Branch("tauphi",  &O_tauphi,  "tauphi/F");
-  outtree->Branch("lepeta",  &O_lepeta,  "lepeta/F");
-  outtree->Branch("lepphi",  &O_lepphi,  "lepphi/F");
-  outtree->Branch("njets",&O_njets,"njets/I");
-  outtree->Branch("sample",&O_sample,"sample/I");
-  outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
-  outtree->Branch("tau_genflav",     &O_tau_genflav,     "tau_genflav/b");
-  outtree->Branch("lep_genflav",     &O_lep_genflav,     "lep_genflav/b");
-  outtree->Branch("nGenJet",         &O_nGenJet,         "nGenJet/I");
-  outtree->Branch("jetpt",           O_jetpt,            "jetpt[njets]/F");
-  outtree->Branch("jeteta",          O_jeteta,           "jeteta[njets]/F");
-  outtree->Branch("jetphi",          O_jetphi,           "jetphi[njets]/F");
-
-  Int_t   O_nGenLep;
-  Int_t   O_genlep_pdgid[20];
-  Float_t O_genlep_pt[20];
-  Float_t O_genlep_eta[20];
-  Float_t O_genlep_phi[20];
-
- outtree->Branch("nGenLep",       &O_nGenLep,      "nGenLep/I"); 
- outtree->Branch("genlep_pdgid",  O_genlep_pdgid,  "genlep_pdgid[nGenLep]/I");
- outtree->Branch("genlep_pt",     O_genlep_pt,     "genlep_pt[nGenLep]/F");
- outtree->Branch("genlep_eta",    O_genlep_eta,    "genlep_eta[nGenLep]/F");
- outtree->Branch("genlep_phi",    O_genlep_phi,    "genlep_phi[nGenLep]/F");
 
   //-------------------------------------------------------------------------------------------------
 
@@ -397,58 +351,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Double_t sumgenw_;
   runtree->SetBranchAddress("genEventSumw",&sumgenw_);
 
-//-------------------------- OUTPUT TTREE ---------------------------------------------------------------------------------
+//-------------------------- OUTPUT NTUPLES ------------------------------------------------------------------------------
 
-  Int_t O_ntaus_den, O_ntaus_num;
-  Float_t O_taupt_den[20], O_taueta_den[20], O_tauphi_den[20];
-  Float_t O_taupt_num[20], O_taueta_num[20], O_tauphi_num[20];
-  Int_t O_tauDM_den[20],O_tauDM_num[20];
-
-  Int_t O_neles_den, O_neles_num;
-  Float_t O_elept_den[20], O_eleeta_den[20], O_elephi_den[20];
-  Float_t O_elept_num[20], O_eleeta_num[20], O_elephi_num[20];
-
-  Int_t O_nmuons_den, O_nmuons_num;
-  Float_t O_muonpt_den[20], O_muoneta_den[20], O_muonphi_den[20];
-  Float_t O_muonpt_num[20], O_muoneta_num[20], O_muonphi_num[20];
-
-  Float_t O_tauweight, O_eleweight, O_muonweight;
-
-  outtree->Branch("ntaus_den",      &O_ntaus_den,   "ntaus_den/I");
-  outtree->Branch("taupt_den",       O_taupt_den,   "taupt_den[ntaus_den]/F");
-  outtree->Branch("taueta_den",      O_taueta_den,  "taueta_den[ntaus_den]/F");
-  outtree->Branch("tauphi_den",      O_tauphi_den,  "tauphi_den[ntaus_den]/F");
-  outtree->Branch("tauDM_den",       O_tauDM_den,   "tauDM_den[ntaus_den]/I");
-
-  outtree->Branch("ntaus_num",      &O_ntaus_num,   "ntaus_num/I");
-  outtree->Branch("taupt_num",       O_taupt_num,   "taupt_num[ntaus_num]/F");
-  outtree->Branch("taueta_num",      O_taueta_num,  "taueta_num[ntaus_num]/F");
-  outtree->Branch("tauphi_num",      O_tauphi_num,  "tauphi_num[ntaus_num]/F");
-  outtree->Branch("tauDM_num",       O_tauDM_num,   "tauDM_num[ntaus_num]/I");
-
-  outtree->Branch("neles_den",      &O_neles_den,   "neles_den/I");
-  outtree->Branch("elept_den",       O_elept_den,   "elept_den[neles_den]/F");
-  outtree->Branch("eleeta_den",      O_eleeta_den,  "eleeta_den[neles_den]/F");
-  outtree->Branch("elephi_den",      O_elephi_den,  "elephi_den[neles_den]/F");
-
-  outtree->Branch("neles_num",      &O_neles_num,   "neles_num/I");
-  outtree->Branch("elept_num",       O_elept_num,   "elept_num[neles_num]/F");
-  outtree->Branch("eleeta_num",      O_eleeta_num,  "eleeta_num[neles_num]/F");
-  outtree->Branch("elephi_num",      O_elephi_num,  "elephi_num[neles_num]/F");
-
-  outtree->Branch("nmuons_den",      &O_nmuons_den,   "nmuons_den/I");
-  outtree->Branch("muonpt_den",       O_muonpt_den,   "muonpt_den[nmuons_den]/F");
-  outtree->Branch("muoneta_den",      O_muoneta_den,  "muoneta_den[nmuons_den]/F");
-  outtree->Branch("muonphi_den",      O_muonphi_den,  "muonphi_den[nmuons_den]/F");
-
-  outtree->Branch("nmuons_num",      &O_nmuons_num,   "nmuons_num/I");
-  outtree->Branch("muonpt_num",       O_muonpt_num,   "muonpt_num[nmuons_num]/F");
-  outtree->Branch("muoneta_num",      O_muoneta_num,  "muoneta_num[nmuons_num]/F");
-  outtree->Branch("muonphi_num",      O_muonphi_num,  "muonphi_num[nmuons_num]/F");
-
-  outtree->Branch("tauweight",       &O_tauweight,    "tauweight/F");
-  outtree->Branch("eleweight",       &O_eleweight,    "eleweight/F");
-  outtree->Branch("muonweight",      &O_muonweight,   "muonweight/F");
+  TNtuple *tau_den  = new TNtuple("tree","tau_den", "ev:taupt:taueta:tauphi:tauDM:njets:weight");
+  TNtuple *tau_num  = new TNtuple("tree","tau_num", "ev:taupt:taueta:tauphi:tauDM:njets:weight");
+  TNtuple *ele_den  = new TNtuple("tree","ele_den", "ev:elept:eleeta:elephi:njets:weight");
+  TNtuple *ele_num  = new TNtuple("tree","ele_num", "ev:elept:eleeta:elephi:njets:weight");
+  TNtuple *muon_den = new TNtuple("tree","muon_den","ev:muonpt:muoneta:muonphi:njets:weight");
+  TNtuple *muon_num = new TNtuple("tree","muon_den","ev:muonpt:muoneta:muonphi:njets:weight");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -475,26 +385,18 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t eleweight_  = weight_;
     Float_t muonweight_ = weight_;
 
-    vector<int> tauidx_den;
-    vector<int> tauidx_num;
-    vector<int> eleidx_den;
-    vector<int> eleidx_num;
-    vector<int> muonidx_den;
-    vector<int> muonidx_num;
-
     for(int j=0; j<ntaus_; j++){
-      if(tau_source[j] != 5) continue;
+      if(static_cast<int>(tau_source_[j]) != 5) continue;
       Float_t taupt = tau_pt[j];
-      Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight_);
+      Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight_);
+      int DM_ = static_cast<int>(tau_decay_[j]);
       if(pass){
         int vsjet = static_cast<int>(tauidvsjet_[j]);
         if(vsjet >= 4){
-          tauidx_den.push_back(j);
-          O_taupt_den[tauidx_den.size() - 1] = taupt;
+          tau_den->Fill(i,taupt,tau_eta_[j],tau_phi_[j],DM_,njets,tauweight_);
         }
         if(vsjet >= 5){
-          tauidx_num.push_back(j);
-          O_taupt_num[tauidx_num.size() - 1] = taupt;
+          tau_num->Fill(i,taupt,tau_eta_[j],tau_phi_[j],DM_,njets,tauweight_);
         }
       }
     }
@@ -505,12 +407,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, eleweight_);
       if(pass){
         if(ele_mvaid90_[j]){
-          eleidx_den.push_back(j);
-          O_elept_den[eleidx_den.size() - 1] = elept;
+          ele_dem->Fill(i, elept, ele_eta_[j], ele_phi_[j], njets, eleweight_);
         }
         if(ele_mvaid80_[j]){
-         eleidx_num.push_back(j);
-         O_elept_num[eleidx_num.size() - 1] = elept;
+          ele_num->Fill(i, elept, ele_eta_[j], ele_phi_[j], njets, eleweight_);
         }
       }
     }
@@ -521,121 +421,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, muonweight_);
       if(pass){
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-            muonidx_den.push_back(j);
-            O_muonpt_den[muonidx_den.size() - 1] = muonpt;
+          muon_den->Fill(i, muonpt, muon_eta_[j], muon_phi_[j], njets, muonweight_);
         }
         if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-            muonidx_num.push_back(j);
-            O_muonpt_num[muonidx_num.size() - 1] = muonpt;
+          muon_num->Fill(i, muonpt, muon_eta_[j], muon_phi_[j], njets, muonweight_);
         }
       }
     }
-  
-    int idx_arr = 0;
-    if(tauidx_den.size()>0 || eleidx_den.size()>0 || muonidx_den.size()>0){
+  }  
 
-      if(tauidx_den.size() != 0){
-        O_ntaus_den = tauidx_den.size();
-        for(int j : tauidx_den){
-          O_taueta_den[idx_arr] = tau_eta_[j];
-          O_tauphi_den[idx_arr] = tau_phi_[j];
-          O_tauDM_den[idx_arr]  = tau_decay_[j];
-          idx_arr++;
-        }
-      }else{
-        O_ntaus_den = 1;
-        O_taupt_den[0]  = -200.;
-        O_taueta_den[0] = -200.;
-        O_tauphi_den[0] = -200.;
-        O_tauDM_num[0]  = -200;
-      }
-
-      idx_arr = 0;
-      if(tauidx_num.size() != 0){
-        O_ntaus_num = tauidx_num.size();
-        for(int j : tauidx_num){
-          O_taueta_num[idx_arr] = tau_eta_[j];
-          O_tauphi_num[idx_arr] = tau_phi_[j];
-          O_tauDM_num[idx_arr]  = tau_decay_[j];
-          idx_arr++;
-        }
-      }else{
-        O_ntaus_num = 1;
-        O_taupt_num[0]  = -200.;
-        O_taueta_num[0] = -200.;
-        O_tauphi_num[0] = -200.;
-        O_tauDM_num[0]  = -200;
-      }
-
-      idx_arr = 0;
-      if(eleidx_den.size() != 0){
-        O_neles_den = eleidx_den.size();
-        for(int j : eleidx_den){
-          O_eleeta_den[idx_arr] = ele_eta_[j];
-          O_elephi_den[idx_arr] = ele_phi_[j];
-          idx_arr++;
-        }
-      }else{
-        O_neles_den = 1;
-        O_elept_den[0]  = -200.;
-        O_eleeta_den[0] = -200.;
-        O_elephi_den[0] = -200.;
-      }
-
-      idx_arr = 0;
-      if(eleidx_num.size() != 0){
-        O_neles_num = eleidx_num.size();
-        for(int j : eleidx_num){
-          O_eleeta_num[idx_arr] = ele_eta_[j];
-          O_elephi_num[idx_arr] = ele_phi_[j];
-          idx_arr++;
-        }
-      }else{
-        O_neles_num = 1;
-        O_elept_num[0]  = -200.;
-        O_eleeta_num[0] = -200.;
-        O_elephi_num[0] = -200.;
-      }
-
-      idx_arr = 0;
-      if(muonidx_den.size() != 0){
-        O_nmuons_den = muonidx_den.size();
-        for(int j : muonidx_den){
-          O_muoneta_den[idx_arr] = muon_eta_[j];
-          O_muonphi_den[idx_arr] = muon_phi_[j];
-          idx_arr++;
-        }
-      }else{
-        O_nmuons_den = 1;
-        O_muonpt_den[0]  = -200.;
-        O_muoneta_den[0] = -200.;
-        O_muonphi_den[0] = -200.;
-      }
-
-      idx_arr = 0;
-      if(muonidx_num.size() != 0){
-        O_nmuons_num = muonidx_num.size();
-        for(int j : muonidx_num){
-          O_muoneta_num[idx_arr] = muon_eta_[j];
-          O_muonphi_num[idx_arr] = muon_phi_[j];
-          idx_arr++;
-        }
-      }else{
-        O_nmuons_num = 1;
-        O_muonpt_num[0]  = -200.;
-        O_muoneta_num[0] = -200.;
-        O_muonphi_num[0] = -200.;
-      }
-
-      O_tauweight  = tauweight_;
-      O_eleweight  = eleweight_;
-      O_muonweight = muonweight_;
-
-      outtree->Fill();
-    }  
-  }
-  
-  outtree->Write();
+  tau_den->Write();
+  tau_num->Write();
+  ele_den->Write();
+  ele_num->Write();
+  muon_den->Write();
+  muon_num->Write();
 
   f->Close();
   output->Close();
