@@ -132,8 +132,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("Electron_convVeto",&ele_conv_);
   
   tree->SetBranchStatus("Electron_mvaIso_WP80", 1);
-  Bool_t ele_mvaid_[128];
-  tree->SetBranchAddress("Electron_mvaIso_WP80", &ele_mvaid_);
+  Bool_t ele_mvaid80_[128];
+  tree->SetBranchAddress("Electron_mvaIso_WP80", &ele_mvaid80_);
+
+  tree->SetBranchStatus("Electron_mvaIso_WP90", 1);
+  Bool_t ele_mvaid90_[128];
+  tree->SetBranchAddress("Electron_mvaIso_WP90", &ele_mvaid90_);
 
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
@@ -408,6 +412,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_muonpt_den[20], O_muoneta_den[20], O_muonphi_den[20];
   Float_t O_muonpt_num[20], O_muoneta_num[20], O_muonphi_num[20];
 
+  Float_t O_tauweight, O_eleweight, O_muonweight;
+
   outtree->Branch("ntaus_den",      &O_ntaus_den,   "ntaus_den/I");
   outtree->Branch("taupt_den",       O_taupt_den,   "taupt_den[ntaus_den]/F");
   outtree->Branch("taueta_den",      O_taueta_den,  "taueta_den[ntaus_den]/F");
@@ -440,7 +446,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("muoneta_num",      O_muoneta_num,  "muoneta_num[nmuons_num]/F");
   outtree->Branch("muonphi_num",      O_muonphi_num,  "muonphi_num[nmuons_num]/F");
 
+  outtree->Branch("tauweight",       &O_tauweight,    "tauweight/F");
+  outtree->Branch("eleweight",       &O_elweight,     "eleweight/F");
+  outtree->Branch("muonweight",      &O_muonweight,   "muonweight/F");
+
 \\-------------------------------------------------------------------------------------------------------------------------
+
   runtree->GetEntry(0);
 
   float weightscale_=1/sumgenw_;
@@ -462,22 +473,171 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t weight_=genweight_*weightscale_;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
 
+    Float_t tauweight_  = weight_;
+    Float_t eleweight_  = weight_;
+    Float_t muonweight_ = weight_;
+
     vector<int> tauidx_den;
     vector<int> tauidx_num;
     vector<int> eleidx_den;
     vector<int> eleidx_num;
     vector<int> muonidx_den;
     vector<int> muonidx_num;
- 
-    
+
+    for(int j=0; j<ntaus_; j++){
+      if(tau_source[j] == 0) continue;
+      Float_t taupt = tau_pt[j];
+      Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight_);
+      if(pass){
+        int vsjet = static_cast<int>(tauidvsjet_[j]);
+        if(vsjet >= 4){
+          tauidx_den.push_back(j);
+          taupt_den[tauidx_den.size() - 1] = taupt;
+        }
+        if(vsjet >= 5){
+          tauidx_num.push_back(j);
+          taupt_num[tauidx_num.size() - 1] = taupt;
+        }
+      }
     }
- }
+
+    for(int j=0; j<nelectrons_; j++){
+      if(ele_source[j] == 0) continue;
+      Float_t elept = ele_pt_[j];
+      Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, eleweight_);
+      if(pass){
+        if(ele_mvaid90_[j]){
+          eleidx_den.push_back(j);
+          elept_den[eleidx_den.size() - 1] = elept;
+        }
+        if(ele_mvaid80_[j]){
+         eleidx_num.push_back(j);
+         elept_num[eleidx_num.size() - 1] = elept;
+        }
+      }
+    }
+
+    for(int j=0; j<nmuons_; j++){
+      if(muon_source_[j] != 1 && muon_source_[j] != 15) continue;
+      Float_t muonpt = muon_pt_[j];
+      Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, muonweight_);
+      if(pass){
+        if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
+            eleidx_den.push_back(j);
+            elept_den[eleidx_den.size() - 1] = elept;
+        }
+        if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
+            eleidx_num.push_back(j);
+            elept_num[eleidx_num.size() - 1] = elept;
+        }
+      }
+    }
+  
+    int idx_arr = 0;
+    if(tauidx_den.size()>0 || eleidx_den.size()>0 || muonidx_den.size()>0){
+
+      if(tauidx_den.size() != 0){
+        O_ntaus_den = tauidx_den.size();
+        for(int j : tauidx_den){
+          O_taueta_den[idx_arr] = tau_eta_[j];
+          O_tauphi_den[idx_arr] = tau_phi_[j];
+          O_tauDM_den[idx_arr]  = tau_decay_[j];
+          idx_arr++;
+        }
+      }else{
+        O_ntaus_den = 1;
+        O_taupt_den[0]  = -200.;
+        O_taueta_den[0] = -200.;
+        O_tauphi_den[0] = -200.;
+        O_tauDM_num[0]  = -200;
+      }
+
+      idx_arr = 0;
+      if(tauidx_num.size() != 0){
+        O_ntaus_num = tauidx_num.size();
+        for(int j : tauidx_num){
+          O_taueta_num[idx_arr] = tau_eta_[j];
+          O_tauphi_num[idx_arr] = tau_phi_[j];
+          O_tauDM_num[idx_arr]  = tau_decay_[j];
+          idx_arr++;
+        }
+      }else{
+        O_ntaus_num = 1;
+        O_taupt_num[0]  = -200.;
+        O_taueta_num[0] = -200.;
+        O_tauphi_num[0] = -200.;
+        O_tauDM_num[0]  = -200;
+      }
+
+      idx_arr = 0;
+      if(eleidx_den.size() != 0){
+        O_neles_den = eleidx_den.size();
+        for(int j : eleidx_den){
+          O_eleeta_den[idx_arr] = ele_eta_[j];
+          O_elephi_den[idx_arr] = ele_phi_[j];
+          idx_arr++;
+        }
+      }else{
+        O_neles_den = 1;
+        O_elept_den[0]  = -200.;
+        O_eleeta_den[0] = -200.;
+        O_elephi_den[0] = -200.;
+      }
+
+      idx_arr = 0;
+      if(eleidx_num.size() != 0){
+        O_neles_num = eleidx_num.size();
+        for(int j : eleidx_num){
+          O_eleeta_num[idx_arr] = ele_eta_[j];
+          O_elephi_num[idx_arr] = ele_phi_[j];
+          idx_arr++;
+        }
+      }else{
+        O_neles_num = 1;
+        O_elept_num[0]  = -200.;
+        O_eleeta_num[0] = -200.;
+        O_elephi_num[0] = -200.;
+      }
+
+      idx_arr = 0;
+      if(muonidx_den.size() != 0){
+        O_nmuons_den = muonidx_den.size();
+        for(int j : muonidx_den){
+          O_muoneta_den[idx_arr] = muon_eta_[j];
+          O_muonphi_den[idx_arr] = muon_phi_[j];
+          idx_arr++;
+        }
+      }else{
+        O_nmuons_den = 1;
+        O_muonpt_den[0]  = -200.;
+        O_muoneta_den[0] = -200.;
+        O_muonphi_den[0] = -200.;
+      }
+
+      idx_arr = 0;
+      if(muonidx_num.size() != 0){
+        O_nmuons_num = muonidx_num.size();
+        for(int j : muonidx_num){
+          O_muoneta_num[idx_arr] = muon_eta_[j];
+          O_muonphi_num[idx_arr] = muon_phi_[j];
+          idx_arr++;
+        }
+      }else{
+        O_nmuons_num = 1;
+        O_muonpt_num[0]  = -200.;
+        O_muoneta_num[0] = -200.;
+        O_muonphi_num[0] = -200.;
+      }
+
+      O_tauweight  = tauweight_;
+      O_eleweight  = eleweight_;
+      O_muonweight = muonweight_;
+
+      outtree->Fill();
+    }  
+  }
   
   outtree->Write();
-  auto endTime = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-
-  std::cout << "Total execution time: " << duration << " milliseconds" << std::endl;
 
   f->Close();
   output->Close();
