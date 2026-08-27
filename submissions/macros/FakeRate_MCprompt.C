@@ -447,10 +447,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("muonphi_num",      O_muonphi_num,  "muonphi_num[nmuons_num]/F");
 
   outtree->Branch("tauweight",       &O_tauweight,    "tauweight/F");
-  outtree->Branch("eleweight",       &O_elweight,     "eleweight/F");
+  outtree->Branch("eleweight",       &O_eleweight,    "eleweight/F");
   outtree->Branch("muonweight",      &O_muonweight,   "muonweight/F");
 
-\\-------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------
 
   runtree->GetEntry(0);
 
@@ -466,11 +466,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     Bool_t METfilters= (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
     Float_t lumi_eff = trigpath_Jet(HLT_PFJet40_, HLT_PFJet60_, HLT_PFJet80_, HLT_PFJet110_, HLT_PFJet140_, HLT_PFJet200_, HLT_PFJet260_);
-    if(!METfilters || Lumi_eff == -200.) continue;
+    if(!METfilters || lumi_eff == -200.) continue;
 
-    weightscale_*=lumi_eff*xsec_*1000;
-
-    Float_t weight_=genweight_*weightscale_;
+    Float_t weight_=genweight_*weightscale_*lumi_eff*xsec_*1000;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
 
     Float_t tauweight_  = weight_;
@@ -492,11 +490,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         int vsjet = static_cast<int>(tauidvsjet_[j]);
         if(vsjet >= 4){
           tauidx_den.push_back(j);
-          taupt_den[tauidx_den.size() - 1] = taupt;
+          O_taupt_den[tauidx_den.size() - 1] = taupt;
         }
         if(vsjet >= 5){
           tauidx_num.push_back(j);
-          taupt_num[tauidx_num.size() - 1] = taupt;
+          O_taupt_num[tauidx_num.size() - 1] = taupt;
         }
       }
     }
@@ -508,11 +506,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(pass){
         if(ele_mvaid90_[j]){
           eleidx_den.push_back(j);
-          elept_den[eleidx_den.size() - 1] = elept;
+          O_elept_den[eleidx_den.size() - 1] = elept;
         }
         if(ele_mvaid80_[j]){
          eleidx_num.push_back(j);
-         elept_num[eleidx_num.size() - 1] = elept;
+         O_elept_num[eleidx_num.size() - 1] = elept;
         }
       }
     }
@@ -523,12 +521,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, muonweight_);
       if(pass){
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-            eleidx_den.push_back(j);
-            elept_den[eleidx_den.size() - 1] = elept;
+            muonidx_den.push_back(j);
+            O_muonpt_den[muonidx_den.size() - 1] = muonpt;
         }
         if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-            eleidx_num.push_back(j);
-            elept_num[eleidx_num.size() - 1] = elept;
+            muonidx_num.push_back(j);
+            O_muonpt_num[muonidx_num.size() - 1] = muonpt;
         }
       }
     }
