@@ -353,12 +353,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 //-------------------------- OUTPUT NTUPLES ------------------------------------------------------------------------------
 
-  TNtuple *tau_den  = new TNtuple("tau_den","tau_den", "ev:taupt:taueta:tauphi:tauDM:njets:weight");
-  TNtuple *tau_num  = new TNtuple("tau_num","tau_num", "ev:taupt:taueta:tauphi:tauDM:njets:weight");
-  TNtuple *ele_den  = new TNtuple("ele_den","ele_den", "ev:elept:eleeta:elephi:njets:weight");
-  TNtuple *ele_num  = new TNtuple("ele_num","ele_num", "ev:elept:eleeta:elephi:njets:weight");
-  TNtuple *muon_den = new TNtuple("muon_den","muon_den","ev:muonpt:muoneta:muonphi:njets:weight");
-  TNtuple *muon_num = new TNtuple("muon_num","muon_num","ev:muonpt:muoneta:muonphi:njets:weight");
+  TNtuple *tau_den  = new TNtuple("tau_den","tau_den",  "ev:pt:eta:DM:weight");
+  TNtuple *tau_num  = new TNtuple("tau_num","tau_num",  "ev:pt:eta:DM:weight");
+  TNtuple *ele_den  = new TNtuple("ele_den","ele_den",  "ev:pt:eta:weight");
+  TNtuple *ele_num  = new TNtuple("ele_num","ele_num",  "ev:pt:eta:weight");
+  TNtuple *muon_den = new TNtuple("muon_den","muon_den","ev:pt:eta:weight");
+  TNtuple *muon_num = new TNtuple("muon_num","muon_num","ev:pt:eta:weight");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -384,13 +384,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t O_tauweight  = weight_;
     Float_t O_eleweight  = weight_;
     Float_t O_muonweigh_ = weight_;
-    Int_t O_njets = 0;
+    Int_t njets = 0;
 
     for(int j=0; j<njets_; j++){
 			Float_t jetpt = jet_pt_[j];
 			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
-      if(pass) O_njets++;
+      if(pass) njets++;
     }
+
+	if(njets<2) continue;
 
     for(int j=0; j<ntaus_; j++){
       if(static_cast<int>(tau_source_[j]) != 5) continue;
@@ -400,10 +402,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(pass){
         int vsjet = static_cast<int>(tauidvsjet_[j]);
         if(vsjet >= 4){
-          tau_den->Fill(i,taupt,tau_eta_[j], tau_phi_[j], DM_, O_njets, O_tauweight);
+          tau_den->Fill(i,taupt,tau_eta_[j], DM_, O_tauweight);
         }
         if(vsjet >= 5){
-          tau_num->Fill(i,taupt,tau_eta_[j], tau_phi_[j], DM_, O_njets, O_tauweight);
+          tau_num->Fill(i,taupt,tau_eta_[j], DM_, O_tauweight);
         }
       }
     }
@@ -414,10 +416,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
       if(pass){
         if(ele_mvaid90_[j]){
-          ele_dem->Fill(i, elept, ele_eta_[j], ele_phi_[j], O_njets, O_eleweight);
+          ele_dem->Fill(i, elept, ele_eta_[j], O_eleweight);
         }
         if(ele_mvaid80_[j]){
-          ele_num->Fill(i, elept, ele_eta_[j], ele_phi_[j], O_njets, O_eleweight);
+          ele_num->Fill(i, elept, ele_eta_[j], O_eleweight);
         }
       }
     }
@@ -428,10 +430,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, O_muonweight);
       if(pass){
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-          muon_den->Fill(i, muonpt, muon_eta_[j], muon_phi_[j], O_njets, O_muonweight);
+          muon_den->Fill(i, muonpt, muon_eta_[j], O_muonweight);
         }
         if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-          muon_num->Fill(i, muonpt, muon_eta_[j], muon_phi_[j], O_njets, O_muonweight);
+          muon_num->Fill(i, muonpt, muon_eta_[j], O_muonweight);
         }
       }
     }
