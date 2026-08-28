@@ -383,7 +383,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     Float_t O_tauweight  = weight_;
     Float_t O_eleweight  = weight_;
-    Float_t O_muonweigh_ = weight_;
+    Float_t O_muonweight = weight_;
     Int_t njets = 0;
 
     for(int j=0; j<njets_; j++){
@@ -416,7 +416,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
       if(pass){
         if(ele_mvaid90_[j]){
-          ele_dem->Fill(i, elept, ele_eta_[j], O_eleweight);
+          ele_den->Fill(i, elept, ele_eta_[j], O_eleweight);
         }
         if(ele_mvaid80_[j]){
           ele_num->Fill(i, elept, ele_eta_[j], O_eleweight);
