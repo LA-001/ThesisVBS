@@ -412,5 +412,18 @@ Bool_t MuonSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, F
 
     return true;
   }
+
+Bool_t JetSelector(Float_t pt, Float_t eta, Float_t phi){
+  if(abs(eta)<5.1){
+    if(abs(phi)> 3.141592653589793){ // Safeguard against cases where the phi is not in the range of the vetomap corrections
+      if(std::signbit(phi)) phi+=6.2831853;
+      else phi-=6.2831853;
+    }
+    bool jetveto= JET_veto->evaluate({"jetvetomap",eta,phi});
+    if(jetveto) return false;
+    if(pt<=50 && abs(eta)>2.5 && abs(eta)<3) return false;    // spikes in that abs(eta) range
+    if(pt>30) return true;
+    else return false;
+  }
   else return false;
 }
