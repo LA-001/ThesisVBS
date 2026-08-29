@@ -478,12 +478,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
   }  
 
-  tau_den->Write();
-  tau_num->Write();
-  ele_den->Write();
-  ele_num->Write();
-  muon_den->Write();
-  muon_num->Write();
+  h_tau_pt_den->Write();   h_tau_eta_den->Write();   h_tau_2d_den->Write();
+  h_tau_pt_num->Write();   h_tau_eta_num->Write();   h_tau_2d_num->Write();
+  h_ele_pt_den->Write();   h_ele_eta_den->Write();   h_ele_2d_den->Write();
+  h_ele_pt_num->Write();   h_ele_eta_num->Write();   h_ele_2d_num->Write();
+  h_muon_pt_den->Write();  h_muon_eta_den->Write();  h_muon_2d_den->Write();
+  h_muon_pt_num->Write();  h_muon_eta_num->Write();  h_muon_2d_num->Write();
 
   f->Close();
   output->Close();
