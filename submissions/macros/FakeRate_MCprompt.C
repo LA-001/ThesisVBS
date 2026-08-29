@@ -353,12 +353,39 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 //-------------------------- OUTPUT NTUPLES ------------------------------------------------------------------------------
 
-  TNtuple *tau_den  = new TNtuple("tau_den","tau_den",  "ev:pt:eta:DM:weight");
-  TNtuple *tau_num  = new TNtuple("tau_num","tau_num",  "ev:pt:eta:DM:weight");
-  TNtuple *ele_den  = new TNtuple("ele_den","ele_den",  "ev:pt:eta:weight");
-  TNtuple *ele_num  = new TNtuple("ele_num","ele_num",  "ev:pt:eta:weight");
-  TNtuple *muon_den = new TNtuple("muon_den","muon_den","ev:pt:eta:weight");
-  TNtuple *muon_num = new TNtuple("muon_num","muon_num","ev:pt:eta:weight");
+	Float_t edge_pt1[]  = {20.,25.,30.,35.,40.,45.,50.,55.,60.,70.,80.,100.,120.,140.,160.,180.,200.};
+	Float_t edge_pt2[]  = {20.,40.,60.,80.,100.,120.,145.,200.};
+	Float_t edge_eta1[]  = {-2.5,-2.,-1.479,-1.,0.,1.,1.479,2.,2.5};
+	Float_t edge_eta2[]  = {0.,1.,1.479,2.,2.5};
+
+	const int n_pt1  = sizeof(edge_pt1)/sizeof(edge_pt1[0])  - 1;
+	const int n_pt2  = sizeof(edge_pt2)/sizeof(edge_pt2[0])  - 1;
+	const int n_eta1  = sizeof(edge_eta1)/sizeof(edge_eta1[0]) - 1;
+	const int n_eta2  = sizeof(edge_eta2)/sizeof(edge_eta2[0]) - 1;
+	
+	TH1F *h_tau_pt_den   = new TH1F("h_tau_pt_den","h_tau_pt_den",n_pt1,edge_pt1);
+	TH1F *h_tau_eta_den  = new TH1F("h_tau_eta_den","h_tau_eta_den",n_eta1,edge_eta1);
+	TH2F *h_tau_2d_den   = new TH2F("h_tau_2d_den","h_tau_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_tau_pt_num   = new TH1F("h_tau_pt_num","h_tau_pt_num",n_pt1,edge_pt1);
+	TH1F *h_tau_eta_num  = new TH1F("h_tau_eta_num","h_tau_eta_num",n_eta1,edge_eta1);
+	TH2F *h_tau_2d_num   = new TH2F("h_tau_2d_num","h_tau_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_ele_pt_den   = new TH1F("h_ele_pt_den","h_ele_pt_den",n_pt1,edge_pt1);
+	TH1F *h_ele_eta_den  = new TH1F("h_ele_eta_den","h_ele_eta_den",n_eta1,edge_eta1);
+	TH2F *h_ele_2d_den   = new TH2F("h_ele_2d_den","h_ele_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_ele_pt_num   = new TH1F("h_ele_pt_num","h_ele_pt_num",n_pt1,edge_pt1);
+	TH1F *h_ele_eta_num  = new TH1F("h_ele_eta_num","h_ele_eta_num",n_eta1,edge_eta1);
+	TH2F *h_ele_2d_num   = new TH2F("h_ele_2d_num","h_ele_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_muon_pt_den  = new TH1F("h_muon_pt_den","h_muon_pt_den",n_pt1,edge_pt1);
+	TH1F *h_muon_eta_den = new TH1F("h_muon_eta_den","h_muon_eta_den",n_eta1,edge_eta1);
+	TH2F *h_muon_2d_den  = new TH2F("h_muon_2d_den","h_muon_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_muon_pt_num  = new TH1F("h_muon_pt_num","h_muon_pt_num",n_pt1,edge_pt1);
+	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
+	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -402,10 +429,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(pass){
         int vsjet = static_cast<int>(tauidvsjet_[j]);
         if(vsjet >= 4){
-          tau_den->Fill(i,taupt,tau_eta_[j], DM_, O_tauweight);
+		    h_tau_pt_den->Fill(taupt, O_tauweight);
+		    h_tau_eta_den->Fill(tau_eta_[j], O_tauweight);
+		    h_tau_2d_den->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
         }
         if(vsjet >= 5){
-          tau_num->Fill(i,taupt,tau_eta_[j], DM_, O_tauweight);
+		    h_tau_pt_num->Fill(taupt, O_tauweight);
+		    h_tau_eta_num->Fill(tau_eta_[j], O_tauweight);
+		    h_tau_2d_num->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
         }
       }
     }
@@ -416,10 +447,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
       if(pass){
         if(ele_mvaid90_[j]){
-          ele_den->Fill(i, elept, ele_eta_[j], O_eleweight);
+		    h_ele_pt_den->Fill(elept, O_eleweight);
+		    h_ele_eta_den->Fill(ele_eta_[j], O_eleweight);
+		    h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight);
         }
         if(ele_mvaid80_[j]){
-          ele_num->Fill(i, elept, ele_eta_[j], O_eleweight);
+		    h_ele_pt_num->Fill(elept, O_eleweight);
+		    h_ele_eta_num->Fill(ele_eta_[j], O_eleweight);
+		    h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight);
         }
       }
     }
@@ -430,10 +465,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, O_muonweight);
       if(pass){
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-          muon_den->Fill(i, muonpt, muon_eta_[j], O_muonweight);
+		    h_muon_pt_den->Fill(muonpt, O_muonweight);
+		    h_muon_eta_den->Fill(muon_eta_[j], O_muonweight);
+		    h_muon_2d_den->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
         }
         if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-          muon_num->Fill(i, muonpt, muon_eta_[j], O_muonweight);
+		    h_muon_pt_num->Fill(muonpt, O_muonweight);
+		    h_muon_eta_num->Fill(muon_eta_[j], O_muonweight);
+		    h_muon_2d_num->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
         }
       }
     }
