@@ -413,12 +413,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
     if(!METfilters || !trigpath) continue;
 
-		for(int j=0; j<njets_; j++){
+	Int_t njets = 0;
+	for(int j=0; j<njets_; j++){
 			Bool_t pass = JetSelector_data(jet_pt_[j],jet_eta_[j],jet_phi_[j]);
     	if(pass) njets++;
     }
 
-		if(njets<2) continue;
+	if(njets<2) continue;
 
     //-------------------------- TAU ----------------------------------------------------------------
     for(int j=0; j<ntaus_; j++){
