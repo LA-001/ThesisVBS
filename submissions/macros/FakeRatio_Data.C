@@ -46,7 +46,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("luminosityBlock",&ls_);
 
 //-------------------------- ELECTRONS ------------------------------------------------------------------------------------
-  /*
+
   tree->SetBranchStatus("Electron_pt", 1);
   Float_t ele_pt_[128];
   tree->SetBranchAddress("Electron_pt",&ele_pt_);
@@ -98,9 +98,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("nElectron", 1);
   Int_t nelectrons_;
   tree->SetBranchAddress("nElectron",&nelectrons_);
-  */
+
 //-------------------------- MUONS ----------------------------------------------------------------------------------------
-  /*
+
   tree->SetBranchStatus("Muon_pt", 1);
   Float_t muon_pt_[128];
   tree->SetBranchAddress("Muon_pt",&muon_pt_);
@@ -152,7 +152,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Muon_looseId", 1);
   Bool_t muon_looseid_[128];
   tree->SetBranchAddress("Muon_looseId",&muon_looseid_);
-  */
+
 //-------------------------- TAUS -----------------------------------------------------------------------------------------
   
   tree->SetBranchStatus("Tau_pt", 1);
@@ -204,7 +204,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("nTau",&ntaus_);
 
 //-------------------------- JETS -----------------------------------------------------------------------------------------
-  /*
+
   tree->SetBranchStatus("Jet_pt", 1);
   Float_t jet_pt_[128];
   tree->SetBranchAddress("Jet_pt",&jet_pt_);
@@ -232,7 +232,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Jet_rawFactor", 1);
   Float_t jet_raw_[128];
   tree->SetBranchAddress("Jet_rawFactor",&jet_raw_);
-  */
 
   tree->SetBranchStatus("nJet", 1);
   Int_t njets_;
@@ -363,24 +362,44 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Long64_t numEntries = tree->GetEntries();
 
   auto goldenMap = loadGoldenJSON(Goldenjson_2024);
-  Int_t O_ntaus_den, O_ntaus_num, O_njets;
-  Float_t O_taupt_den[20], O_taueta_den[20], O_tauphi_den[20];
-  Float_t O_taupt_num[20], O_taueta_num[20], O_tauphi_num[20];
-  Int_t O_tauDM_den[20],O_tauDM_num[20];
 
-  outtree->Branch("ntaus_den",      &O_ntaus_den,   "ntaus_den/I");
-  outtree->Branch("taupt_den",       O_taupt_den,   "taupt_den[ntaus_den]/F");
-  outtree->Branch("taueta_den",      O_taueta_den,  "taueta_den[ntaus_den]/F");
-  outtree->Branch("tauphi_den",      O_tauphi_den,  "tauphi_den[ntaus_den]/F");
-  outtree->Branch("tauDM_den",       O_tauDM_den,   "tauDM_den[ntaus_den]/I");
+//-------------------------- OUTPUT HISTOS ------------------------------------------------------------------------------
 
-  outtree->Branch("ntaus_num",      &O_ntaus_num,   "ntaus_num/I");
-  outtree->Branch("taupt_num",       O_taupt_num,   "taupt_num[ntaus_num]/F");
-  outtree->Branch("taueta_num",      O_taueta_num,  "taueta_num[ntaus_num]/F");
-  outtree->Branch("tauphi_num",      O_tauphi_num,  "tauphi_num[ntaus_num]/F");
-  outtree->Branch("tauDM_num",       O_tauDM_num,   "tauDM_num[ntaus_num]/I");
+	Float_t edge_pt1[]  = {20.,25.,30.,35.,40.,45.,50.,55.,60.,70.,80.,100.,120.,140.,160.,180.,200.};
+	Float_t edge_pt2[]  = {20.,40.,60.,80.,100.,120.,145.,200.};
+	Float_t edge_eta1[]  = {-2.5,-2.,-1.479,-1.,0.,1.,1.479,2.,2.5};
+	Float_t edge_eta2[]  = {0.,1.,1.479,2.,2.5};
 
-  outtree->Branch("njets",          &O_njets,       "njets/I");
+	const int n_pt1  = sizeof(edge_pt1)/sizeof(edge_pt1[0])  - 1;
+	const int n_pt2  = sizeof(edge_pt2)/sizeof(edge_pt2[0])  - 1;
+	const int n_eta1  = sizeof(edge_eta1)/sizeof(edge_eta1[0]) - 1;
+	const int n_eta2  = sizeof(edge_eta2)/sizeof(edge_eta2[0]) - 1;
+	
+	TH1F *h_tau_pt_den   = new TH1F("h_tau_pt_den","h_tau_pt_den",n_pt1,edge_pt1);
+	TH1F *h_tau_eta_den  = new TH1F("h_tau_eta_den","h_tau_eta_den",n_eta1,edge_eta1);
+	TH2F *h_tau_2d_den   = new TH2F("h_tau_2d_den","h_tau_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_tau_pt_num   = new TH1F("h_tau_pt_num","h_tau_pt_num",n_pt1,edge_pt1);
+	TH1F *h_tau_eta_num  = new TH1F("h_tau_eta_num","h_tau_eta_num",n_eta1,edge_eta1);
+	TH2F *h_tau_2d_num   = new TH2F("h_tau_2d_num","h_tau_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_ele_pt_den   = new TH1F("h_ele_pt_den","h_ele_pt_den",n_pt1,edge_pt1);
+	TH1F *h_ele_eta_den  = new TH1F("h_ele_eta_den","h_ele_eta_den",n_eta1,edge_eta1);
+	TH2F *h_ele_2d_den   = new TH2F("h_ele_2d_den","h_ele_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_ele_pt_num   = new TH1F("h_ele_pt_num","h_ele_pt_num",n_pt1,edge_pt1);
+	TH1F *h_ele_eta_num  = new TH1F("h_ele_eta_num","h_ele_eta_num",n_eta1,edge_eta1);
+	TH2F *h_ele_2d_num   = new TH2F("h_ele_2d_num","h_ele_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_muon_pt_den  = new TH1F("h_muon_pt_den","h_muon_pt_den",n_pt1,edge_pt1);
+	TH1F *h_muon_eta_den = new TH1F("h_muon_eta_den","h_muon_eta_den",n_eta1,edge_eta1);
+	TH2F *h_muon_2d_den  = new TH2F("h_muon_2d_den","h_muon_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_muon_pt_num  = new TH1F("h_muon_pt_num","h_muon_pt_num",n_pt1,edge_pt1);
+	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
+	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
+
+//-------------------------------------------------------------------------------------------------------------------------
 
   for (Long64_t i = 0; i < numEntries; ++i) {
     tree->GetEntry(i);
@@ -391,73 +410,78 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Bool_t excflag = 0;
 
     Bool_t METfilters = (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
-    if(!METfilters) excflag = 1;
+    Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
+    if(!METfilters || !trigpath) continue;
 
-    vector<int> idx_den;
-    vector<int> idx_num;
-    Int_t ntaus_den_=0, ntaus_num_=0; 
-    
-    for(int j=0; j<ntaus_; j++){ 
-      int vse = static_cast<int>(tauidvse_[j]);
-      int vsmu = static_cast<int>(tauidvsmu_[j]);
+		for(int j=0; j<njets_; j++){
+			Bool_t pass = JetSelector_data(jet_pt_[j],jet_eta_[j],jet_phi_[j]);
+    	if(pass) njets++;
+    }
+
+		if(njets<2) continue;
+
+    //-------------------------- TAU ----------------------------------------------------------------
+    for(int j=0; j<ntaus_; j++){
+      int vse   = static_cast<int>(tauidvse_[j]);
+      int vsmu  = static_cast<int>(tauidvsmu_[j]);
       int vsjet = static_cast<int>(tauidvsjet_[j]);
-
-      int DM = static_cast<int>(tau_decay_[j]);
-      if(DM==2 or DM==5 or DM==6) continue;
-
+      int DM    = static_cast<int>(tau_decay_[j]);
+      if(DM==2 || DM==5 || DM==6) continue;
+ 
       if(vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
         if(vsjet>=4){
-          ntaus_den_++;
-          idx_den.push_back(j);       //Loose
+          h_tau_pt_den->Fill(tau_pt_[j]);
+          h_tau_eta_den->Fill(tau_eta_[j]);
+          h_tau_2d_den->Fill(tau_pt_[j], abs(tau_eta_[j]));
         }
         if(vsjet>=5){
-          ntaus_num_++;
-          idx_num.push_back(j);      //Medium
-        }
-      } 
-    }
-
-    Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
-
-    int idx_arr = 0;
-    if(!excflag && trigpath && ntaus_den_>0){
-      for(int j : idx_den){
-        O_taupt_den[idx_arr] = tau_pt_[j];
-        O_taueta_den[idx_arr] = tau_eta_[j];
-        O_tauphi_den[idx_arr] = tau_phi_[j];
-        O_tauDM_den[idx_arr] = static_cast<int>(tau_decay_[j]);
-        idx_arr++;
-      }
-
-      idx_arr = 0;
-      for(int j : idx_num){
-        O_taupt_num[idx_arr] = tau_pt_[j];
-        O_taueta_num[idx_arr] = tau_eta_[j];
-        O_tauphi_num[idx_arr] = tau_phi_[j];
-        O_tauDM_num[idx_arr] = static_cast<int>(tau_decay_[j]);
-        idx_arr++;
-      }
-
-      if(ntaus_num_ == 0){
-	      ntaus_num_ = 5;
-        for(int j=0; j<5; j++){
-	        O_taupt_num[j] = -200.;
-	        O_taueta_num[j] = -200.;
-	        O_tauphi_num[j] = -200.;
-	        O_tauDM_num[j] = -200;
+          h_tau_pt_num->Fill(tau_pt_[j]);
+          h_tau_eta_num->Fill(tau_eta_[j]);
+          h_tau_2d_num->Fill(tau_pt_[j], abs(tau_eta_[j]));
         }
       }
-
-      O_ntaus_den = ntaus_den_;
-      O_ntaus_num = ntaus_num_;
-
-      O_njets = njets_;
-
-      outtree->Fill();
     }
-  }
+ 
+    //-------------------------- ELECTRON -----------------------------------------------------------
+    for(int j=0; j<nelectrons_; j++){
+			if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j]){
+        if(ele_mvaid90_[j]){
+          h_ele_pt_den->Fill(ele_pt_[j]);
+          h_ele_eta_den->Fill(ele_eta_[j]);
+          h_ele_2d_den->Fill(ele_pt_[j], abs(ele_eta_[j]));
+        }
+        if(ele_mvaid80_[j]){
+          h_ele_pt_num->Fill(ele_pt_[j]);
+          h_ele_eta_num->Fill(ele_eta_[j]);
+          h_ele_2d_num->Fill(ele_pt_[j], abs(ele_eta_[j]));
+        }
+      }
+    }
+ 
+    //-------------------------- MUON ---------------------------------------------------------------
+    for(int j=0; j<nmuons_; j++){
+ 		if(muon_pt_[j]>30 && abs(muon_eta_[j]) < 2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2){
+        if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
+          h_muon_pt_den->Fill(muon_pt_[j]);
+          h_muon_eta_den->Fill(muon_eta_[j]);
+          h_muon_2d_den->Fill(muon_pt_[j], abs(muon_eta_[j]));
+        }
+        if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
+          h_muon_pt_num->Fill(muon_pt_[j]);
+          h_muon_eta_num->Fill(muon_eta_[j]);
+          h_muon_2d_num->Fill(muon_pt_[j], abs(muon_eta_[j]));
+        }
+      }
+    }
+	}
+ 
+  h_tau_pt_den->Write();   h_tau_eta_den->Write();   h_tau_2d_den->Write();
+  h_tau_pt_num->Write();   h_tau_eta_num->Write();   h_tau_2d_num->Write();
+  h_ele_pt_den->Write();   h_ele_eta_den->Write();   h_ele_2d_den->Write();
+  h_ele_pt_num->Write();   h_ele_eta_num->Write();   h_ele_2d_num->Write();
+  h_muon_pt_den->Write();  h_muon_eta_den->Write();  h_muon_2d_den->Write();
+  h_muon_pt_num->Write();  h_muon_eta_num->Write();  h_muon_2d_num->Write();
 
-  outtree->Write();
 
   f->Close();
   output->Close();
