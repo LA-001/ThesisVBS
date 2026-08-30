@@ -412,8 +412,10 @@ Bool_t MuonSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, F
 
     return true;
   }
+  else return false;
+}
 
-Bool_t JetSelector(Float_t pt, Float_t eta, Float_t phi){
+Bool_t JetSelector_data(Float_t pt, Float_t eta, Float_t phi){
   if(abs(eta)<5.1){
     if(abs(phi)> 3.141592653589793){ // Safeguard against cases where the phi is not in the range of the vetomap corrections
       if(std::signbit(phi)) phi+=6.2831853;
