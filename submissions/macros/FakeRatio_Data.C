@@ -394,7 +394,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(!METfilters || !trigpath) continue;
 
 	Int_t ntaus=0, neles=0, nmuons=0;
-	ROOT::Math::PtEtaPhiMVector p4tau, p4ele, p4muon, p4MET;
+	ROOT::Math::PtEtaPhiMVector p4tau, p4ele, p4muon, p4met;
 	p4met = ROOT::Math::PtEtaPhiMVector(met_pt_,0,met_phi_,0);
 
     //-------------------------- TAU ----------------------------------------------------------------
@@ -411,7 +411,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 			  p4tau = ROOT::Math::PtEtaPhiMVector(tau_pt_[j],tau_eta_[j],tau_phi_[j],tau_mass_[j]);
 			  float mT = (p4met + p4tau).M();
-			  if(mT < 50) continue;
+			  if(mT > 50) continue;
 
         if(vsjet>=4){
           h_tau_pt_den->Fill(tau_pt_[j]);
@@ -435,7 +435,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 			p4ele = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
 	  	float mT = (p4met + p4ele).M();
-	  	if(mT < 50) continue;
+	  	if(mT > 50) continue;
 
         if(ele_mvaid90_[j]){
           h_ele_pt_den->Fill(ele_pt_[j]);
@@ -459,7 +459,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 			p4ele = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
 	  	float mT = (p4met + p4ele).M();
-	  	if(mT < 50) continue;
+	  	if(mT > 50) continue;
 
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
           h_muon_pt_den->Fill(muon_pt_[j]);
