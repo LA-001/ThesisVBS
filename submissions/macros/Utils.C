@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <algorithm>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -326,17 +327,22 @@ Bool_t is_valid_event(const std::map<UInt_t, std::vector<std::pair<UInt_t, UInt_
     return false;
 }
 
-Float_t trigpath_Jet(const Bool_t HLT_PFJet40_, const Bool_t HLT_PFJet60_, const Bool_t HLT_PFJet80_, const Bool_t HLT_PFJet110_, const Bool_t HLT_PFJet140_, const Bool_t HLT_PFJet200_, const Bool_t HLT_PFJet260_){
-    Float_t lumi_eff = -200.;
-    if(HLT_PFJet40_)  lumi_eff = 0.00022;
-    if(HLT_PFJet60_)  lumi_eff = 0.00166;
-    if(HLT_PFJet80_)  lumi_eff = 0.00640;
-    if(HLT_PFJet110_) lumi_eff = 0.02428;
-    if(HLT_PFJet140_) lumi_eff = 0.07285;
-    if(HLT_PFJet200_) lumi_eff = 0.31211;
-    if(HLT_PFJet260_) lumi_eff = 0.85371;
+Float_t trigpath_Jet(const Bool_t HLT_PFJet40_, const Bool_t HLT_PFJet60_, const Bool_t HLT_PFJet80_, const Bool_t HLT_PFJet110_, const Bool_t HLT_PFJet140_, const Bool_t HLT_PFJet200_, const Bool_t HLT_PFJet260_, const Bool_t HLT_PFHT180_, const Bool_t HLT_PFHT250_, const Bool_t HLT_PFHT350_){
+    vector<float> lumi_eff = {-200.};
+    if(HLT_PFJet40_)  lumi_eff.push_back(0.00022);
+    if(HLT_PFJet60_)  lumi_eff.push_back(0.00166);
+    if(HLT_PFJet80_)  lumi_eff.push_back(0.00640);
+    if(HLT_PFJet110_) lumi_eff.push_back(0.02428);
+    if(HLT_PFJet140_) lumi_eff.push_back(0.07285);
+    if(HLT_PFJet200_) lumi_eff.push_back(0.31211);
+    if(HLT_PFJet260_) lumi_eff.push_back(0.85371);
+    if(HLT_PFHT180_)  lumi_eff.push_back(0.00959);
+    if(HLT_PFHT250_)  lumi_eff.push_back(0.02665);
+    if(HLT_PFHT350_)  lumi_eff.push_back(0.42686);
 
-    return lumi_eff;
+    Float_t max = *max_element(lumi_eff.begin(), lumi_eff.end());
+
+    return max;
 }
 
 Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight){
