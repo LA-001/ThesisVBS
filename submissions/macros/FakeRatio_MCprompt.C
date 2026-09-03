@@ -303,6 +303,18 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t HLT_PFJet260_;
   tree->SetBranchAddress("HLT_PFJet260",&HLT_PFJet260_);
 
+  tree->SetBranchStatus("HLT_PFHT180", 1);
+  Bool_t HLT_PFHT180_;
+  tree->SetBranchAddress("HLT_PFHT180",&HLT_PFHT180_);
+
+  tree->SetBranchStatus("HLT_PFHT250", 1);
+  Bool_t HLT_PFHT250_;
+  tree->SetBranchAddress("HLT_PFHT250",&HLT_PFHT250_);
+
+  tree->SetBranchStatus("HLT_PFHT350", 1);
+  Bool_t HLT_PFHT350_;
+  tree->SetBranchAddress("HLT_PFHT350",&HLT_PFHT350_);
+
 //-------------------------- FLAGS ----------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Flag_goodVertices", 1);
@@ -402,8 +414,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     bool excflag=0;
 
     Bool_t METfilters= (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
-    Float_t lumi_eff = trigpath_Jet(HLT_PFJet40_, HLT_PFJet60_, HLT_PFJet80_, HLT_PFJet110_, HLT_PFJet140_, HLT_PFJet200_, HLT_PFJet260_);
+    Float_t lumi_eff = trigpath_Jet(HLT_PFJet40_, HLT_PFJet60_, HLT_PFJet80_, HLT_PFJet110_, HLT_PFJet140_, HLT_PFJet200_, HLT_PFJet260_,HLT_PFHT180_,HLT_PFHT250_,HLT_PFHT350_);
     if(!METfilters || lumi_eff == -200.) continue;
+
+	Int_t ntaus=0, neles=0, nmuons=0;
+	ROOT::Math::PtEtaPhiMVector p4tau, p4ele, p4muon, p4met;
+	p4met = ROOT::Math::PtEtaPhiMVector(met_pt_,0,met_phi_,0);
 
     Float_t weight_=genweight_*weightscale_*lumi_eff*xsec_*1000;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
@@ -413,25 +429,23 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t O_muonweight = weight_;
     Int_t njets = 0;
 
-    for(int j=0; j<njets_; j++){
-			Float_t jetpt = jet_pt_[j];
-			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
-      if(pass) njets++;
-    }
-
-	if(njets<2) continue;
-
     for(int j=0; j<ntaus_; j++){
+	  if(ntaus == 1) break;
       if(static_cast<int>(tau_source_[j]) != 5) continue;
       Float_t taupt = tau_pt_[j];
       Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight);
-      int DM_ = static_cast<int>(tau_decay_[j]);
       if(pass){
         int vsjet = static_cast<int>(tauidvsjet_[j]);
+
+		p4tau = ROOT::Math::PtEtaPhiMVector(tau_pt_[j],tau_eta_[j],tau_phi_[j],tau_mass_[j]);
+	    float mT = (p4met + p4tau).M();
+		if(mT > 50) continue;
+
         if(vsjet >= 4){
 		    h_tau_pt_den->Fill(taupt, O_tauweight);
 		    h_tau_eta_den->Fill(tau_eta_[j], O_tauweight);
 		    h_tau_2d_den->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
+			ntaus++;
         }
         if(vsjet >= 5){
 		    h_tau_pt_num->Fill(taupt, O_tauweight);
@@ -442,14 +456,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
 
     for(int j=0; j<nelectrons_; j++){
+	  if(neles == 1) break;
       if(static_cast<int>(ele_source_[j]) != 1) continue;
       Float_t elept = ele_pt_[j];
       Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
       if(pass){
+
+		p4ele = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
+	  	float mT = (p4met + p4ele).M();
+	  	if(mT > 50) continue;
+
         if(ele_mvaid90_[j]){
 		    h_ele_pt_den->Fill(elept, O_eleweight);
 		    h_ele_eta_den->Fill(ele_eta_[j], O_eleweight);
 		    h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight);
+			neles++;
         }
         if(ele_mvaid80_[j]){
 		    h_ele_pt_num->Fill(elept, O_eleweight);
@@ -460,14 +481,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
 
     for(int j=0; j<nmuons_; j++){
+	  if(nmuons == 1) break;
       if(static_cast<int>(muon_source_[j]) != 1) continue;
       Float_t muonpt = muon_pt_[j];
       Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, O_muonweight);
       if(pass){
+
+		p4ele = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
+	  	float mT = (p4met + p4ele).M();
+	  	if(mT > 50) continue;
+
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
 		    h_muon_pt_den->Fill(muonpt, O_muonweight);
 		    h_muon_eta_den->Fill(muon_eta_[j], O_muonweight);
 		    h_muon_2d_den->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
+			nmuons++;
         }
         if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
 		    h_muon_pt_num->Fill(muonpt, O_muonweight);
