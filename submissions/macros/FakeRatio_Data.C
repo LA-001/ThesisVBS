@@ -283,6 +283,18 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t HLT_PFJet260_;
   tree->SetBranchAddress("HLT_PFJet260",&HLT_PFJet260_);
 
+  tree->SetBranchStatus("HLT_PFHT180", 1);
+  Bool_t HLT_PFHT180_;
+  tree->SetBranchAddress("HLT_PFHT180",&HLT_PFHT180_);
+
+  tree->SetBranchStatus("HLT_PFHT250", 1);
+  Bool_t HLT_PFHT250_;
+  tree->SetBranchAddress("HLT_PFHT250",&HLT_PFHT250_);
+
+  tree->SetBranchStatus("HLT_PFHT350", 1);
+  Bool_t HLT_PFHT350_;
+  tree->SetBranchAddress("HLT_PFHT350",&HLT_PFHT350_);
+
 //-------------------------- FLAGS ----------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Flag_goodVertices", 1);
@@ -390,7 +402,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Bool_t excflag = 0;
 
     Bool_t METfilters = (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
-    Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_);
+    Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_ || HLT_PFHT180_ || HLT_PFHT250_ || HLT_PFHT350_);
     if(!METfilters || !trigpath) continue;
 
 	Int_t ntaus=0, neles=0, nmuons=0;
