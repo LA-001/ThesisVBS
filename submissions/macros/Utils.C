@@ -372,10 +372,13 @@ Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_,
   else return false;
 }
 
-Bool_t ElectronSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight){
+Bool_t ElectronSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight, Bool_t iswp80){
   if(pt>30 and abs(eta)<2.5 and abs(dxy)<0.1 and abs(dz)<0.2 and convveto){
-    weight*=ele_HLT->evaluate({"2023PromptD","sf","HLT_SF_Ele30_MVAiso80ID",eta,pt}); //Trigger SF
-    weight*=ele_SF->evaluate({"2023PromptD","sf","wp80iso",eta,pt,phi}); //ID SF
+    if(iswp80){
+        weight*=ele_SF->evaluate({"2023PromptD","sf","wp80iso",eta,pt,phi}); //ID SF
+    }else{
+        weight*=ele_SF->evaluate({"2023PromptD","sf","wp90iso",eta,pt,phi}); //ID SF
+    }
     if(pt<75) {
       weight*=ele_SF->evaluate({"2023PromptD","sf","Reco20to75",eta,pt,phi}); //reco SF
     }
@@ -396,7 +399,6 @@ Bool_t MuonSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, F
   if(pt > 30 && abs(eta) < 2.4 && abs(dxy)<0.1 && abs(dz)<0.2){
     weight *= muon_SF1->evaluate({abs(eta),pt,"nominal"}); // ID SF
     weight *= muon_SF2->evaluate({abs(eta),pt,"nominal"}); // ISO SF
-    weight *= muon_HLT_SF->evaluate({abs(eta),pt,"nominal"}); // TRIG SF
     float aMC = muon_amc->evaluate({eta,phi,"nom"});
     float MMC = muon_Mmc->evaluate({eta,phi,"nom"});
     pt = 1/((MMC/pt)+aMC*charge); // Momentum scale correction 
