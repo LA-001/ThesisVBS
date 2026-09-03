@@ -469,8 +469,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
  		if(muon_pt_[j]>30 && abs(muon_eta_[j]) < 2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2){
 
-			p4ele = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
-	  	float mT = (p4met + p4ele).M();
+		p4muon = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
+	  	float mT = (p4met + p4muon).M();
 	  	if(mT > 50) continue;
 
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
