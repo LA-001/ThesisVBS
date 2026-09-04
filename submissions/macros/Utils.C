@@ -372,13 +372,8 @@ Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_,
   else return false;
 }
 
-Bool_t ElectronSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight, Bool_t iswp80){
+Bool_t ElectronSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight){
   if(pt>30 and abs(eta)<2.5 and abs(dxy)<0.1 and abs(dz)<0.2 and convveto){
-    if(iswp80){
-        weight*=ele_SF->evaluate({"2023PromptD","sf","wp80iso",eta,pt,phi}); //ID SF
-    }else{
-        weight*=ele_SF->evaluate({"2023PromptD","sf","wp90iso",eta,pt,phi}); //ID SF
-    }
     if(pt<75) {
       weight*=ele_SF->evaluate({"2023PromptD","sf","Reco20to75",eta,pt,phi}); //reco SF
     }
@@ -393,6 +388,14 @@ Bool_t ElectronSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dx
     return true;
   }
   else return false;  
+}
+
+void Electron_weightSF(Float_t &weight, Float_t eta, Float_t pt, Float_t phi, Bool_t iswp80){
+    if(iswp80){
+        weight *= ele_SF->evaluate({"2023PromptD","sf","wp80iso",eta,pt,phi});
+    }else{
+        weight *= ele_SF->evaluate({"2023PromptD","sf","wp90iso",eta,pt,phi});
+    }
 }
 
 Bool_t MuonSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight){
