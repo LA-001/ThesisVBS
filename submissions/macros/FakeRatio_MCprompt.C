@@ -443,9 +443,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
 	for(int j=0; j<ntaus_; j++){
 	    if(static_cast<int>(tau_source_[j]) != 5) continue;
-	
+
+		Float_t fake_weight = 1.;	
 	    Float_t taupt = tau_pt_[j];
-	    Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight);
+	    Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], fake_weight);
 	
 	    if(pass){
 	        int vsjet = static_cast<int>(tauidvsjet_[j]);
@@ -486,9 +487,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
 	for(int j=0; j<nelectrons_; j++){
 	    if(static_cast<int>(ele_source_[j]) != 1) continue;
-	
+
+		Float_t fake_weight = 1.;	
 	    Float_t elept = ele_pt_[j];
-	    Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
+	    Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, fake_weight);
 	
 	    if(pass && ele_mvaid90_[j]){
 	        neles_candidates++;
@@ -524,9 +526,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
 	for(int j=0; j<nmuons_; j++){
 	    if(static_cast<int>(muon_source_[j]) != 1) continue;
-	
+
+		Float_t fake_weight = 1.;	
 	    Float_t muonpt = muon_pt_[j];
-	    Bool_t pass = MuonSelector_prompt(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, O_muonweight);
+	    Bool_t pass = MuonSelector_prompt(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, fake_weight);
 	
 	    if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
 	        nmuons_candidates++;
