@@ -6,6 +6,7 @@
 #include "TTree.h"
 #include "TH1F.h"
 #include "TH1I.h"
+#include "TH2F.h"
 #include "TRandom3.h"
 #include "TMath.h"
 #include <chrono>
@@ -84,8 +85,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("Electron_convVeto",&ele_conv_);
   
   tree->SetBranchStatus("Electron_mvaIso_WP80", 1);
-  Bool_t ele_mvaid_[128];
-  tree->SetBranchAddress("Electron_mvaIso_WP80", &ele_mvaid_);
+  Bool_t ele_mvaid80_[128];
+  tree->SetBranchAddress("Electron_mvaIso_WP80", &ele_mvaid80_);
+
+  tree->SetBranchStatus("Electron_mvaIso_WP90", 1);
+  Bool_t ele_mvaid90_[128];
+  tree->SetBranchAddress("Electron_mvaIso_WP90", &ele_mvaid90_);
 
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
@@ -367,27 +372,27 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	const int n_eta1  = sizeof(edge_eta1)/sizeof(edge_eta1[0]) - 1;
 	const int n_eta2  = sizeof(edge_eta2)/sizeof(edge_eta2[0]) - 1;
 	
-	TH1F *h_tau_pt_den   = new TH1F("h_tau_pt_den","h_tau_pt_den",n_pt1,edge_pt1);
+	TH1F *h_tau_pt_den   = new TH1F("h_tau_pt_den","h_tau_pt_den",18,20,200);
 	TH1F *h_tau_eta_den  = new TH1F("h_tau_eta_den","h_tau_eta_den",n_eta1,edge_eta1);
 	TH2F *h_tau_2d_den   = new TH2F("h_tau_2d_den","h_tau_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_tau_pt_num   = new TH1F("h_tau_pt_num","h_tau_pt_num",n_pt1,edge_pt1);
+	TH1F *h_tau_pt_num   = new TH1F("h_tau_pt_num","h_tau_pt_num",18,20,200);
 	TH1F *h_tau_eta_num  = new TH1F("h_tau_eta_num","h_tau_eta_num",n_eta1,edge_eta1);
 	TH2F *h_tau_2d_num   = new TH2F("h_tau_2d_num","h_tau_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_ele_pt_den   = new TH1F("h_ele_pt_den","h_ele_pt_den",n_pt1,edge_pt1);
+	TH1F *h_ele_pt_den   = new TH1F("h_ele_pt_den","h_ele_pt_den",18,20,200);
 	TH1F *h_ele_eta_den  = new TH1F("h_ele_eta_den","h_ele_eta_den",n_eta1,edge_eta1);
 	TH2F *h_ele_2d_den   = new TH2F("h_ele_2d_den","h_ele_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_ele_pt_num   = new TH1F("h_ele_pt_num","h_ele_pt_num",n_pt1,edge_pt1);
+	TH1F *h_ele_pt_num   = new TH1F("h_ele_pt_num","h_ele_pt_num",18,20,200);
 	TH1F *h_ele_eta_num  = new TH1F("h_ele_eta_num","h_ele_eta_num",n_eta1,edge_eta1);
 	TH2F *h_ele_2d_num   = new TH2F("h_ele_2d_num","h_ele_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_muon_pt_den  = new TH1F("h_muon_pt_den","h_muon_pt_den",n_pt1,edge_pt1);
+	TH1F *h_muon_pt_den  = new TH1F("h_muon_pt_den","h_muon_pt_den",18,20,200);
 	TH1F *h_muon_eta_den = new TH1F("h_muon_eta_den","h_muon_eta_den",n_eta1,edge_eta1);
 	TH2F *h_muon_2d_den  = new TH2F("h_muon_2d_den","h_muon_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_muon_pt_num  = new TH1F("h_muon_pt_num","h_muon_pt_num",n_pt1,edge_pt1);
+	TH1F *h_muon_pt_num  = new TH1F("h_muon_pt_num","h_muon_pt_num",18,20,200);
 	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
 	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 
