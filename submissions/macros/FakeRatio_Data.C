@@ -406,8 +406,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(!METfilters || !trigpath) continue;
 
 	Int_t ntaus=0, neles=0, nmuons=0;
-	ROOT::Math::PtEtaPhiMVector p4tau, p4ele, p4muon, p4met;
-	p4met = ROOT::Math::PtEtaPhiMVector(met_pt_,0,met_phi_,0);
 
     //-------------------------- TAU ----------------------------------------------------------------
     for(int j=0; j<ntaus_; j++){
@@ -420,10 +418,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(DM==2 || DM==5 || DM==6) continue;
 
       if(vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
-
-			  p4tau = ROOT::Math::PtEtaPhiMVector(tau_pt_[j],tau_eta_[j],tau_phi_[j],tau_mass_[j]);
-			  float mT = (p4met + p4tau).M();
-			  if(mT > 50) continue;
+		
+		Float_t mT = m_T(tau_pt_[j], met_phi_, tau_phi_[j], met_phi_);
+		if(mT > 50) continue;
 
         if(vsjet>=4){
           h_tau_pt_den->Fill(tau_pt_[j]);
@@ -445,8 +442,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 		if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j]){
 
-			p4ele = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
-	  	float mT = (p4met + p4ele).M();
+		Float_t mT = m_T(ele_pt_[j], met_phi_, ele_phi_[j], met_phi_);
 	  	if(mT > 50) continue;
 
         if(ele_mvaid90_[j]){
@@ -469,8 +465,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
  		if(muon_pt_[j]>30 && abs(muon_eta_[j]) < 2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2){
 
-		p4muon = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
-	  	float mT = (p4met + p4muon).M();
+		Float_t mT = m_T(muon_pt_[j], met_phi_, muon_phi_[j], met_phi_);
 	  	if(mT > 50) continue;
 
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
