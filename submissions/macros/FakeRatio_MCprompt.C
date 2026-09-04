@@ -363,7 +363,24 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Double_t sumgenw_;
   runtree->SetBranchAddress("genEventSumw",&sumgenw_);
 
-//-------------------------- OUTPUT NTUPLES ------------------------------------------------------------------------------
+//-------------------------- MET ---------------------------------------------------------------------------------------
+
+  tree->SetBranchStatus("PuppiMET_pt",  1);
+  Float_t met_pt_;
+  tree->SetBranchAddress("PuppiMET_pt", &met_pt_);
+
+  tree->SetBranchStatus("PuppiMET_phi",  1);
+  Float_t met_phi_;
+  tree->SetBranchAddress("PuppiMET_phi", &met_phi_);
+
+  runtree->GetEntry(0);
+
+  float weightscale_=1/sumgenw_;
+
+  Long64_t numEntries = tree->GetEntries();
+  weightscale_*=numEntries/(float)sampleevents_;
+
+//-------------------------- OUTPUT HISTOS ------------------------------------------------------------------------------
 
 	Float_t edge_pt1[]  = {20.,25.,30.,35.,40.,45.,50.,55.,60.,70.,80.,100.,120.,140.,160.,180.,200.};
 	Float_t edge_pt2[]  = {20.,40.,60.,80.,100.,120.,145.,200.};
@@ -375,38 +392,31 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	const int n_eta1  = sizeof(edge_eta1)/sizeof(edge_eta1[0]) - 1;
 	const int n_eta2  = sizeof(edge_eta2)/sizeof(edge_eta2[0]) - 1;
 	
-	TH1F *h_tau_pt_den   = new TH1F("h_tau_pt_den","h_tau_pt_den",n_pt1,edge_pt1);
+	TH1F *h_tau_pt_den   = new TH1F("h_tau_pt_den","h_tau_pt_den",18,20,200);
 	TH1F *h_tau_eta_den  = new TH1F("h_tau_eta_den","h_tau_eta_den",n_eta1,edge_eta1);
 	TH2F *h_tau_2d_den   = new TH2F("h_tau_2d_den","h_tau_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_tau_pt_num   = new TH1F("h_tau_pt_num","h_tau_pt_num",n_pt1,edge_pt1);
+	TH1F *h_tau_pt_num   = new TH1F("h_tau_pt_num","h_tau_pt_num",18,20,200);
 	TH1F *h_tau_eta_num  = new TH1F("h_tau_eta_num","h_tau_eta_num",n_eta1,edge_eta1);
 	TH2F *h_tau_2d_num   = new TH2F("h_tau_2d_num","h_tau_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_ele_pt_den   = new TH1F("h_ele_pt_den","h_ele_pt_den",n_pt1,edge_pt1);
+	TH1F *h_ele_pt_den   = new TH1F("h_ele_pt_den","h_ele_pt_den",18,20,200);
 	TH1F *h_ele_eta_den  = new TH1F("h_ele_eta_den","h_ele_eta_den",n_eta1,edge_eta1);
 	TH2F *h_ele_2d_den   = new TH2F("h_ele_2d_den","h_ele_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_ele_pt_num   = new TH1F("h_ele_pt_num","h_ele_pt_num",n_pt1,edge_pt1);
+	TH1F *h_ele_pt_num   = new TH1F("h_ele_pt_num","h_ele_pt_num",18,20,200);
 	TH1F *h_ele_eta_num  = new TH1F("h_ele_eta_num","h_ele_eta_num",n_eta1,edge_eta1);
 	TH2F *h_ele_2d_num   = new TH2F("h_ele_2d_num","h_ele_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_muon_pt_den  = new TH1F("h_muon_pt_den","h_muon_pt_den",n_pt1,edge_pt1);
+	TH1F *h_muon_pt_den  = new TH1F("h_muon_pt_den","h_muon_pt_den",18,20,200);
 	TH1F *h_muon_eta_den = new TH1F("h_muon_eta_den","h_muon_eta_den",n_eta1,edge_eta1);
 	TH2F *h_muon_2d_den  = new TH2F("h_muon_2d_den","h_muon_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
-	TH1F *h_muon_pt_num  = new TH1F("h_muon_pt_num","h_muon_pt_num",n_pt1,edge_pt1);
+	TH1F *h_muon_pt_num  = new TH1F("h_muon_pt_num","h_muon_pt_num",18,20,200);
 	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
 	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 
 //-------------------------------------------------------------------------------------------------------------------------
-
-  runtree->GetEntry(0);
-
-  float weightscale_=1/sumgenw_;
-
-  Long64_t numEntries = tree->GetEntries();
-  weightscale_*=numEntries/(float)sampleevents_;
 
   for (Long64_t i = 0; i < numEntries; ++i) {
     tree->GetEntry(i);
@@ -427,78 +437,127 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t O_muonweight = weight_;
     Int_t njets = 0;
 
-    for(int j=0; j<ntaus_; j++){
-	  if(ntaus == 1) break;
-      if(static_cast<int>(tau_source_[j]) != 5) continue;
-      Float_t taupt = tau_pt_[j];
-      Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight);
-      if(pass){
-        int vsjet = static_cast<int>(tauidvsjet_[j]);
+	//-------------------------- TAU ----------------------------------------------------------------
+	Int_t ntaus_candidates = 0;
+	Int_t tau_idx_selected = -1;
+	
+	for(int j=0; j<ntaus_; j++){
+	    if(static_cast<int>(tau_source_[j]) != 5) continue;
+	
+	    Float_t taupt = tau_pt_[j];
+	    Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight);
+	
+	    if(pass){
+	        int vsjet = static_cast<int>(tauidvsjet_[j]);
+	        if(vsjet >= 4){
+	            ntaus_candidates++;
+	            if(tau_idx_selected < 0) tau_idx_selected = j;
+	        }
+	    }
+	}
+	
+	if(ntaus_candidates == 1){
+	    int j = tau_idx_selected;
+	    Float_t taupt = tau_pt_[j];
+	
+	    // riapplica il selector per il peso corretto (dato che modifica taupt e il weight)
+	    Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight);
+	
+	    int vsjet = static_cast<int>(tauidvsjet_[j]);
+	    Float_t mT = m_T(taupt, met_pt_, tau_phi_[j], met_phi_);
+	
+	    if(mT <= 50){
+	        if(vsjet >= 4){
+	            h_tau_pt_den->Fill(taupt, O_tauweight);
+	            h_tau_eta_den->Fill(tau_eta_[j], O_tauweight);
+	            h_tau_2d_den->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
+	        }
+	        if(vsjet >= 5){
+	            h_tau_pt_num->Fill(taupt, O_tauweight);
+	            h_tau_eta_num->Fill(tau_eta_[j], O_tauweight);
+	            h_tau_2d_num->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
+	        }
+	    }
+	}
 
-		Float_t mT = m_T(taupt, met_phi_, tau_phi_[j], met_phi_);
-		if(mT > 50) continue;
+	//-------------------------- ELECTRON -----------------------------------------------------------
+	Int_t neles_candidates = 0;
+	Int_t ele_idx_selected = -1;
+	
+	for(int j=0; j<nelectrons_; j++){
+	    if(static_cast<int>(ele_source_[j]) != 1) continue;
+	
+	    Float_t elept = ele_pt_[j];
+	    Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
+	
+	    if(pass && ele_mvaid90_[j]){
+	        neles_candidates++;
+	        if(ele_idx_selected < 0) ele_idx_selected = j;
+	    }
+	}
+	
+	if(neles_candidates == 1){
+	    int j = ele_idx_selected;
+	    Float_t elept = ele_pt_[j];
+	
+	    Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
+	
+	    Float_t mT = m_T(elept, met_pt_, ele_phi_[j], met_phi_);
+	
+	    if(pass && mT <= 50){
+	        if(ele_mvaid90_[j]){
+	            h_ele_pt_den->Fill(elept, O_eleweight);
+	            h_ele_eta_den->Fill(ele_eta_[j], O_eleweight);
+	            h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight);
+	        }
+	        if(ele_mvaid80_[j]){
+	            h_ele_pt_num->Fill(elept, O_eleweight);
+	            h_ele_eta_num->Fill(ele_eta_[j], O_eleweight);
+	            h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight);
+	        }
+	    }
+	}
+	
+	//-------------------------- MUON ---------------------------------------------------------------
+	Int_t nmuons_candidates = 0;
+	Int_t muon_idx_selected = -1;
+	
+	for(int j=0; j<nmuons_; j++){
+	    if(static_cast<int>(muon_source_[j]) != 1) continue;
+	
+	    Float_t muonpt = muon_pt_[j];
+	    Bool_t pass = MuonSelector_prompt(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, O_muonweight);
+	
+	    if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
+	        nmuons_candidates++;
+	        if(muon_idx_selected < 0) muon_idx_selected = j;
+	    }
+	}
+	
+	if(nmuons_candidates == 1){
+	    int j = muon_idx_selected;
+	    Float_t muonpt = muon_pt_[j];
+	
+	    Bool_t pass = MuonSelector_prompt(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, O_muonweight);
+	
+	    Float_t mT = m_T(muonpt, met_pt_, muon_phi_[j], met_phi_);
+	
+	    if(pass && mT <= 50){
+	        if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
+	            h_muon_pt_den->Fill(muonpt, O_muonweight);
+	            h_muon_eta_den->Fill(muon_eta_[j], O_muonweight);
+	            h_muon_2d_den->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
+	        }
+	        if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
+	            h_muon_pt_num->Fill(muonpt, O_muonweight);
+	            h_muon_eta_num->Fill(muon_eta_[j], O_muonweight);
+	            h_muon_2d_num->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
+	        }
+	    }
+	}
 
-        if(vsjet >= 4){
-		    h_tau_pt_den->Fill(taupt, O_tauweight);
-		    h_tau_eta_den->Fill(tau_eta_[j], O_tauweight);
-		    h_tau_2d_den->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
-			ntaus++;
-        }
-        if(vsjet >= 5){
-		    h_tau_pt_num->Fill(taupt, O_tauweight);
-		    h_tau_eta_num->Fill(tau_eta_[j], O_tauweight);
-		    h_tau_2d_num->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
-        }
-      }
-    }
+	//-----------------------------------------------------------------------------------------------
 
-    for(int j=0; j<nelectrons_; j++){
-	  if(neles == 1) break;
-      if(static_cast<int>(ele_source_[j]) != 1) continue;
-      Float_t elept = ele_pt_[j];
-      Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
-      if(pass){
-
-		Float_t mT = m_T(elept, met_phi_, ele_phi_[j], met_phi_);
-	  	if(mT > 50) continue;
-
-        if(ele_mvaid90_[j]){
-		    h_ele_pt_den->Fill(elept, O_eleweight);
-		    h_ele_eta_den->Fill(ele_eta_[j], O_eleweight);
-		    h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight);
-			neles++;
-        }
-        if(ele_mvaid80_[j]){
-		    h_ele_pt_num->Fill(elept, O_eleweight);
-		    h_ele_eta_num->Fill(ele_eta_[j], O_eleweight);
-		    h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight);
-        }
-      }
-    }
-
-    for(int j=0; j<nmuons_; j++){
-	  if(nmuons == 1) break;
-      if(static_cast<int>(muon_source_[j]) != 1) continue;
-      Float_t muonpt = muon_pt_[j];
-      Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, O_muonweight);
-      if(pass){
-
-		Float_t mT = m_T(muonpt, met_phi_, muon_phi_[j], met_phi_);
-	  	if(mT > 50) continue;
-
-        if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-		    h_muon_pt_den->Fill(muonpt, O_muonweight);
-		    h_muon_eta_den->Fill(muon_eta_[j], O_muonweight);
-		    h_muon_2d_den->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
-			nmuons++;
-        }
-        if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-		    h_muon_pt_num->Fill(muonpt, O_muonweight);
-		    h_muon_eta_num->Fill(muon_eta_[j], O_muonweight);
-		    h_muon_2d_num->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
-        }
-      }
-    }
   }  
 
   h_tau_pt_den->Write();   h_tau_eta_den->Write();   h_tau_2d_den->Write();
