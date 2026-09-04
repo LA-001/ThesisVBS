@@ -508,14 +508,20 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
 	    if(pass && mT <= 50){
 	        if(ele_mvaid90_[j]){
-	            h_ele_pt_den->Fill(elept, O_eleweight);
-	            h_ele_eta_den->Fill(ele_eta_[j], O_eleweight);
-	            h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight);
+				Float_t O_eleweight90 = O_eleweight;
+				Electron_weightSF(O_eleweight90, ele_eta_[j], elept, ele_phi_[j], false);
+
+	            h_ele_pt_den->Fill(elept, O_eleweight90);
+	            h_ele_eta_den->Fill(ele_eta_[j], O_eleweight90);
+	            h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight90);
 	        }
 	        if(ele_mvaid80_[j]){
-	            h_ele_pt_num->Fill(elept, O_eleweight);
-	            h_ele_eta_num->Fill(ele_eta_[j], O_eleweight);
-	            h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight);
+				Float_t O_eleweight80 = O_eleweight;
+				Electron_weightSF(O_eleweight80, ele_eta_[j], elept, ele_phi_[j], true);
+
+	            h_ele_pt_num->Fill(elept, O_eleweight80);
+	            h_ele_eta_num->Fill(ele_eta_[j], O_eleweight80);
+	            h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight80);
 	        }
 	    }
 	}
