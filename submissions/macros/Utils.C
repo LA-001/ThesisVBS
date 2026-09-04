@@ -130,8 +130,8 @@ Float_t WP_XXT = 0.9739;
 
 //Practical functions for some computations
 
-double deltaPhi(const double& phi1, const double &phi2) {
-  double result = phi1 - phi2;
+Float_t deltaPhi(const Float_t& phi1, const Float_t &phi2) {
+  Float_t result = phi1 - phi2;
   while (result > M_PI) result -= 2*M_PI;
   while (result <= -M_PI) result += 2*M_PI;
   return result;
@@ -423,17 +423,8 @@ Bool_t MuonSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, F
   else return false;
 }
 
-Bool_t JetSelector_data(Float_t pt, Float_t eta, Float_t phi){
-  if(abs(eta)<5.1){
-    if(abs(phi)> 3.141592653589793){ // Safeguard against cases where the phi is not in the range of the vetomap corrections
-      if(std::signbit(phi)) phi+=6.2831853;
-      else phi-=6.2831853;
-    }
-    bool jetveto= JET_veto->evaluate({"jetvetomap",eta,phi});
-    if(jetveto) return false;
-    if(pt<=50 && abs(eta)>2.5 && abs(eta)<3) return false;    // spikes in that abs(eta) range
-    if(pt>30) return true;
-    else return false;
-  }
-  else return false;
+Float_t m_T(Float_t leppt, Float_t metpt, Float_t lepphi, Float_t metphi){
+    Float_t deltaphi = deltaPhi(lepphi,metphi);
+
+    return TMath::Sqrt(2*leppt*metpt*(1 - TMath::Cos(deltaphi)));
 }
