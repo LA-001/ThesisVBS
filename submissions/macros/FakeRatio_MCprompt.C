@@ -418,8 +418,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(!METfilters || lumi_eff == -200.) continue;
 
 	Int_t ntaus=0, neles=0, nmuons=0;
-	ROOT::Math::PtEtaPhiMVector p4tau, p4ele, p4muon, p4met;
-	p4met = ROOT::Math::PtEtaPhiMVector(met_pt_,0,met_phi_,0);
 
     Float_t weight_=genweight_*weightscale_*lumi_eff*xsec_*1000;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
@@ -437,8 +435,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(pass){
         int vsjet = static_cast<int>(tauidvsjet_[j]);
 
-		p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
-	    float mT = (p4met + p4tau).M();
+		Float_t mT = m_T(taupt, met_phi_, tau_phi_[j], met_phi_);
 		if(mT > 50) continue;
 
         if(vsjet >= 4){
@@ -462,8 +459,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
       if(pass){
 
-		p4ele = ROOT::Math::PtEtaPhiMVector(elept,ele_eta_[j],ele_phi_[j],ele_mass_[j]);
-	  	float mT = (p4met + p4ele).M();
+		Float_t mT = m_T(elept, met_phi_, ele_phi_[j], met_phi_);
 	  	if(mT > 50) continue;
 
         if(ele_mvaid90_[j]){
@@ -487,8 +483,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Bool_t pass = MuonSelector_prompt(muonpt,muon_eta_[j],muon_phi_[j],muon_dxy_[j],muon_dz_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, O_muonweight);
       if(pass){
 
-		p4muon = ROOT::Math::PtEtaPhiMVector(muonpt,muon_eta_[j],muon_phi_[j],muon_mass_[j]);
-	  	float mT = (p4met + p4muon).M();
+		Float_t mT = m_T(muonpt, met_phi_, muon_phi_[j], met_phi_);
 	  	if(mT > 50) continue;
 
         if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
