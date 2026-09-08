@@ -105,16 +105,22 @@ auto muon_polyparams = muon_ss_c_set->at("poly_params");
 
 string tau_idfile = "jsons/tau_DeepTau2018v2p5_2023_postBPix_FIXED.json.gz";
 string tau_idfile2 = "jsons/test_tau_pt-dm_2023_postBPix.json.gz";
+string tau_idfile3 = "json/tau_DeepTau2018v2p5_2024.json.gz"
 string tes_file = "jsons/test_tes_tau_pt-dm_2023_postBPix.json.gz";
 auto tau_c_set = CorrectionSet::from_file(tau_idfile);
 auto tau_c_set2 = CorrectionSet::from_file(tau_idfile2);
+auto tau_c_set3 = CorrectionSet::from_file(tau_idfile3);
 auto tes_c_set = CorrectionSet::from_file(tes_file);
-auto tau_SFvsjet= tau_c_set->at("DeepTau2018v2p5VSjet");
-auto tau_SFvsjet2= tau_c_set2->at("test_DeepTau2018v2p5VSjet_pt-dm");
-auto tau_TES= tes_c_set->at("test_DeepTau2018v2p5VSjet_tes_pt-dm");
-auto tau_SFvse= tau_c_set->at("DeepTau2018v2p5VSe");
-auto tau_SFvsmu= tau_c_set->at("DeepTau2018v2p5VSmu");
-auto tau_energyscale= tau_c_set->at("tau_energy_scale");
+auto tau_SFvsjet = tau_c_set->at("DeepTau2018v2p5VSjet");
+auto tau_SFvsjet2 = tau_c_set2->at("test_DeepTau2018v2p5VSjet_pt-dm");
+auto tau_SFvsjet3 = tau_c_set3->at("DeepTau2018v2p5VSjet")
+auto tau_TES = tes_c_set->at("test_DeepTau2018v2p5VSjet_tes_pt-dm");
+auto tau_SFvse = tau_c_set->at("DeepTau2018v2p5VSe");
+auto tau_SFvse3 = tau_c_set3->at("DeepTau2018v2p5VSe");
+auto tau_SFvsmu = tau_c_set->at("DeepTau2018v2p5VSmu");
+auto tau_SFvsmu3 = tau_c_set3->at("DeepTau2018v2p5VSmu");
+auto tau_energyscale = tau_c_set->at("tau_energy_scale");
+auto tau_energyscale3 = tau_c_set3->at("tau_energy_scale");
 
 string DY_ptfile = "jsons/DY_pTll_weights_2023postBPix.json.gz";
 auto DY_c_set = CorrectionSet::from_file(DY_ptfile);
@@ -194,13 +200,13 @@ Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and vsjet>=7 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
     //Scale factor for genuine taus
-    weight*=tau_SFvsjet2->evaluate({pt,DM,source,"VTight","Tight","default","dm"});
+    weight*=tau_SFvsjet3->evaluate({pt,DM,source,"Medium","Tight","default","dm"});
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
-      weight*=tau_SFvsmu->evaluate({eta,source,"Tight","nom"});
+      weight*=tau_SFvsmu3->evaluate({eta,source,"Tight","nom"});
     }
     else if(source==1 || source==3) {
-      weight*=tau_SFvse->evaluate({eta,DM,source,"Tight","nom"});
+      weight*=tau_SFvse3->evaluate({eta,DM,source,"Tight","nom"});
     }
     //Energy scale correction
     else if(source==5){
