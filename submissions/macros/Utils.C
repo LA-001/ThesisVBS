@@ -105,7 +105,7 @@ auto muon_polyparams = muon_ss_c_set->at("poly_params");
 
 string tau_idfile = "jsons/tau_DeepTau2018v2p5_2023_postBPix_FIXED.json.gz";
 string tau_idfile2 = "jsons/test_tau_pt-dm_2023_postBPix.json.gz";
-string tau_idfile3 = "json/tau_DeepTau2018v2p5_2024.json.gz"
+string tau_idfile3 = "jsons/tau_DeepTau2018v2p5_2024.json.gz";
 string tes_file = "jsons/test_tes_tau_pt-dm_2023_postBPix.json.gz";
 auto tau_c_set = CorrectionSet::from_file(tau_idfile);
 auto tau_c_set2 = CorrectionSet::from_file(tau_idfile2);
@@ -113,7 +113,7 @@ auto tau_c_set3 = CorrectionSet::from_file(tau_idfile3);
 auto tes_c_set = CorrectionSet::from_file(tes_file);
 auto tau_SFvsjet = tau_c_set->at("DeepTau2018v2p5VSjet");
 auto tau_SFvsjet2 = tau_c_set2->at("test_DeepTau2018v2p5VSjet_pt-dm");
-auto tau_SFvsjet3 = tau_c_set3->at("DeepTau2018v2p5VSjet")
+auto tau_SFvsjet3 = tau_c_set3->at("DeepTau2018v2p5VSjet");
 auto tau_TES = tes_c_set->at("test_DeepTau2018v2p5VSjet_tes_pt-dm");
 auto tau_SFvse = tau_c_set->at("DeepTau2018v2p5VSe");
 auto tau_SFvse3 = tau_c_set3->at("DeepTau2018v2p5VSe");
