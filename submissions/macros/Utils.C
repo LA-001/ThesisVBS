@@ -190,23 +190,23 @@ Float_t getBTagEff(Float_t pt, Float_t eta, int flav){
 //Object selectors
 
 Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t vsjet_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight){
-  
+
   int DM = static_cast<int>(DM_);
   if(DM==2 or DM==5 or DM==6) return false;
   int vse = static_cast<int>(vse_);
   int vsmu = static_cast<int>(vsmu_);
   int vsjet = static_cast<int>(vsjet_);
-  
+
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and vsjet>=7 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
     //Scale factor for genuine taus
-    weight*=tau_SFvsjet3->evaluate({pt,DM,source,"Medium","Tight","default","dm"});
+    weight*=tau_SFvsjet2->evaluate({pt,DM,source,"VTight","Tight","default","dm"});
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
-      weight*=tau_SFvsmu3->evaluate({eta,source,"Tight","nom"});
+      weight*=tau_SFvsmu->evaluate({eta,source,"Tight","nom"});
     }
     else if(source==1 || source==3) {
-      weight*=tau_SFvse3->evaluate({eta,DM,source,"Tight","nom"});
+      weight*=tau_SFvse->evaluate({eta,DM,source,"Tight","nom"});
     }
     //Energy scale correction
     else if(source==5){
