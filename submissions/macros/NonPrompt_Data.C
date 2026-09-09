@@ -28,7 +28,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TFile *f = TFile::Open(filename);
   if(f) cout<<"File has been opened!"<<endl;
   TFile *output= new TFile("testoutput.root","RECREATE");
-  TFile *f_fakerate = new TFile("fileroot/fakeratios.root"); 
   TTree* tree = (TTree*)f->Get("Events");
   TTree* runtree = (TTree*)f->Get("Runs");
 
@@ -368,10 +367,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	outtree->Branch("lepeta",&O_lepeta,"lepeta/F");
 
 //-------------------------------------------------------------------------------------------------------------------------
-
-  TEfficiency *eff_tau_2d = (TEfficiency*)f_fakerate->Get("eff_tau_2d");
-  TEfficiency *eff_ele_2d = (TEfficiency*)f_fakerate->Get("eff_ele_2d");
-  TEfficiency *eff_muon_2d = (TEfficiency*)f_fakerate->Get("eff_muon_2d");
 
   Bool_t isEGamma = srcfile.Contains("EGamma");
 
