@@ -26,11 +26,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   //TString filename = "root://cms-xrd-global.cern.ch/" + srcfile;
   TString filename = "root://xrootd-cms.infn.it/" + srcfile;
   TFile *f = TFile::Open(filename);
-  TFile *output= new TFile("testoutput.root","RECREATE");
+  TFile *output = new TFile("testoutput.root","RECREATE");
+  TFile *f_fakerate = new TFile("fileroot/fakeratios.root"); 
   TTree* tree = (TTree*)f->Get("Events");
   TTree* runtree = (TTree*)f->Get("Runs");
-
-  TTree *outtree = new TTree("outtree", "outtree");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -322,22 +321,48 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
 
+  Bool_t O_istauLT, O_islepLT, O_ismuon;
+	Float_t O_taupt, O_taueta, O_leppt, O_lepeta;
+
+  TTree *outtree = new TTree("outtree", "outtree");
+  outtree->Branch("istauLT",&O_istauLT,"istauLT/O");
+  outtree->Branch("islepLT",&O_islepLT,"islepLT/O");
+  outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
+	outtree->Branch("taupt",&O_taupt,"taupt/F");
+	outtree->Branch("taueta",&O_taueta,"taueta/F");
+	outtree->Branch("leppt",&O_leppt,"leppt/F");
+	outtree->Branch("lepeta",&O_lepeta,"lepeta/F");
 
 //-------------------------------------------------------------------------------------------------------------------------
+
+  TEfficiency *eff_tau_2d = (TEfficiency*)f_fakerate->Get("eff_tau_2d");
+  TEfficiency *eff_ele_2d = (TEfficiency*)f_fakerate->Get("eff_ele_2d");
+  TEfficiency *eff_muon_2d = (TEfficiency*)f_fakerate->Get("eff_muon_2d");
+
+	Bool_t isMuon = 0;
+  Bool_t isEGamma = srcfile.Contains("EGamma");
+  isMuon = srcfile.Contains("Muon");
+  if(isEGamma == isMuon) cout << "ERROR: cannot determine dataset type from filename: " << srcfile << endl;
 
   for (Long64_t i = 0; i < numEntries; ++i) {
     tree->GetEntry(i);
 
     Bool_t golden_event = is_valid_event(goldenMap, run_, ls_);
     if(!golden_event) continue;
-    
-    Bool_t excflag = 0;
 
     Bool_t METfilters = (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
-    Bool_t trigpath = ;
-    if(!METfilters || !trigpath) continue;
 
-	Int_t ntaus=0, neles=0, nmuons=0;
+		Bool_t trigpath = 0;
+		if(isEGamma){
+			trigpath = eletri_;
+		}else if(isMuon){
+			trigpath = muontri_;
+		}
+
+	if(!METfilters || !trigpath) continue;
+
+	Bool_t istauLT = 0, islepLT = 0;
+	Float_t taupt,taueta,leppt,lepeta;
 
 	//-------------------------- TAU ----------------------------------------------------------------
 	Int_t ntaus_candidates = 0;
@@ -362,84 +387,79 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
 	    Float_t mT = m_T(tau_pt_[j], met_pt_, tau_phi_[j], met_phi_);
 	    if(mT <= 50){
-	        if(vsjet>=4){
-	            h_tau_pt_den->Fill(tau_pt_[j]);
-	            h_tau_eta_den->Fill(tau_eta_[j]);
-	            h_tau_2d_den->Fill(tau_pt_[j], abs(tau_eta_[j]));
-	        }
-	        if(vsjet>=5){
-	            h_tau_pt_num->Fill(tau_pt_[j]);
-	            h_tau_eta_num->Fill(tau_eta_[j]);
-	            h_tau_2d_num->Fill(tau_pt_[j], abs(tau_eta_[j]));
+	        if(vsjet>=4 && vsjet<5){
+	            istauLT = 1;
+							taupt = tau_pt_[j];
+							taueta = tau_eta_[j];
 	        }
 	    }
 	}
  
 	//-------------------------- ELECTRON -----------------------------------------------------------
-	Int_t neles_candidates = 0;
-	Int_t ele_idx_selected = -1;
-	
-	for(int j=0; j<nelectrons_; j++){
-	    if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j] && ele_mvaid90_[j]){
-	        neles_candidates++;
-	        if(ele_idx_selected < 0) ele_idx_selected = j;
-	    }
-	}
-	
-	if(neles_candidates == 1){
-	    int j = ele_idx_selected;
-	    Float_t mT = m_T(ele_pt_[j], met_pt_, ele_phi_[j], met_phi_);
-	    if(mT <= 50){
-	        if(ele_mvaid90_[j]){
-	            h_ele_pt_den->Fill(ele_pt_[j]);
-	            h_ele_eta_den->Fill(ele_eta_[j]);
-	            h_ele_2d_den->Fill(ele_pt_[j], abs(ele_eta_[j]));
-	        }
-	        if(ele_mvaid80_[j]){
-	            h_ele_pt_num->Fill(ele_pt_[j]);
-	            h_ele_eta_num->Fill(ele_eta_[j]);
-	            h_ele_2d_num->Fill(ele_pt_[j], abs(ele_eta_[j]));
-	        }
-	    }
+	if(isEGamma){
+		Int_t neles_candidates = 0;
+		Int_t ele_idx_selected = -1;
+		
+		for(int j=0; j<nelectrons_; j++){
+		    if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j] && ele_mvaid90_[j]){
+		        neles_candidates++;
+		        if(ele_idx_selected < 0) ele_idx_selected = j;
+		    }
+		}
+		
+		if(neles_candidates == 1){
+		    int j = ele_idx_selected;
+		    Float_t mT = m_T(ele_pt_[j], met_pt_, ele_phi_[j], met_phi_);
+		    if(mT <= 50){
+		        if(ele_mvaid90_[j] && !ele_mvaid80_[j]){
+								islepLT = 1;
+								leppt = ele_pt_[j];
+								lepeta = ele_eta_[j];
+		        }
+		    }
+		}
 	}
  
 	//-------------------------- MUON ---------------------------------------------------------------
-	Int_t nmuons_candidates = 0;
-	Int_t muon_idx_selected = -1;
-	
-	for(int j=0; j<nmuons_; j++){
-	    if(muon_pt_[j]>30 && abs(muon_eta_[j])<2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2 && muon_looseid_[j] && muon_isoscore_[j]<0.4){
-	        nmuons_candidates++;
-	        if(muon_idx_selected < 0) muon_idx_selected = j;
-	    }
+	if(isMuon){
+		Int_t nmuons_candidates = 0;
+		Int_t muon_idx_selected = -1;
+		
+		for(int j=0; j<nmuons_; j++){
+		    if(muon_pt_[j]>30 && abs(muon_eta_[j])<2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2 && muon_looseid_[j] && muon_isoscore_[j]<0.4){
+		        nmuons_candidates++;
+		        if(muon_idx_selected < 0) muon_idx_selected = j;
+		    }
+		}
+		
+		if(nmuons_candidates == 1){
+		    int j = muon_idx_selected;
+		    Float_t mT = m_T(muon_pt_[j], met_pt_, muon_phi_[j], met_phi_);
+		    if(mT <= 50){
+		        if(muon_looseid_[j] && !muon_mediumid_[j] && muon_isoscore_[j]<0.4 && && muon_isoscore_[j]>0.15){
+								islepLT = 1;
+		            leppt = muon_pt_[j];
+								lepeta = muon_eta_[j];
+		        }
+		    }
+		}
 	}
-	
-	if(nmuons_candidates == 1){
-	    int j = muon_idx_selected;
-	    Float_t mT = m_T(muon_pt_[j], met_pt_, muon_phi_[j], met_phi_);
-	    if(mT <= 50){
-	        if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-	            h_muon_pt_den->Fill(muon_pt_[j]);
-	            h_muon_eta_den->Fill(muon_eta_[j]);
-	            h_muon_2d_den->Fill(muon_pt_[j], abs(muon_eta_[j]));
-	        }
-	        if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-	            h_muon_pt_num->Fill(muon_pt_[j]);
-	            h_muon_eta_num->Fill(muon_eta_[j]);
-	            h_muon_2d_num->Fill(muon_pt_[j], abs(muon_eta_[j]));
-	        }
-	    }
-	}
-
 	//-----------------------------------------------------------------------------------------------
 	}
- 
-  h_tau_pt_den->Write();   h_tau_eta_den->Write();   h_tau_2d_den->Write();
-  h_tau_pt_num->Write();   h_tau_eta_num->Write();   h_tau_2d_num->Write();
-  h_ele_pt_den->Write();   h_ele_eta_den->Write();   h_ele_2d_den->Write();
-  h_ele_pt_num->Write();   h_ele_eta_num->Write();   h_ele_2d_num->Write();
-  h_muon_pt_den->Write();  h_muon_eta_den->Write();  h_muon_2d_den->Write();
-  h_muon_pt_num->Write();  h_muon_eta_num->Write();  h_muon_2d_num->Write();
+
+	if(ntaus_candidates == 1 && isEGamma != isMuon){
+		if(neles_candidates == 1 ^ nmuons_candidates == 1){
+				O_istauLT = istauLT;
+				O_islepLT = islepLT;
+				O_ismuon  = isMuon;
+				O_taupt   = taupt;
+				O_taueta  = taueta;
+				O_leppt   = leppt;
+				O_lepeta  = lepeta;
+
+				outtree->Fill();
+		}
+	}
 
   f->Close();
   output->Close();
