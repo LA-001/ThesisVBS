@@ -386,6 +386,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     bool excflag = 0;
 	  bool btagflag = 0;
     bool ismuon = false;
+    Int_t ntaus=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
 
     Bool_t METfilters= (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
     if(!METfilters) excflag=1;
@@ -532,7 +533,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 			outtree->Fill();
     }
  }
-  
+
+  outtree->Write(); 
   f->Close();
   output->Close();
 }
