@@ -355,7 +355,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
 
   Bool_t O_istauLT, O_islepLT, O_ismuon;
-	Float_t O_taupt, O_taueta, O_leppt, O_lepeta;
+	Float_t O_taupt, O_taueta, O_leppt, O_lepeta, O_mjj, O_deltaRjj;
 
   TTree *outtree = new TTree("outtree", "outtree");
   outtree->Branch("istauLT",&O_istauLT,"istauLT/O");
@@ -365,6 +365,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	outtree->Branch("taueta",&O_taueta,"taueta/F");
 	outtree->Branch("leppt",&O_leppt,"leppt/F");
 	outtree->Branch("lepeta",&O_lepeta,"lepeta/F");
+	outtree->Branch("mjj",&O_mjj,"mjj/F");
+	outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -490,11 +492,16 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 			if(deltaR(p4tau,p4lep) < 0.4) continue;      
 		
 			if(jet_pt_[j]>30 && abs(jet_eta_[j])<5.1){
-        if(jet_pt_[j]<=50 && abs(jet_eta_[j])>2.5 && abs(jet_eta_[j])<3) continue;
+	        	if(jet_pt_[j]<=50 && abs(jet_eta_[j])>2.5 && abs(jet_eta_[j])<3) continue;
 				if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
 				if(jet_btag_[j] >= WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
-
-	  		njets++;
+	
+		  		njets++;
+		  		if(njets==1){
+					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+				}else if(njets==2){
+					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+				}
 			}
     }
 	}
@@ -507,13 +514,20 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	else if(islepLT && !istauLT && !istauT) excflag=1;
     
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
+
+      ROOT::Math::PtEtaPhiMVector p4jets=p4jet1+p4jet2;
+      float mjj = p4jets.M(); // Invariant mass of the dijet system
+      float deltaRjj = deltaR(p4jet1,p4jet2);
+
       O_istauLT = istauLT;
-			O_islepLT = islepLT;
-			O_ismuon  = ismuon;
-			O_taupt   = taupt;
-			O_taueta  = taueta;
-		  O_leppt   = leppt;
-			O_lepeta  = lepeta;
+	  O_islepLT = islepLT;
+      O_ismuon  = ismuon;
+	  O_taupt   = taupt;
+	  O_taueta  = taueta;
+	  O_leppt   = leppt;
+	  O_lepeta  = lepeta;
+	  O_deltaRjj = deltaRjj;
+	  O_mjj = mjj;
 
 			outtree->Fill();
     }
