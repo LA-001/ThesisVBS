@@ -391,7 +391,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
 
     Bool_t istauLT=false, islepLT=false;
-	  Float_t taupt,taueta,leppt,lepeta; 
+	Bool_t istauT=false, islepT=false; 
+	Float_t taupt,taueta,leppt,lepeta; 
 
     //-------------------------- TAU ----------------------------------------------------------------
     
@@ -408,9 +409,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		    p4tau = ROOT::Math::PtEtaPhiMVector(tau_pt_[j],tau_eta_[j],tau_phi_[j],tau_mass_[j]);
         if(vsjet>=4 && vsjet<5){
 	        istauLT = true;
-					taupt = tau_pt_[j];
-					taueta = tau_eta_[j];
+			taupt = tau_pt_[j];
+			taueta = tau_eta_[j];
         }
+		if(vsjet>=5){
+			istauT = true;
+		}
       }
     }
 
@@ -429,10 +433,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           lepcharge=ele_charge_[j];
 	  		  p4lep = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
           if(ele_mvaid90_[j] && !ele_mvaid80_[j]){
-						islepLT = 1;
+						islepLT = true;
 						leppt = ele_pt_[j];
 						lepeta = ele_eta_[j];
-		      }
+			}
+			if(ele_mvaid80_[j]){
+				islepT=true;
+			}
         }
     	}
       
@@ -443,10 +450,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  			  lepcharge=muon_charge_[j];
 	  			  p4lep = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
             if(muon_looseid_[j] && !muon_mediumid_[j] && muon_isoscore_[j]<0.4 && muon_isoscore_[j]>0.15){
-						  islepLT = 1;
-		          leppt = muon_pt_[j];
-						  lepeta = muon_eta_[j];
-		        }
+				islepLT = true;
+		        leppt = muon_pt_[j];
+				lepeta = muon_eta_[j];
+		    }
+			if(muon_mediumid_[j] && muon_isoscore_[j]<0.15)
+				islepT = true;
         	}
     	}
 
@@ -494,6 +503,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
     if(!istauLT && !islepLT) excflag=1;
+	else if(istauLT && !islepLT && !islepT) excflag=1;
+	else if(islepLT && !istauLT && !istauT) excflag=1;
     
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
       O_istauLT = istauLT;
