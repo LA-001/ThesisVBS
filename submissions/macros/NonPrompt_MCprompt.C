@@ -33,6 +33,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
+  tree->SetBranchStatus("genWeight", 1);
+  Float_t genweight_;
+  tree->SetBranchAddress("genWeight",&genweight_);
+
   tree->SetBranchStatus("run", 1);
   UInt_t run_;
   tree->SetBranchAddress("run",&run_);
@@ -348,12 +352,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   runtree->GetEntry(0);
 
-  Long64_t numEntries = tree->GetEntries();
-
   auto goldenMap = loadGoldenJSON(Goldenjson_2024);
 
   float weightscale_=1/sumgenw_;
-
   Long64_t numEntries = tree->GetEntries();
   weightscale_*=numEntries/(float)sampleevents_;
 
@@ -390,8 +391,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(eletri_ && mutri_) continue;
     }
 
+	Float_t weight_=genweight_*weightscale_;
+    weight_*=pu_SF->evaluate({npu2_,"nominal"});
+
+    Float_t tauweight  = weight_;
+    Float_t lepweight  = weight_;
+
     bool excflag = 0;
-	  bool btagflag = 0;
+	bool btagflag = 0;
     bool ismuon = false;
     Int_t ntaus=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
 
@@ -412,7 +419,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(static_cast<int>(tau_source_[j]) != 5) continue;
       int vsjet = static_cast<int>(tauidvsjet_[j]);
       Float_t pt = tau_pt_[j];
-      Bool_t pass = TauSelector_prompt(pt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], PESO!!!);
+      Bool_t pass = TauSelector_prompt(pt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight);
       if(pass){
 		    ntaus++;
         tauindex=j;
@@ -440,7 +447,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     	for(int j=0; j<nelectrons_; j++){
 	      if(static_cast<int>(ele_source_[j]) != 1) continue;
         Float_t pt = ele_pt_[j];
-        Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, PESO!!!);
+        Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, lepweight);
         if(pass){
           nelectrons++;
           eleindex=j;
@@ -460,7 +467,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     	for(int j=0; j<nmuons_; j++){
           if(static_cast<int>(muon_source_[j]) != 1) continue;
           Float_t pt = muon_pt_[j];
-          Bool_t pass = MuonSelector_prompt(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, PESO!!!);
+          Bool_t pass = MuonSelector_prompt(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, lepweight);
         	if(pass){
         		nmuons++;
 	  			  muindex=j;
@@ -544,8 +551,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  O_lepeta  = lepeta;
 	  O_deltaRjj = deltaRjj;
 	  O_mjj = mjj;
+	  O_tauweight = tauweight;
+	  O_lepweight = lepweight;
 
-			outtree->Fill();
+	  outtree->Fill();
     }
  }
 
