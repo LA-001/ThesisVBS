@@ -509,25 +509,27 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       
     for(int j=0; j<njets_; j++){
 			
-			ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-			if(deltaR(p4jet,p4tau) < 0.4) continue;
-			if(deltaR(p4jet,p4lep) < 0.4) continue;
-			if(deltaR(p4tau,p4lep) < 0.4) continue;      
-		
-			if(jet_pt_[j]>30 && abs(jet_eta_[j])<5.1){
-  	    if(jet_pt_[j]<=50 && abs(jet_eta_[j])>2.5 && abs(jet_eta_[j])<3) continue;
-  			if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
-  			if(jet_btag_[j] >= WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
-  	
-  		  njets++;
-  		  if(njets==1){
-  					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-  			}else if(njets==2){
-  					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-  			}
-			}
+		ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+		if(deltaR(p4jet,p4tau) < 0.4) continue;
+		if(deltaR(p4jet,p4lep) < 0.4) continue;
+		if(deltaR(p4tau,p4lep) < 0.4) continue;      
+
+		Float_t pt = jet_pt_[j];
+		Bool_t pass = JetSelector(pt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
+
+		if(pass){
+	  		if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
+	  		if(jet_btag_[j] >= WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
+	  	
+	  	    njets++;
+	  	    if(njets==1){
+	   			p4jet1 = ROOT::Math::PtEtaPhiMVector(pt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+	  		}else if(njets==2){
+	  			p4jet2 = ROOT::Math::PtEtaPhiMVector(pt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+	  		}
+		}
     }
-	}
+}
     
     bool trigpath=false; 
     if(typeevent==1) trigpath=mutri_; 
