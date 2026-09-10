@@ -457,8 +457,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		        leppt = muon_pt_[j];
 				lepeta = muon_eta_[j];
 		    }
-			if(muon_mediumid_[j] && muon_isoscore_[j]<0.15)
+			if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
 				islepT = true;
+			}
         	}
     	}
 
