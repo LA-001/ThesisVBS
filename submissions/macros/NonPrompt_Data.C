@@ -476,21 +476,22 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 		//----------------------------------------------------------------------------------------------
 
-    if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-  		if(nmuons==1){ 
-        typeevent=1; 
-        ismuon = true;
-      }else{ 
-        typeevent=2;
-      }
-   	}
+	    if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
+	  		if(nmuons==1){ 
+	        typeevent=1; 
+	        ismuon = true;
+	      }else{ 
+	        typeevent=2;
+	      }
+	   	}
+
+		if(deltaR(p4tau,p4lep) < 0.4) excflag = 1; 
       
     for(int j=0; j<njets_; j++){
 			
 			ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 			if(deltaR(p4jet,p4tau) < 0.4) continue;
-			if(deltaR(p4jet,p4lep) < 0.4) continue;
-			if(deltaR(p4tau,p4lep) < 0.4) continue;      
+			if(deltaR(p4jet,p4lep) < 0.4) continue;     
 		
 			if(jet_pt_[j]>30 && abs(jet_eta_[j])<5.1){
 	        	if(jet_pt_[j]<=50 && abs(jet_eta_[j])>2.5 && abs(jet_eta_[j])<3) continue;
@@ -499,9 +500,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
 		  		njets++;
 		  		if(njets==1){
-					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+					p4jet1 = ROOT::Math::PtEtaPhiMVector(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 				}else if(njets==2){
-					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+					p4jet2 = ROOT::Math::PtEtaPhiMVector(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 				}
 			}
     }
