@@ -415,7 +415,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         tauindex=j;
 		taucharge=tau_charge_[j];
 		p4tau = ROOT::Math::PtEtaPhiMVector(tau_pt_[j],tau_eta_[j],tau_phi_[j],tau_mass_[j]);
-		istauLT = true;
+		istauL = true;
 		taupt = tau_pt_[j];
 		taueta = tau_eta_[j];
         if(vsjet>=5)  istauT = true;
@@ -436,7 +436,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           eleindex = j;
           lepcharge = ele_charge_[j];
 	  	  p4lep = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
-		  islepLT = true;
+		  islepL = true;
 		  leppt = ele_pt_[j];
 		  lepeta = ele_eta_[j];
 	      if(ele_mvaid80_[j])  islepT=true;
@@ -449,7 +449,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  	  muindex = j;
 	  	  lepcharge = muon_charge_[j];
 	  	  p4lep = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
-		  islepLT = true;
+		  islepL = true;
 		  leppt = muon_pt_[j];
 		  lepeta = muon_eta_[j];
 		  if(muon_mediumid_[j] && muon_isoscore_[j]<0.15) islepT = true;
