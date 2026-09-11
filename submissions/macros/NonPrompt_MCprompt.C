@@ -357,27 +357,28 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Long64_t numEntries = tree->GetEntries();
   weightscale_*=numEntries/(float)sampleevents_;
 
-  float lumi = 999.; //put correct 2024 luminosity!!!! (in fb^-1)
+  float lumi = 112.7; //2024 luminosity (in fb^-1)
   weightscale_*=lumi*xsec_*1000;
 
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
 
   Bool_t O_istauL, O_islepL, O_ismuon;
   Bool_t O_istauT, O_islepT;
-  Float_t O_taupt, O_taueta, O_leppt, O_lepeta, O_mjj, O_deltaRjj;
+  Float_t O_taupt, O_taueta, O_leppt, O_lepeta, O_mjj, O_deltaRjj, O_weight;
 
   TTree *outtree = new TTree("outtree", "outtree");
-  outtree->Branch("istauLT",&O_istauL,"istauL/O");
-  outtree->Branch("islepLT",&O_islepL,"islepL/O");
-  outtree->Branch("istauT",&O_istauT,"istauT/O");
-  outtree->Branch("islepT",&O_islepT,"islepT/O");
-  outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
-  outtree->Branch("taupt",&O_taupt,"taupt/F");
-  outtree->Branch("taueta",&O_taueta,"taueta/F");
-  outtree->Branch("leppt",&O_leppt,"leppt/F");
-  outtree->Branch("lepeta",&O_lepeta,"lepeta/F");
-  outtree->Branch("mjj",&O_mjj,"mjj/F");
-  outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
+  outtree->Branch("istauL",   &O_istauL,   "istauL/O");
+  outtree->Branch("islepL",   &O_islepL,   "islepL/O");
+  outtree->Branch("istauT",   &O_istauT,   "istauT/O");
+  outtree->Branch("islepT",   &O_islepT,   "islepT/O");
+  outtree->Branch("ismuon",   &O_ismuon,   "ismuon/O");
+  outtree->Branch("taupt",    &O_taupt,    "taupt/F");
+  outtree->Branch("taueta",   &O_taueta,   "taueta/F");
+  outtree->Branch("leppt",    &O_leppt,    "leppt/F");
+  outtree->Branch("lepeta",   &O_lepeta,   "lepeta/F");
+  outtree->Branch("mjj",      &O_mjj,      "mjj/F");
+  outtree->Branch("deltaRjj", &O_deltaRjj, "deltaRjj/F");
+  outtree->Branch("weight",   &O_weight,   "weight/F");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -388,9 +389,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 	Float_t weight_=genweight_*weightscale_;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
-
-    Float_t tauweight  = weight_;
-    Float_t lepweight  = weight_;
 
     bool excflag = 0;
 	bool btagflag = 0;
@@ -405,7 +403,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Bool_t istauLT=false, islepLT=false;
 	Bool_t istauT=false, islepT=false; 
 	Float_t taupt,taueta,leppt,lepeta;
-    Float_t tauweight, lepweight;
 
     //-------------------------- TAU ----------------------------------------------------------------
     
@@ -414,7 +411,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(static_cast<int>(tau_source_[j]) != 5) continue;
       int vsjet = static_cast<int>(tauidvsjet_[j]);
       Float_t pt = tau_pt_[j];
-      Bool_t pass = TauSelector_prompt(pt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight);
+      Bool_t pass = TauSelector_prompt(pt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], weight_);
       if(pass && vsjet>=4){
 	    ntaus++;
         tauindex=j;
@@ -438,7 +435,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     	for(int j=0; j<nelectrons_; j++){
 	      if(static_cast<int>(ele_source_[j]) != 1) continue;
           Float_t pt = ele_pt_[j];
-          Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, lepweight);
+          Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
           if(pass && ele_mvaid90_[j]){
             nelectrons++;
             eleindex=j;
@@ -454,7 +451,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     	for(int j=0; j<nmuons_; j++){
           if(static_cast<int>(muon_source_[j]) != 1) continue;
           Float_t pt = muon_pt_[j];
-          Bool_t pass = MuonSelector_prompt(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, lepweight);
+          Bool_t pass = MuonSelector_prompt(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, weight_);
           if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
             nmuons++;
 	  		muindex=j;
@@ -537,6 +534,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  O_lepeta  = lepeta;
 	  O_deltaRjj = deltaRjj;
 	  O_mjj = mjj;
+	  O_weight = weight_;
 
 	  outtree->Fill();
     }
