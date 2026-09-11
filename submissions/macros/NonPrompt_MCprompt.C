@@ -352,44 +352,39 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   runtree->GetEntry(0);
 
-  auto goldenMap = loadGoldenJSON(Goldenjson_2024);
-
   float weightscale_=1/sumgenw_;
+
   Long64_t numEntries = tree->GetEntries();
   weightscale_*=numEntries/(float)sampleevents_;
 
+  float lumi = 999.; //put correct 2024 luminosity!!!! (in fb^-1)
+  weightscale_*=lumi*xsec_*1000;
+
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
 
-  Bool_t O_istauLT, O_islepLT, O_ismuon;
-	Float_t O_taupt, O_taueta, O_leppt, O_lepeta, O_mjj, O_deltaRjj, O_tauweight, O_lepweight;
+  Bool_t O_istauL, O_islepL, O_ismuon;
+  Bool_t O_istauT, O_islepT;
+  Float_t O_taupt, O_taueta, O_leppt, O_lepeta, O_mjj, O_deltaRjj;
 
   TTree *outtree = new TTree("outtree", "outtree");
-  outtree->Branch("istauLT",&O_istauLT,"istauLT/O");
-  outtree->Branch("islepLT",&O_islepLT,"islepLT/O");
+  outtree->Branch("istauLT",&O_istauL,"istauL/O");
+  outtree->Branch("islepLT",&O_islepL,"islepL/O");
+  outtree->Branch("istauT",&O_istauT,"istauT/O");
+  outtree->Branch("islepT",&O_islepT,"islepT/O");
   outtree->Branch("ismuon",&O_ismuon,"ismuon/O");
-	outtree->Branch("taupt",&O_taupt,"taupt/F");
-	outtree->Branch("taueta",&O_taueta,"taueta/F");
-	outtree->Branch("leppt",&O_leppt,"leppt/F");
-	outtree->Branch("lepeta",&O_lepeta,"lepeta/F");
-	outtree->Branch("mjj",&O_mjj,"mjj/F");
-	outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
-  outtree->Branch("tauweight",&O_tauweight,"tauweight/F");
-  outtree->Branch("lepweight",&O_lepweight,"lepweight/F");
+  outtree->Branch("taupt",&O_taupt,"taupt/F");
+  outtree->Branch("taueta",&O_taueta,"taueta/F");
+  outtree->Branch("leppt",&O_leppt,"leppt/F");
+  outtree->Branch("lepeta",&O_lepeta,"lepeta/F");
+  outtree->Branch("mjj",&O_mjj,"mjj/F");
+  outtree->Branch("deltaRjj",&O_deltaRjj,"deltaRjj/F");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
-  Bool_t isEGamma = srcfile.Contains("EGamma");
 
   for (Long64_t i = 0; i < numEntries; ++i) {
     
     tree->GetEntry(i);
-
-    Bool_t golden_event = is_valid_event(goldenMap, run_, ls_);
-    if(!golden_event) continue;
-
-    if(isEGamma){
-      if(eletri_ && mutri_) continue;
-    }
 
 	Float_t weight_=genweight_*weightscale_;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
@@ -408,8 +403,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
 
     Bool_t istauLT=false, islepLT=false;
-	  Bool_t istauT=false, islepT=false; 
-	  Float_t taupt,taueta,leppt,lepeta;
+	Bool_t istauT=false, islepT=false; 
+	Float_t taupt,taueta,leppt,lepeta;
     Float_t tauweight, lepweight;
 
     //-------------------------- TAU ----------------------------------------------------------------
@@ -420,19 +415,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       int vsjet = static_cast<int>(tauidvsjet_[j]);
       Float_t pt = tau_pt_[j];
       Bool_t pass = TauSelector_prompt(pt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight);
-      if(pass){
-		    ntaus++;
+      if(pass && vsjet>=4){
+	    ntaus++;
         tauindex=j;
-		    taucharge=tau_charge_[j];
-		    p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
-        if(vsjet>=4 && vsjet<5){
-	        istauLT = true;
-          taupt = pt;
-			    taueta = tau_eta_[j];
-        }
-		    if(vsjet>=5){
-			    istauT = true;
-		    }
+		taucharge=tau_charge_[j];
+		p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
+	    istauL = true;
+        taupt = pt;
+		taueta = tau_eta_[j];
+        if(vsjet>=5)  istauT = true;
       }
     }
 
@@ -446,78 +437,70 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     	for(int j=0; j<nelectrons_; j++){
 	      if(static_cast<int>(ele_source_[j]) != 1) continue;
-        Float_t pt = ele_pt_[j];
-        Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, lepweight);
-        if(pass){
-          nelectrons++;
-          eleindex=j;
-          lepcharge=ele_charge_[j];
-	  		  p4lep = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
-          if(ele_mvaid90_[j] && !ele_mvaid80_[j]){
-						islepLT = true;
-						leppt = pt;
-						lepeta = ele_eta_[j];
-			    }
-			    if(ele_mvaid80_[j]){
-				    islepT=true;
-			    }
-        }
+          Float_t pt = ele_pt_[j];
+          Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, lepweight);
+          if(pass && ele_mvaid90_[j]){
+            nelectrons++;
+            eleindex=j;
+            lepcharge=ele_charge_[j];
+	  		p4lep = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
+			islepL = true;
+			leppt = pt;
+			lepeta = ele_eta_[j];
+			if(ele_mvaid80_[j])  islepT=true;
+          }
     	}
       
     	for(int j=0; j<nmuons_; j++){
           if(static_cast<int>(muon_source_[j]) != 1) continue;
           Float_t pt = muon_pt_[j];
           Bool_t pass = MuonSelector_prompt(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, lepweight);
-        	if(pass){
-        		nmuons++;
-	  			  muindex=j;
-	  			  lepcharge=muon_charge_[j];
-	  			  p4lep = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
-            if(muon_looseid_[j] && !muon_mediumid_[j] && muon_isoscore_[j]<0.4 && muon_isoscore_[j]>0.15){
-				      islepLT = true;
-		          leppt = muon_pt_[j];
-				      lepeta = muon_eta_[j];
-		        }
-			      if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-				      islepT = true;
-            }
-        	}
-    	  }
+          if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
+            nmuons++;
+	  		muindex=j;
+	  		lepcharge=muon_charge_[j];
+	  		p4lep = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
+			islepL = true;
+		    leppt = muon_pt_[j];
+			lepeta = muon_eta_[j];
+			if(muon_mediumid_[j] && muon_isoscore_[j]<0.15)  islepT = true;
+          }
+    	}
 
 		//----------------------- Veto on additional Loose leptons -------------------------------------
 
 		for(int i=0; i<nelectrons_; i++){
-  		if(i==eleindex) continue;
-  		if(ele_pt_[i] > 10 && abs(ele_eta_[i]) < 2.4 && static_cast<int>(ele_id_[i])>=1) excflag=1;
+  		  if(i==eleindex) continue;
+  		  if(ele_pt_[i] > 10 && abs(ele_eta_[i]) < 2.4 && static_cast<int>(ele_id_[i])>=1) excflag=1;
  		}
 
 		for(int i=0; i<nmuons_; i++){
-  		if(i==muindex) continue;
-  		if(muon_pt_[i] > 10 && abs(muon_eta_[i]) < 2.4 && muon_looseid_[i]) excflag=1;
+  		  if(i==muindex) continue;
+  		  if(muon_pt_[i] > 10 && abs(muon_eta_[i]) < 2.4 && muon_looseid_[i]) excflag=1;
  		}
 
 		//----------------------------------------------------------------------------------------------
 
-    if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-  		if(nmuons==1){ 
-        typeevent=1; 
-        ismuon = true;
-      }else{ 
-        typeevent=2;
-      }
-   	}
-      
-    for(int j=0; j<njets_; j++){
-			
-		ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-		if(deltaR(p4jet,p4tau) < 0.4) continue;
-		if(deltaR(p4jet,p4lep) < 0.4) continue;
-		if(deltaR(p4tau,p4lep) < 0.4) continue;      
+        if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
+  		  if(nmuons==1){ 
+            typeevent=1; 
+            ismuon = true;
+          }else{ 
+            typeevent=2;
+          }
+   	    }
 
-		Float_t pt = jet_pt_[j];
-		Bool_t pass = JetSelector(pt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
+		if(deltaR(p4tau,p4lep) < 0.4) excflag = 1; 
 
-		if(pass){
+        for(int j=0; j<njets_; j++){			
+		  ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+		  if(deltaR(p4jet,p4tau) < 0.4) continue;
+		  if(deltaR(p4jet,p4lep) < 0.4) continue;    
+
+		  Float_t pt = jet_pt_[j];
+		  Bool_t pass = JetSelector(pt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
+
+		  if(pass){
 	  		if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
 	  		if(jet_btag_[j] >= WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
 	  	
@@ -527,16 +510,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  		}else if(njets==2){
 	  			p4jet2 = ROOT::Math::PtEtaPhiMVector(pt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 	  		}
-		}
+		  }
+        }
     }
-}
     
     bool trigpath=false; 
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
-    if(!istauLT && !islepLT) excflag=1;
-	else if(istauLT && !islepLT && !islepT) excflag=1;
-	else if(islepLT && !istauLT && !istauT) excflag=1;
+    if(!istauL && !islepL) excflag=1;
+	if(istauT && islepT) excflag=1;
     
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
 
@@ -544,8 +526,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       float mjj = p4jets.M(); // Invariant mass of the dijet system
       float deltaRjj = deltaR(p4jet1,p4jet2);
 
-      O_istauLT = istauLT;
-	  O_islepLT = islepLT;
+      O_istauL = istauL;
+	  O_islepL = islepL;
+      O_istauT = istauT;
+	  O_islepT = islepT;
       O_ismuon  = ismuon;
 	  O_taupt   = taupt;
 	  O_taueta  = taueta;
@@ -553,12 +537,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  O_lepeta  = lepeta;
 	  O_deltaRjj = deltaRjj;
 	  O_mjj = mjj;
-	  O_tauweight = tauweight;
-	  O_lepweight = lepweight;
 
 	  outtree->Fill();
     }
- }
+  }
 
   outtree->Write(); 
   f->Close();
