@@ -200,13 +200,13 @@ Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and vsjet>=7 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
     //Scale factor for genuine taus
-    weight*=tau_SFvsjet3->evaluate({pt,DM,source,"Loose","Tight","default","dm"});            //wp Loose per lo studio dei leptoni fake, poi rimettere Medium
+    weight*=tau_SFvsjet2->evaluate({pt,DM,source,"VTight","Tight","default","dm"});         
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
-      weight*=tau_SFvsmu3->evaluate({eta,source,"Tight","Tight","Loose","nom"});
+      weight*=tau_SFvsmu->evaluate({eta,source,"Tight","nom"});
     }
     else if(source==1 || source==3) {
-      weight*=tau_SFvse3->evaluate({eta,DM,source,"Tight","nom"});
+      weight*=tau_SFvse->evaluate({eta,DM,source,"Tight","nom"});
     }
     //Energy scale correction
     else if(source==5){
@@ -361,13 +361,13 @@ Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_,
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
     //Scale factor for genuine taus
-    weight*=tau_SFvsjet2->evaluate({pt,DM,source,"VTight","Tight","default","dm"});
+    weight*=tau_SFvsjet3->evaluate({pt,DM,source,"Loose","Tight","default","dm"});            //wp Loose per lo studio dei leptoni fake, poi rimettere Medium
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
-      weight*=tau_SFvsmu->evaluate({eta,source,"Tight","nom"});
+      weight*=tau_SFvsmu3->evaluate({eta,source,"Tight","Tight","Loose","nom"});
     }
     else if(source==1 || source==3) {
-      weight*=tau_SFvse->evaluate({eta,DM,source,"Tight","nom"});
+      weight*=tau_SFvse3->evaluate({eta,DM,source,"Tight","nom"});
     }
     //Energy scale correction
     else if(source==5){
