@@ -416,7 +416,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    ntaus++;
         tauindex=j;
 		taucharge=tau_charge_[j];
-		p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
+		p4tau = ROOT::Math::PtEtaPhiMVector(pt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
 	    istauL = true;
         taupt = pt;
 		taueta = tau_eta_[j];
@@ -440,7 +440,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             nelectrons++;
             eleindex=j;
             lepcharge=ele_charge_[j];
-	  		p4lep = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
+	  		p4lep = ROOT::Math::PtEtaPhiMVector(pt,ele_eta_[j],ele_phi_[j],ele_mass_[j]);
 			islepL = true;
 			leppt = pt;
 			lepeta = ele_eta_[j];
@@ -454,11 +454,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           Bool_t pass = MuonSelector_prompt(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, weight_);
           if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
             nmuons++;
-	  		muindex=j;
-	  		lepcharge=muon_charge_[j];
-	  		p4lep = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
+	  		muindex = j;
+	  	    lepcharge = muon_charge_[j];
+	  		p4lep = ROOT::Math::PtEtaPhiMVector(pt,muon_eta_[j],muon_phi_[j],muon_mass_[j]);
 			islepL = true;
-		    leppt = muon_pt_[j];
+		    leppt = pt;
 			lepeta = muon_eta_[j];
 			if(muon_mediumid_[j] && muon_isoscore_[j]<0.15)  islepT = true;
           }
