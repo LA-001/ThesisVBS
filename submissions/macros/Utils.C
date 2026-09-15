@@ -51,10 +51,13 @@ std::array<decltype(JEC_c_set->begin()->second), 27> jec_syst = {{
     JEC_c_set->at(MCera+"_V1_MC_PileUpPtHF_AK4PFPuppi")
   }};
 
-string JET_vetomap= "jsons/jetvetomaps_2023BPix.json.gz";
+string JET_vetomap_2023= "jsons/jetvetomaps_2023BPix.json.gz";
+string JET_vetomap_2024= "jsons/jetvetomaps_2024.json.gz";
 string vetocorr="Summer23BPixPrompt23_RunD_V1";
-auto JETveto_c_set = CorrectionSet::from_file(JET_vetomap);
-auto JET_veto = JETveto_c_set->at(vetocorr);
+auto JETveto_c_set_2023 = CorrectionSet::from_file(JET_vetomap_2023);
+auto JET_veto_2023 = JETveto_c_set->at(vetocorr);
+auto JETveto_c_set_2024 = CorrectionSet::from_file(JET_vetomap_2024);
+auto JET_veto_2024 = JETveto_c_set->at("Summer24Prompt24_RunBCDEFGHI_V1");
 
 string pu_file= "jsons/puWeights_2023BPix.json.gz";
 string pucorr="Collisions2023_369803_370790_eraD_GoldenJson";
@@ -270,7 +273,7 @@ Bool_t JetSelector(Float_t &pt, Float_t eta, Float_t &phi, Float_t rawfactor, Fl
       if(std::signbit(phi)) phi+=6.2831853;
       else phi-=6.2831853;
     }
-    bool jetveto= JET_veto->evaluate({"jetvetomap",eta,phi});
+    bool jetveto= JET_veto_2024->evaluate({"jetvetomap",eta,phi});
     if(jetveto) return false;
     pt*=(1-rawfactor);
     pt*= JEC_L2MC->evaluate({eta,phi,pt}); // Jet pt scale correction
