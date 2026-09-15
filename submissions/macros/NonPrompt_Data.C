@@ -347,7 +347,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_leppt, O_lepeta, O_lepphi;
   Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
   Float_t O_mjj, O_deltaRjj;
-  Float_t O_mvis, O_njets, O_metpt, O_metphi, O_zep;
+  Float_t O_mvis, O_njets, O_metpt, O_metphi;
 
   TTree *outtree = new TTree("outtree", "outtree");
   outtree->Branch("istauT",		&O_istauT,		"istauT/O");
@@ -369,7 +369,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   outtree->Branch("mjj",		&O_mjj,			"mjj/F");
   outtree->Branch("deltaRjj",	&O_deltaRjj,	"deltaRjj/F");
-  outtree->Branch("zep",		&O_zep,			"zep/F");
   outtree->Branch("metpt",   	&O_metpt,   	"metpt/F");
   outtree->Branch("metphi",  	&O_metphi,  	"metphi/F");
   outtree->Branch("mvis",       &O_mvis,        "mvis/F");
@@ -520,11 +519,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       ROOT::Math::PtEtaPhiMVector p4leps = p4lep+p4tau;
       float mvis = p4leps.M();
 
-	  Float_t D1 = p4tau.Eta() - abs((p4jet1.Eta() + p4jet2.Eta())/2.);
-	  Float_t D2 = p4lep.Eta() - abs((p4jet1.Eta() + p4jet2.Eta())/2.);
-	  Float_t N = 2.*(p4jet1.Eta() - p4jet2.Eta());
-	  Float_t zep = D1/N + D2/N;
-
       O_istauT   = istauT;
 	  O_islepT   = islepT;
       O_ismuon   = ismuon;
@@ -545,7 +539,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  O_mjj      = mjj;
       O_mvis     = mvis;
       O_deltaRjj = deltaRjj;
-	  O_zep      = zep;
 	  O_metpt    = met_pt_;
 	  O_metphi   = met_phi_;
       O_njets    = njets;
