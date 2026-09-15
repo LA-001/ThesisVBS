@@ -226,10 +226,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t jet_mass_[128];
   tree->SetBranchAddress("Jet_mass",&jet_mass_);
 
-  tree->SetBranchStatus("Jet_hadronFlavour", 1);
-  UChar_t jet_flav_[128];
-  tree->SetBranchAddress("Jet_hadronFlavour",&jet_flav_);
-
   tree->SetBranchStatus("Jet_btagUParTAK4B", 1); //Jet_btagUParTAK4B
   Float_t jet_btag_[128];
   tree->SetBranchAddress("Jet_btagUParTAK4B",&jet_btag_);
@@ -299,14 +295,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Rho_fixedGridRhoFastjetCentralCalo", 1);
   Float_t rho_calo_;
   tree->SetBranchAddress("Rho_fixedGridRhoFastjetCentralCalo",&rho_calo_);
-  
-  tree->SetBranchStatus("Pileup_nTrueInt", 1);
-  Float_t npu2_;
-  tree->SetBranchAddress("Pileup_nTrueInt",&npu2_);
-
-  runtree->SetBranchStatus("genEventSumw", 1);
-  Double_t sumgenw_;
-  runtree->SetBranchAddress("genEventSumw",&sumgenw_);
 
   tree->SetBranchStatus("PuppiMET_pt",  1);
   Float_t met_pt_;
