@@ -359,13 +359,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Long64_t numEntries = tree->GetEntries();
 
   string year = Run(srcfile);
-
-  if(goldenjson_map.find(year) == goldenjson_map.end()){
-    cout << "ERROR: no Golden JSON defined for year: " << year << " (file: " << srcfile << ")" << endl;
+  cout<<"Year: Run"<<year<<endl;
+  if(YearConfig_map.find(year) == YearConfig_map.end()){
+    cout << "ERROR: no configuration found for year: " << year << " (file: " << srcfile << ")" << endl;
     return;
   }
 
- auto goldenMap = loadGoldenJSON(goldenjson_map[year]);
+  YearConfig cfg = YearConfig_map[year];
+  auto goldenMap = loadGoldenJSON(cfg.goldenjson);
 
 //-------------------------- OUTPUT HISTOS ------------------------------------------------------------------------------
 
