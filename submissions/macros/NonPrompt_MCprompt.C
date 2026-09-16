@@ -435,8 +435,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           Float_t pt = ele_pt_[j];
           Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
           if(pass && ele_mvaid90_[j]){
-			weight_* = ele_HLT->evaluate({"2023PromptD","sf","HLT_SF_Ele30_MVAiso80ID",eta,pt}); //Trigger SF
-			weight_* = ele_SF->evaluate({"2023PromptD","sf","wp90iso",eta,pt,phi}); //ID SF
+			weight_* = ele_HLT->evaluate({"2023PromptD","sf","HLT_SF_Ele30_MVAiso80ID",ele_eta_[j],pt}); //Trigger SF
+			weight_* = ele_SF->evaluate({"2023PromptD","sf","wp90iso",ele_eta_[j],pt,ele_phi_[j]}); //ID SF
             nelectrons++;
             eleindex = j;
             lepcharge = ele_charge_[j];
@@ -452,7 +452,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           Float_t pt = muon_pt_[j];
           Bool_t pass = MuonSelector_prompt(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, weight_);
           if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
-			weight_ *= muon_HLT_SF->evaluate({abs(eta),pt,"nominal"}); // TRIG SF
+			weight_ *= muon_HLT_SF->evaluate({abs(muon_eta_[j]),pt,"nominal"}); // TRIG SF
             nmuons++;
 	  		muindex = j;
 	  	    lepcharge = muon_charge_[j];
