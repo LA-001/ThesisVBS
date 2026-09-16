@@ -130,6 +130,7 @@ auto DY_c_set = CorrectionSet::from_file(DY_ptfile);
 auto DY_SF= DY_c_set->at("DY_pTll_reweighting");
 
 string Goldenjson_2024 = "jsons/Cert_Collisions2024_378981_386951_Golden.json";
+string Goldenjson_2025 = "jsons/Cert_Collisions2025_391658_398903_Golden.json"
 
 Float_t WP_L = 0.0246; 
 Float_t WP_M = 0.1272;
