@@ -408,7 +408,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     
     int tauindex=0;
     for(int j=0; j<ntaus_; j++){
-      if(static_cast<int>(tau_source_[j]) != 5) continue;
       int vsjet = static_cast<int>(tauidvsjet_[j]);
       Float_t pt = tau_pt_[j];
       Bool_t pass = TauSelector_prompt(pt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], weight_);
@@ -433,7 +432,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(ntaus == 1){
 
     	for(int j=0; j<nelectrons_; j++){
-	      if(static_cast<int>(ele_source_[j]) != 1) continue;
           Float_t pt = ele_pt_[j];
           Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
           if(pass && ele_mvaid90_[j]){
@@ -449,7 +447,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     	}
       
     	for(int j=0; j<nmuons_; j++){
-          if(static_cast<int>(muon_source_[j]) != 1) continue;
           Float_t pt = muon_pt_[j];
           Bool_t pass = MuonSelector_prompt(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, weight_);
           if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
@@ -516,7 +513,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     else if(typeevent==2) trigpath=eletri_;
     if(!istauL && !islepL) excflag=1;
 	if(istauT && islepT) excflag=1;
-    
+
+	// The lepton (both tau and lep) Loose but not Tight must be prompt 
+	if(!istauT){
+    	if(static_cast<int>(tau_source_[tauindex]) != 5) excflag=1;
+    }
+
+	if(!islepT){
+		if(ismuon){
+    		if(static_cast<int>(muon_source_[muindex]) != 1) excflag=1;
+		}else{
+			if(static_cast<int>(ele_source_[eleindex]) != 1) excflag=1;
+		}
+    }
+	
+
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
 
       ROOT::Math::PtEtaPhiMVector p4jets=p4jet1+p4jet2;
