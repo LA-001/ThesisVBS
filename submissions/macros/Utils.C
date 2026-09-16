@@ -133,7 +133,7 @@ auto DY_SF= DY_c_set->at("DY_pTll_reweighting");
 
 struct YearConfig{
     string goldenjson;
-    string lumi_recorded;
+    float lumi_recorded;
     string jetvetomap;
     array<float, 10> lumi_eff;
 };
@@ -141,12 +141,12 @@ struct YearConfig{
 // lumi_eff array = {PFjet40,PFJet60,PFjet80,PFJet110,PFjet140,PFJet200,PFjet260,PFHT180,PFHT250,PFHT350}
 map<string, YearConfig> YearConfig_map = {
     {"2024", {"jsons/Cert_Collisions2024_378981_386951_Golden.json",
-              "109.95",
+              109.95,
               "JET_vetomap_2024",
               {0.00022,0.00166,0.00640,0.02428,0.07285,0.31221,0.85371,0.00959,0.02665,0.42686}}
     },
     {"2025", {"jsons/Cert_Collisions2025_391658_398903_Golden.json",
-              "110.63",
+              110.63,
               "JET_vetomap_2025",
               {0.00023,0.00152,0.00456,0.02050,0.06149,0.25740,0.86425,0.00851,0.02459,0.43213}}
     }
