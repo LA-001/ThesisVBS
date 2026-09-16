@@ -357,7 +357,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Long64_t numEntries = tree->GetEntries();
   weightscale_*=numEntries/(float)sampleevents_;
 
-  float lumi = 112.7; //2024 luminosity (in fb^-1)
+  float lumi = 109.95; //2024 luminosity (in fb^-1)
   weightscale_*=lumi*xsec_*1000;
 
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
