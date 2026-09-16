@@ -358,7 +358,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   Long64_t numEntries = tree->GetEntries();
 
-  auto goldenMap = loadGoldenJSON(Goldenjson_2024);
+  string year = Run(srcfile);
+
+  if(goldenjson_map.find(year) == goldenjson_map.end()){
+    cout << "ERROR: no Golden JSON defined for year: " << year << " (file: " << srcfile << ")" << endl;
+    return;
+  }
+
+ auto goldenMap = loadGoldenJSON(goldenjson_map[year]);
 
 //-------------------------- OUTPUT HISTOS ------------------------------------------------------------------------------
 
