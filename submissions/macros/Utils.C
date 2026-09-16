@@ -2,6 +2,7 @@
 #include <string>
 #include "TString.h"
 #include <vector>
+#include <array>
 #include <map>
 #include <fstream>
 #include <algorithm>
@@ -130,9 +131,25 @@ string DY_ptfile = "jsons/DY_pTll_weights_2023postBPix.json.gz";
 auto DY_c_set = CorrectionSet::from_file(DY_ptfile);
 auto DY_SF= DY_c_set->at("DY_pTll_reweighting");
 
-map<string, string> goldenjson_map = {
-    {"2024", "jsons/Cert_Collisions2024_378981_386951_Golden.json"},
-    {"2025", "jsons/Cert_Collisions2025_391658_398903_Golden.json"},
+struct YearConfig{
+    string goldenjson;
+    string lumi_recorded;
+    string jetvetomap;
+    array<float, 10> lumi_eff;
+};
+
+// lumi_eff array = {PFjet40,PFJet60,PFjet80,PFJet110,PFjet140,PFJet200,PFjet260,PFHT180,PFHT250,PFHT350}
+map<string, YearConfig> YearConfig_map = {
+    {"2024", {"jsons/Cert_Collisions2024_378981_386951_Golden.json",
+              "109.95",
+              "JET_vetomap_2024",
+              {0.00022,0.00166,0.00640,0.02428,0.07285,0.31221,0.85371,0.00959,0.02665,0.42686}}
+    },
+    {"2025", {"jsons/Cert_Collisions2025_391658_398903_Golden.json",
+              "110.63",
+              "JET_vetomap_2025",
+              {0.00023,0.00152,0.00456,0.02050,0.06149,0.25740,0.86425,0.00851,0.02459,0.43213}}
+    }
 };
 
 Float_t WP_L = 0.0246; 
@@ -340,20 +357,21 @@ Bool_t is_valid_event(const std::map<UInt_t, std::vector<std::pair<UInt_t, UInt_
     return false;
 }
 
-Float_t trigpath_Jet(const Bool_t HLT_PFJet40_, const Bool_t HLT_PFJet60_, const Bool_t HLT_PFJet80_, const Bool_t HLT_PFJet110_, const Bool_t HLT_PFJet140_, const Bool_t HLT_PFJet200_, const Bool_t HLT_PFJet260_, const Bool_t HLT_PFHT180_, const Bool_t HLT_PFHT250_, const Bool_t HLT_PFHT350_){
-    vector<float> lumi_eff = {-200.};
-    if(HLT_PFJet40_)  lumi_eff.push_back(0.00022);
-    if(HLT_PFJet60_)  lumi_eff.push_back(0.00166);
-    if(HLT_PFJet80_)  lumi_eff.push_back(0.00640);
-    if(HLT_PFJet110_) lumi_eff.push_back(0.02428);
-    if(HLT_PFJet140_) lumi_eff.push_back(0.07285);
-    if(HLT_PFJet200_) lumi_eff.push_back(0.31211);
-    if(HLT_PFJet260_) lumi_eff.push_back(0.85371);
-    if(HLT_PFHT180_)  lumi_eff.push_back(0.00959);
-    if(HLT_PFHT250_)  lumi_eff.push_back(0.02665);
-    if(HLT_PFHT350_)  lumi_eff.push_back(0.42686);
+// Prescaled luminosity for the hadronic HLTs
+Float_t trigpath_Jet(string year, const Bool_t HLT_PFJet40_, const Bool_t HLT_PFJet60_, const Bool_t HLT_PFJet80_, const Bool_t HLT_PFJet110_, const Bool_t HLT_PFJet140_, const Bool_t HLT_PFJet200_, const Bool_t HLT_PFJet260_, const Bool_t HLT_PFHT180_, const Bool_t HLT_PFHT250_, const Bool_t HLT_PFHT350_){
+    vector<float> lumi = {-200.};
+    if(HLT_PFJet40_)  lumi.push_back(YearConfig_map[anno].lumi_eff[0]);
+    if(HLT_PFJet60_)  lumi.push_back(YearConfig_map[anno].lumi_eff[1]);
+    if(HLT_PFJet80_)  lumi.push_back(YearConfig_map[anno].lumi_eff[2]);
+    if(HLT_PFJet110_) lumi.push_back(YearConfig_map[anno].lumi_eff[3]);
+    if(HLT_PFJet140_) lumi.push_back(YearConfig_map[anno].lumi_eff[4]);
+    if(HLT_PFJet200_) lumi.push_back(YearConfig_map[anno].lumi_eff[5]);
+    if(HLT_PFJet260_) lumi.push_back(YearConfig_map[anno].lumi_eff[6]);
+    if(HLT_PFHT180_)  lumi.push_back(YearConfig_map[anno].lumi_eff[7]);
+    if(HLT_PFHT250_)  lumi.push_back(YearConfig_map[anno].lumi_eff[8]);
+    if(HLT_PFHT350_)  lumi.push_back(YearConfig_map[anno].lumi_eff[9]);
 
-    Float_t max = *max_element(lumi_eff.begin(), lumi_eff.end());
+    Float_t max = *max_element(lumi.begin(), lumi.end());
 
     return max;
 }
