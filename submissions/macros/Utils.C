@@ -130,8 +130,10 @@ string DY_ptfile = "jsons/DY_pTll_weights_2023postBPix.json.gz";
 auto DY_c_set = CorrectionSet::from_file(DY_ptfile);
 auto DY_SF= DY_c_set->at("DY_pTll_reweighting");
 
-string Goldenjson_2024 = "jsons/Cert_Collisions2024_378981_386951_Golden.json";
-string Goldenjson_2025 = "jsons/Cert_Collisions2025_391658_398903_Golden.json"
+map<string, string> goldenjson_map = {
+    {"2024", "jsons/Cert_Collisions2024_378981_386951_Golden.json"},
+    {"2025", "jsons/Cert_Collisions2025_391658_398903_Golden.json"},
+};
 
 Float_t WP_L = 0.0246; 
 Float_t WP_M = 0.1272;
@@ -443,8 +445,8 @@ Float_t m_T(Float_t leppt, Float_t metpt, Float_t lepphi, Float_t metphi){
     return TMath::Sqrt(2*leppt*metpt*(1 - TMath::Cos(deltaphi)));
 }
 
-TString Run(TString file) {
-    TString year;
+string Run(TString file) {
+    string year;
     
     if (file.Contains("Run2022"))      year = "2022";
     else if (file.Contains("Run2023")) year = "2023";
