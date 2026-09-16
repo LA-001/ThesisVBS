@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include "TString.h"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -440,4 +441,17 @@ Float_t m_T(Float_t leppt, Float_t metpt, Float_t lepphi, Float_t metphi){
     Float_t deltaphi = deltaPhi(lepphi,metphi);
 
     return TMath::Sqrt(2*leppt*metpt*(1 - TMath::Cos(deltaphi)));
+}
+
+TString Run(TString file) {
+    TString year;
+    
+    if (file.Contains("Run2022"))      year = "2022";
+    else if (file.Contains("Run2023")) year = "2023";
+    else if (file.Contains("Run2024")) year = "2024";
+    else if (file.Contains("Run2025")) year = "2025";
+    else if (file.Contains("Run2026")) year = "2026";
+    else year = "Run year wasn't found!";
+
+    return year;
 }
