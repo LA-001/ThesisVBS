@@ -361,16 +361,16 @@ Bool_t is_valid_event(const std::map<UInt_t, std::vector<std::pair<UInt_t, UInt_
 // Prescaled luminosity for the hadronic HLTs
 Float_t trigpath_Jet(string year, const Bool_t HLT_PFJet40_, const Bool_t HLT_PFJet60_, const Bool_t HLT_PFJet80_, const Bool_t HLT_PFJet110_, const Bool_t HLT_PFJet140_, const Bool_t HLT_PFJet200_, const Bool_t HLT_PFJet260_, const Bool_t HLT_PFHT180_, const Bool_t HLT_PFHT250_, const Bool_t HLT_PFHT350_){
     vector<float> lumi = {-200.};
-    if(HLT_PFJet40_)  lumi.push_back(YearConfig_map[anno].lumi_eff[0]);
-    if(HLT_PFJet60_)  lumi.push_back(YearConfig_map[anno].lumi_eff[1]);
-    if(HLT_PFJet80_)  lumi.push_back(YearConfig_map[anno].lumi_eff[2]);
-    if(HLT_PFJet110_) lumi.push_back(YearConfig_map[anno].lumi_eff[3]);
-    if(HLT_PFJet140_) lumi.push_back(YearConfig_map[anno].lumi_eff[4]);
-    if(HLT_PFJet200_) lumi.push_back(YearConfig_map[anno].lumi_eff[5]);
-    if(HLT_PFJet260_) lumi.push_back(YearConfig_map[anno].lumi_eff[6]);
-    if(HLT_PFHT180_)  lumi.push_back(YearConfig_map[anno].lumi_eff[7]);
-    if(HLT_PFHT250_)  lumi.push_back(YearConfig_map[anno].lumi_eff[8]);
-    if(HLT_PFHT350_)  lumi.push_back(YearConfig_map[anno].lumi_eff[9]);
+    if(HLT_PFJet40_)  lumi.push_back(YearConfig_map[year].lumi_eff[0]);
+    if(HLT_PFJet60_)  lumi.push_back(YearConfig_map[year].lumi_eff[1]);
+    if(HLT_PFJet80_)  lumi.push_back(YearConfig_map[year].lumi_eff[2]);
+    if(HLT_PFJet110_) lumi.push_back(YearConfig_map[year].lumi_eff[3]);
+    if(HLT_PFJet140_) lumi.push_back(YearConfig_map[year].lumi_eff[4]);
+    if(HLT_PFJet200_) lumi.push_back(YearConfig_map[year].lumi_eff[5]);
+    if(HLT_PFJet260_) lumi.push_back(YearConfig_map[year].lumi_eff[6]);
+    if(HLT_PFHT180_)  lumi.push_back(YearConfig_map[year].lumi_eff[7]);
+    if(HLT_PFHT250_)  lumi.push_back(YearConfig_map[year].lumi_eff[8]);
+    if(HLT_PFHT350_)  lumi.push_back(YearConfig_map[year].lumi_eff[9]);
 
     Float_t max = *max_element(lumi.begin(), lumi.end());
 
