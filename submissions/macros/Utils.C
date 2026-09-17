@@ -387,7 +387,7 @@ Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_,
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
     //Scale factor for genuine taus
-    weight*=tau_SFvsjet3->evaluate({pt,DM,source,"Loose","Tight","default","dm"});            //wp Loose per lo studio dei leptoni fake, poi rimettere Medium
+    weight*=tau_SFvsjet3->evaluate({pt,DM,source,"Loose","Tight","nom","dm"});            //wp Loose per lo studio dei leptoni fake, poi rimettere Medium
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
       weight*=tau_SFvsmu3->evaluate({abs(eta),source,"Tight","Tight","Loose","nom"});
@@ -467,11 +467,11 @@ Float_t m_T(Float_t leppt, Float_t metpt, Float_t lepphi, Float_t metphi){
 string Run(TString file) {
     string year;
     
-    if (file.Contains("Run2022"))      year = "2022";
-    else if (file.Contains("Run2023")) year = "2023";
-    else if (file.Contains("Run2024")) year = "2024";
-    else if (file.Contains("Run2025")) year = "2025";
-    else if (file.Contains("Run2026")) year = "2026";
+    if (file.Contains("Run2022") || file.Contains("RunIII2022"))      year = "2022";
+    else if (file.Contains("Run2023") || file.Contains("RunIII2023")) year = "2023";
+    else if (file.Contains("Run2024") || file.Contains("RunIII2024")) year = "2024";
+    else if (file.Contains("Run2025") || file.Contains("RunIII2025")) year = "2025";
+    else if (file.Contains("Run2026") || file.Contains("RunIII2026")) year = "2026";
     else year = "Run year wasn't found!";
 
     return year;
