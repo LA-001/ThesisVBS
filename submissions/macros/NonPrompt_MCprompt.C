@@ -211,6 +211,20 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Int_t ntaus_;
   tree->SetBranchAddress("nTau",&ntaus_);
 
+//-------------------------- MC TRUTH -------------------------------------------------------------------------------------
+
+  tree->SetBranchStatus("Tau_genPartFlav", 1);
+  UChar_t tau_source_[128];
+  tree->SetBranchAddress("Tau_genPartFlav",&tau_source_);
+
+  tree->SetBranchStatus("Electron_genPartFlav", 1);
+  UChar_t ele_source_[128];
+  tree->SetBranchAddress("Electron_genPartFlav",&ele_source_);
+
+  tree->SetBranchStatus("Muon_genPartFlav", 1);
+  UChar_t muon_source_[128];
+  tree->SetBranchAddress("Muon_genPartFlav",&muon_source_);
+
 
 //-------------------------- JETS -----------------------------------------------------------------------------------------
 
@@ -460,8 +474,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           Float_t pt = ele_pt_[j];
           Bool_t pass = ElectronSelector_prompt(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
           if(pass && ele_mvaid90_[j]){
-			weight_* = ele_HLT->evaluate({"2023PromptD","sf","HLT_SF_Ele30_MVAiso80ID",ele_eta_[j],pt}); //Trigger SF
-			weight_* = ele_SF->evaluate({"2023PromptD","sf","wp90iso",ele_eta_[j],pt,ele_phi_[j]}); //ID SF
+			weight_ *= ele_HLT->evaluate({"2023PromptD","sf","HLT_SF_Ele30_MVAiso80ID",ele_eta_[j],pt}); //Trigger SF
+			weight_ *= ele_SF->evaluate({"2023PromptD","sf","wp90iso",ele_eta_[j],pt,ele_phi_[j]}); //ID SF
             nelectrons++;
             eleindex = j;
             lepcharge = ele_charge_[j];
