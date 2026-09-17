@@ -518,6 +518,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     else if(typeevent==2) trigpath=eletri_;
     if(!istauL && !islepL) excflag=1;
 	if(istauT && islepT) excflag=1;
+	//if(!istauT || !islepT) excflag=1;			//For real data selection
     
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
 
