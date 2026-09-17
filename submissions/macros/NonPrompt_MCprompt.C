@@ -352,33 +352,58 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   runtree->GetEntry(0);
 
-  float weightscale_=1/sumgenw_;
+  Float_t weightscale_=1/sumgenw_;
 
   Long64_t numEntries = tree->GetEntries();
-  weightscale_*=numEntries/(float)sampleevents_;
 
-  float lumi = 109.95; //2024 luminosity (in fb^-1)
+  string year = Run(srcfile);
+  cout<<"Year: Run"<<year<<endl;
+  if(YearConfig_map.find(year) == YearConfig_map.end()){
+    cout << "ERROR: no configuration found for year: " << year << " (file: " << srcfile << ")" << endl;
+    return;
+  }
+
+  YearConfig cfg = YearConfig_map[year];
+
+  weightscale_*=numEntries/(float)sampleevents_;
+  Float_t lumi = cfg.lumi_recorded; //(in fb^-1)
   weightscale_*=lumi*xsec_*1000;
 
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
 
-  Bool_t O_istauL, O_islepL, O_ismuon;
-  Bool_t O_istauT, O_islepT;
-  Float_t O_taupt, O_taueta, O_leppt, O_lepeta, O_mjj, O_deltaRjj, O_weight;
+  Bool_t O_istauT, O_islepT, O_ismuon;
+  Float_t O_taupt, O_taueta, O_tauphi;
+  Float_t O_leppt, O_lepeta, O_lepphi;
+  Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
+  Float_t O_mjj, O_deltaRjj;
+  Float_t O_mvis, O_metpt, O_metphi, O_weight;
+  Int_t O_njets;
 
   TTree *outtree = new TTree("outtree", "outtree");
-  outtree->Branch("istauL",   &O_istauL,   "istauL/O");
-  outtree->Branch("islepL",   &O_islepL,   "islepL/O");
-  outtree->Branch("istauT",   &O_istauT,   "istauT/O");
-  outtree->Branch("islepT",   &O_islepT,   "islepT/O");
-  outtree->Branch("ismuon",   &O_ismuon,   "ismuon/O");
-  outtree->Branch("taupt",    &O_taupt,    "taupt/F");
-  outtree->Branch("taueta",   &O_taueta,   "taueta/F");
-  outtree->Branch("leppt",    &O_leppt,    "leppt/F");
-  outtree->Branch("lepeta",   &O_lepeta,   "lepeta/F");
-  outtree->Branch("mjj",      &O_mjj,      "mjj/F");
-  outtree->Branch("deltaRjj", &O_deltaRjj, "deltaRjj/F");
-  outtree->Branch("weight",   &O_weight,   "weight/F");
+  outtree->Branch("istauT",		&O_istauT,		"istauT/O");
+  outtree->Branch("islepT",		&O_islepT,		"islepT/O");
+  outtree->Branch("ismuon",		&O_ismuon,		"ismuon/O");
+
+  outtree->Branch("taupt",		&O_taupt,		"taupt/F");
+  outtree->Branch("taueta",		&O_taueta,		"taueta/F");
+  outtree->Branch("tauphi",		&O_tauphi,		"tauphi/F");
+
+  outtree->Branch("leppt",		&O_leppt,		"leppt/F");
+  outtree->Branch("lepeta",		&O_lepeta,		"lepeta/F");
+  outtree->Branch("lepphi",		&O_lepphi,		"lepphi/F");
+
+  outtree->Branch("jet1eta",    &O_jet1eta, 	"jet1eta/F");
+  outtree->Branch("jet1phi", 	&O_jet1phi, 	"jet1phi/F");
+  outtree->Branch("jet2eta", 	&O_jet2eta, 	"jet2eta/F");
+  outtree->Branch("jet2phi", 	&O_jet2phi, 	"jet2phi/F");
+
+  outtree->Branch("mjj",		&O_mjj,			"mjj/F");
+  outtree->Branch("deltaRjj",	&O_deltaRjj,	"deltaRjj/F");
+  outtree->Branch("metpt",   	&O_metpt,   	"metpt/F");
+  outtree->Branch("metphi",  	&O_metphi,  	"metphi/F");
+  outtree->Branch("mvis",       &O_mvis,        "mvis/F");
+  outtree->Branch("njets",      &O_njets,       "njets/I");
+  outtree->Branch("weight",     &O_weight,      "weight/F");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -400,9 +425,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
 
-    Bool_t istauLT=false, islepLT=false;
+    Bool_t istauL=false, islepL=false;
 	Bool_t istauT=false, islepT=false; 
-	Float_t taupt,taueta,leppt,lepeta;
+	Float_t taupt,taueta,leppt,lepeta; 
 
     //-------------------------- TAU ----------------------------------------------------------------
     
@@ -533,22 +558,37 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
 
-      ROOT::Math::PtEtaPhiMVector p4jets=p4jet1+p4jet2;
-      float mjj = p4jets.M(); // Invariant mass of the dijet system
-      float deltaRjj = deltaR(p4jet1,p4jet2);
+      ROOT::Math::PtEtaPhiMVector p4jets = p4jet1+p4jet2;
+      Float_t mjj = p4jets.M(); // Invariant mass of the dijet system
+      Float_t deltaRjj = deltaR(p4jet1,p4jet2);
 
-      O_istauL = istauL;
-	  O_islepL = islepL;
-      O_istauT = istauT;
-	  O_islepT = islepT;
-      O_ismuon  = ismuon;
-	  O_taupt   = taupt;
-	  O_taueta  = taueta;
-	  O_leppt   = leppt;
-	  O_lepeta  = lepeta;
-	  O_deltaRjj = deltaRjj;
-	  O_mjj = mjj;
-	  O_weight = weight_;
+      ROOT::Math::PtEtaPhiMVector p4leps = p4lep+p4tau;
+      float mvis = p4leps.M();
+
+      O_istauT   = istauT;
+	  O_islepT   = islepT;
+      O_ismuon   = ismuon;
+
+      O_taupt    = p4tau.Pt();
+	  O_taueta   = p4tau.Eta();
+	  O_tauphi   = p4tau.Phi();
+
+      O_leppt    = p4lep.Pt();
+	  O_lepeta   = p4lep.Eta();
+	  O_lepphi   = p4lep.Phi();
+
+	  O_jet1eta  = p4jet1.Eta();
+      O_jet1phi  = p4jet1.Phi();
+      O_jet2eta  = p4jet2.Eta();
+      O_jet2phi  = p4jet2.Phi();
+
+	  O_mjj      = mjj;
+      O_mvis     = mvis;
+      O_deltaRjj = deltaRjj;
+	  O_metpt    = met_pt_;
+	  O_metphi   = met_phi_;
+      O_njets    = njets;
+	  O_weight   = weight_;
 
 	  outtree->Fill();
     }
