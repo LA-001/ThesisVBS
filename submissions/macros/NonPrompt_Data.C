@@ -338,7 +338,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   Long64_t numEntries = tree->GetEntries();
 
-  auto goldenMap = loadGoldenJSON(Goldenjson_2024);
+  string year = Run(srcfile);
+  cout<<"Year: Run"<<year<<endl;
+  if(YearConfig_map.find(year) == YearConfig_map.end()){
+    cout << "ERROR: no configuration found for year: " << year << " (file: " << srcfile << ")" << endl;
+    return;
+  }
+
+  YearConfig cfg = YearConfig_map[year];
+  auto goldenMap = loadGoldenJSON(cfg.goldenjson);
 
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
 
@@ -347,7 +355,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_leppt, O_lepeta, O_lepphi;
   Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
   Float_t O_mjj, O_deltaRjj;
-  Float_t O_mvis, O_njets, O_metpt, O_metphi;
+  Float_t O_mvis, O_metpt, O_metphi;
+  Int_t O_njets;
 
   TTree *outtree = new TTree("outtree", "outtree");
   outtree->Branch("istauT",		&O_istauT,		"istauT/O");
@@ -489,7 +498,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		  if(deltaR(p4jet,p4lep) < 0.4) continue;     
 		
 		  if(jet_pt_[j]>30 && abs(jet_eta_[j])<5.1){
-			if(JET_veto_2024->evaluate({"jetvetomap",jet_eta_[j],jet_phi_[j]})) continue;
+			if(cfg.jetvetomap->evaluate({"jetvetomap",jet_eta_[j],jet_phi_[j]})) continue;
 	        if(jet_pt_[j]<=50 && abs(jet_eta_[j])>2.5 && abs(jet_eta_[j])<3) continue;
 			if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
 			if(jet_btag_[j] >= WP_M && abs(jet_eta_[j]) < 2.5)	btagflag = true;
