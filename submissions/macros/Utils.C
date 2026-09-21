@@ -56,11 +56,12 @@ std::array<decltype(JEC_c_set->begin()->second), 27> jec_syst = {{
 string JET_vetomap_2023 = "jsons/jetvetomaps_2023BPix.json.gz";
 string JET_vetomap_2024 = "jsons/jetvetomaps_2024.json.gz";
 string JET_vetomap_2025 = "jsons/jetvetomaps_2025.json.gz";
-string vetocorr="Summer23BPixPrompt23_RunD_V1";
 auto JETveto_c_set_2023 = CorrectionSet::from_file(JET_vetomap_2023);
-auto JET_veto_2023 = JETveto_c_set_2023->at(vetocorr);
+auto JET_veto_2023 = JETveto_c_set_2023->at("Summer23BPixPrompt23_RunD_V1");
 auto JETveto_c_set_2024 = CorrectionSet::from_file(JET_vetomap_2024);
 auto JET_veto_2024 = JETveto_c_set_2024->at("Summer24Prompt24_RunBCDEFGHI_V1");
+auto JETveto_c_set_2025 = CorrectionSet::from_file(JET_vetomap_2025);
+auto JET_veto_2025 = JETveto_c_set_2025->at("Summer24Prompt25_RunCDEFG_V1");
 
 string pu_file= "jsons/puWeights_2023BPix.json.gz";
 string pucorr="Collisions2023_369803_370790_eraD_GoldenJson";
@@ -143,12 +144,12 @@ struct YearConfig{
 map<string, YearConfig> YearConfig_map = {
     {"2024", {"jsons/Cert_Collisions2024_378981_386951_Golden.json",
               109.95,
-              JET_vetomap_2024,
+              JET_veto_2024,
               {0.00022,0.00166,0.00640,0.02428,0.07285,0.31221,0.85371,0.00959,0.02665,0.42686}}
     },
     {"2025", {"jsons/Cert_Collisions2025_391658_398903_Golden.json",
               110.63,
-              JET_vetomap_2025,
+              JET_veto_2025,
               {0.00023,0.00152,0.00456,0.02050,0.06149,0.25740,0.86425,0.00851,0.02459,0.43213}}
     }
 };
