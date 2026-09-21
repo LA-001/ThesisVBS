@@ -380,6 +380,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Long64_t numEntries = tree->GetEntries();
   weightscale_*=numEntries/(float)sampleevents_;
 
+  string year = Run(srcfile);
+  cout<<"Year: Run"<<year<<endl;
+  if(YearConfig_map.find(year) == YearConfig_map.end()){
+    cout << "ERROR: no configuration found for year: " << year << " (file: " << srcfile << ")" << endl;
+    return;
+  }
+
 //-------------------------- OUTPUT HISTOS ------------------------------------------------------------------------------
 
 	Float_t edge_pt1[]  = {20.,25.,30.,35.,40.,45.,50.,55.,60.,70.,80.,100.,120.,140.,160.,180.,200.};
@@ -424,7 +431,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     bool excflag=0;
 
     Bool_t METfilters= (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
-    Float_t lumi_eff = trigpath_Jet(HLT_PFJet40_, HLT_PFJet60_, HLT_PFJet80_, HLT_PFJet110_, HLT_PFJet140_, HLT_PFJet200_, HLT_PFJet260_,HLT_PFHT180_,HLT_PFHT250_,HLT_PFHT350_);
+    Float_t lumi_eff = trigpath_Jet(year,HLT_PFJet40_, HLT_PFJet60_, HLT_PFJet80_, HLT_PFJet110_, HLT_PFJet140_, HLT_PFJet200_, HLT_PFJet260_,HLT_PFHT180_,HLT_PFHT250_,HLT_PFHT350_);
     if(!METfilters || lumi_eff == -200.) continue;
 
 	Int_t ntaus=0, neles=0, nmuons=0;
