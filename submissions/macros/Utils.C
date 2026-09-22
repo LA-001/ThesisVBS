@@ -73,7 +73,7 @@ string muon_idfile   = "jsons/muon_Z.json.gz";
 auto muon_c_set      = CorrectionSet::from_file(muon_idfile);
 auto muon_SF1        = muon_c_set->at("NUM_MediumID_DEN_TrackerMuons");
 auto muon_SF2        = muon_c_set->at("NUM_TightPFIso_DEN_MediumID");  //??? è effettivamente Tight ???
-auto muon_HLT_SF     = muon_HLT_c_set->at("NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoTight");
+auto muon_HLT_SF     = muon_c_set->at("NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoTight");
 
 string muon_ssfile   = "jsons/muon_scalesmearing.json.gz";
 auto muon_ss_c_set   = CorrectionSet::from_file(muon_ssfile);
@@ -248,7 +248,7 @@ Bool_t MuonSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dx
     float kfactor      = 0.;
     if(kDATA>kMC) kfactor = sqrt(kDATA*kDATA-kMC*kMC);
     float rndm         = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
-    pt* = (1+kfactor*std*rndm); // Momentum smearing correction
+    pt *= (1+kfactor*std*rndm); // Momentum smearing correction
 
     return true;
   }
