@@ -523,15 +523,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  			continue;
 			}
 			Float_t jetpt = jet_pt_[j];
-			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_);
+			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_, jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j]);
 			if(pass) {
-				if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
+	  		njets++;
 
-	  			njets++;
+				if(jet_btag_[j] >= btag_thr_ && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
 
-				if(jet_btag_[j] >= WP_M && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
-
-	  			if(njets==1){
+	  		if(njets==1){
 					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
 				}else if(njets==2){
 					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
