@@ -411,24 +411,19 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Long64_t numEntries = tree->GetEntries();
   weightscale_*=numEntries/(float)sampleevents_;
 
-  TRandom3 *tr3 = new TRandom3;
-
-  auto startTime = std::chrono::high_resolution_clock::now();
-
-  cout<<"Started!"<<endl;
-
-  float totalll1=0., totalll2=0.;
-  int nummm=0;
+  string year = Run(srcfile);
+  cout<<"Year: Run"<<year<<endl;
+  if(YearConfig_map.find(year) == YearConfig_map.end()){
+    cout << "ERROR: no configuration found for year: " << year << " (file: " << srcfile << ")" << endl;
+    return;
+  }
 
   for (Long64_t i = 0; i < numEntries; ++i) {
-
-    //if(i>5000) break;
-    if(i%10000==0) cout<<"Analyzing event n. "<<i<<"/"<<numEntries<<endl;
     
     tree->GetEntry(i);
 
     bool excflag=0;
-	bool btagflag=0;
+	  bool btagflag=0;
 
     Bool_t METfilters= (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
     if(!METfilters) excflag=1;
@@ -441,8 +436,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     Int_t ntaus=0, nbtags=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
     Float_t selectedtaupt=0., selectedleppt=0.;
-	Int_t jet1index = -1, jet2index = -1;
-	Bool_t ismuon = true;
+	  Int_t jet1index = -1, jet2index = -1;
+	  Bool_t ismuon = true;
 
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
     
@@ -451,10 +446,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       Float_t taupt = tau_pt_[j];
       Bool_t pass = TauSelector(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], weight_);
       if(pass){
-		ntaus++;
+		    ntaus++;
         tauindex=j;
-		taucharge=tau_charge_[j];
-		p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
+		    taucharge=tau_charge_[j];
+		    p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
       }
     }
         
@@ -465,25 +460,25 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(ntaus == 1){
 
     	for(int j=0; j<nelectrons_; j++){
-			Float_t elept = ele_pt_[j];
-			Bool_t pass = ElectronSelector(elept, ele_eta_[j], ele_phi_[j], ele_mvaid_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
-			if(pass){
-	  			nelectrons++;
-	  			eleindex=j;
-	  			lepcharge=ele_charge_[j];
-	  			p4lep = ROOT::Math::PtEtaPhiMVector(elept,ele_eta_[eleindex],ele_phi_[eleindex],ele_mass_[eleindex]);
-			}
+        Float_t elept = ele_pt_[j];
+        Bool_t pass = ElectronSelector(elept, ele_eta_[j], ele_phi_[j], ele_mvaid_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
+        if(pass){
+            nelectrons++;
+            eleindex=j;
+            lepcharge=ele_charge_[j];
+            p4lep = ROOT::Math::PtEtaPhiMVector(elept,ele_eta_[eleindex],ele_phi_[eleindex],ele_mass_[eleindex]);
+        }
     	}
       
     	for(int j=0; j<nmuons_; j++){
-			Float_t muonpt = muon_pt_[j];
-			Bool_t pass = MuonSelector(muonpt,muon_eta_[j],muon_phi_[j],muon_mediumid_[j],muon_dxy_[j],muon_dz_[j],muon_isoscore_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, weight_);
-        	if(pass){
-        		nmuons++;
-	  			muindex=j;
-	  			lepcharge=muon_charge_[j];
-	  			p4lep = ROOT::Math::PtEtaPhiMVector(muonpt,muon_eta_[muindex],muon_phi_[muindex],muon_mass_[muindex]);
-        	}
+        Float_t muonpt = muon_pt_[j];
+        Bool_t pass = MuonSelector(muonpt,muon_eta_[j],muon_phi_[j],muon_mediumid_[j],muon_dxy_[j],muon_dz_[j],muon_isoscore_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, weight_);
+        if(pass){
+          nmuons++;
+          muindex=j;
+          lepcharge=muon_charge_[j];
+          p4lep = ROOT::Math::PtEtaPhiMVector(muonpt,muon_eta_[muindex],muon_phi_[muindex],muon_mass_[muindex]);
+        }
     	}
 
 		//----------------------- Veto on additional Loose leptons -------------------------------------
@@ -501,43 +496,37 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		//----------------------------------------------------------------------------------------------
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-			O_tau_genflav = tau_source_[tauindex];
-    		if(nmuons==1){ 
-				typeevent=1; //Mu-tauh events
-				ismuon = true;
-				O_lep_genflav = muon_source_[muindex];
-			}else{ 
-				typeevent=2; //E-tauh events
-				ismuon = false;
-				O_lep_genflav = ele_source_[eleindex];
-			}
+        O_tau_genflav = tau_source_[tauindex];
+        if(nmuons==1){ 
+          typeevent=1; //Mu-tauh events
+          ismuon = true;
+          O_lep_genflav = muon_source_[muindex];
+        }else{ 
+          typeevent=2; //E-tauh events
+          ismuon = false;
+          O_lep_genflav = ele_source_[eleindex];
+        }
     	}
       
+      if(deltaR(p4tau,p4lep)<0.4) excflag=1;
+
     	for(int j=0; j<njets_; j++){
-			
-			ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-			if(deltaR(p4jet,p4tau)<0.4) { // Reject jets that overlap with the tau
-	  			continue;
-			}
-			if(deltaR(p4jet,p4lep)<0.4) { // Reject jets that overlap with the other lepton
-	  			continue;
-			}
-			Float_t jetpt = jet_pt_[j];
-			Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_, jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j]);
-			if(pass) {
-	  		njets++;
+        ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+        if(deltaR(p4jet,p4tau)<0.4) continue;
+        if(deltaR(p4jet,p4lep)<0.4) continue;
 
-				if(jet_btag_[j] >= btag_thr_ && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
+        Float_t jetpt = jet_pt_[j];
+        Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_, jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j]);
+        if(pass) {
+          njets++;
 
-	  		if(njets==1){
-					p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-				}else if(njets==2){
-					p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-				}
+          if(jet_btag_[j] >= btag_thr_ && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
 
-			}
+          if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+          else if(njets==2) p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+        }
     	}
-	}
+	  }
     
     bool trigpath=false; 
     if(typeevent==1) trigpath=mutri_; 

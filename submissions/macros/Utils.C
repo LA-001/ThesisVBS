@@ -180,7 +180,7 @@ Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_
   int vsmu = static_cast<int>(vsmu_);
   int vsjet = static_cast<int>(vsjet_);
 
-  if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and vsjet>=7 and abs(dz)<0.2){
+  if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and vsjet>=5 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
 
     //Scale factor for genuine taus
@@ -327,6 +327,7 @@ Float_t trigpath_Jet(string year, const Bool_t HLT_PFJet40_, const Bool_t HLT_PF
     return max;
 }
 
+/*    // Ancora da guardare questi
 Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight){
   
   int DM = static_cast<int>(DM_);
@@ -407,6 +408,7 @@ Bool_t MuonSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, F
   }
   else return false;
 }
+*/
 
 Float_t m_T(Float_t leppt, Float_t metpt, Float_t lepphi, Float_t metphi){
     Float_t deltaphi = deltaPhi(lepphi,metphi);
