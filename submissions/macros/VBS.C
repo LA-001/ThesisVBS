@@ -570,10 +570,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
  }
   
   outtree->Write();
-  auto endTime = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-
-  std::cout << "Total execution time: " << duration << " milliseconds" << std::endl;
 
   f->Close();
   output->Close();
