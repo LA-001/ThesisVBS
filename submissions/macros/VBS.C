@@ -38,9 +38,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_tauphi, O_lepeta, O_lepphi, O_metpt, O_metphi;
   Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
   Float_t O_weight;
-  UChar_t O_tau_genflav, O_lep_genflav;
   
-  bool O_ismuon, O_excflag;
+  Bool_t O_ismuon, O_excflag, O_isvsjetVT;
 
   outtree->Branch("weight",&O_weight,"weight/F");
   outtree->Branch("mvis",&O_mvis,"mvis/F");
@@ -62,8 +61,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("jet2phi", &O_jet2phi, "jet2phi/F");
   outtree->Branch("metpt",   &O_metpt,   "metpt/F");
   outtree->Branch("metphi",  &O_metphi,  "metphi/F");
-  outtree->Branch("tau_genflav", &O_tau_genflav, "tau_genflav/b");
-  outtree->Branch("lep_genflav", &O_lep_genflav, "lep_genflav/b");
+  outtree->Branch("isvsjetVT", &O_isvsjetVT, "isvsjetVT/O");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -437,7 +435,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Int_t ntaus=0, nbtags=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
     Float_t selectedtaupt=0., selectedleppt=0.;
 	  Int_t jet1index = -1, jet2index = -1;
-	  Bool_t ismuon = true;
+	  Bool_t ismuon = true, isvsjetVT = false;
 
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
     
@@ -450,6 +448,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         tauindex=j;
 		    taucharge=tau_charge_[j];
 		    p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
+        Int_t vsjet = static_cast<int>(tauidvsjet_[j]);
+        if(vsjet >= 7) isvsjetVT = true;
       }
     }
         
@@ -496,15 +496,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		//----------------------------------------------------------------------------------------------
 
     	if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-        O_tau_genflav = tau_source_[tauindex];
         if(nmuons==1){ 
           typeevent=1; //Mu-tauh events
           ismuon = true;
-          O_lep_genflav = muon_source_[muindex];
         }else{ 
           typeevent=2; //E-tauh events
           ismuon = false;
-          O_lep_genflav = ele_source_[eleindex];
         }
     	}
       
@@ -551,18 +548,19 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       O_leppt    = p4lep.Pt();
       O_mjj      = mjj_;
       O_deltaRjj = deltaRjj_;
-	  O_ismuon   = ismuon;
+	    O_ismuon   = ismuon;
 
-	  O_taueta   = p4tau.Eta();
-	  O_tauphi   = p4tau.Phi();
-	  O_lepeta   = p4lep.Eta();
-	  O_lepphi   = p4lep.Phi();
-	  O_metpt    = met_pt_;
-	  O_metphi   = met_phi_;
-	  O_jet1eta  = p4jet1.Eta();
+      O_taueta   = p4tau.Eta();
+      O_tauphi   = p4tau.Phi();
+      O_lepeta   = p4lep.Eta();
+      O_lepphi   = p4lep.Phi();
+      O_metpt    = met_pt_;
+      O_metphi   = met_phi_;
+	    O_jet1eta  = p4jet1.Eta();
       O_jet1phi  = p4jet1.Phi();
       O_jet2eta  = p4jet2.Eta();
       O_jet2phi  = p4jet2.Phi();
+      O_isvsjetVT = isvsjetVT;
       
       outtree->Fill();
 
