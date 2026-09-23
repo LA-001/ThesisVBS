@@ -439,9 +439,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t weight_=genweight_*weightscale_*lumi_eff*xsec_*1000;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
 
-    Float_t O_tauweight  = weight_;
-    Float_t O_eleweight  = weight_;
-    Float_t O_muonweight = weight_;
+    Float_t O_tauweight_den  = weight_;    Float_t O_tauweight_num  = weight_;
+    Float_t O_eleweight_den  = weight_;    Float_t O_eleweight_num  = weight_;
+    Float_t O_muonweight_den = weight_;    Float_t O_muonweight_num = weight_;
     Int_t njets = 0;
 
 	//-------------------------- TAU ----------------------------------------------------------------
@@ -450,17 +450,16 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
 	for(int j=0; j<ntaus_; j++){
 	    if(static_cast<int>(tau_source_[j]) != 5) continue;
+	    int vsjet = static_cast<int>(tauidvsjet_[j]);
 
-		Float_t fake_weight = 1.;	
+		Float_t fake_weight1 = 1.;
+        Float_t fake_weight2 = 1.;		
 	    Float_t taupt = tau_pt_[j];
-	    Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], fake_weight);
+	    Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], fake_weight1, fake_weight2);
 	
-	    if(pass){
-	        int vsjet = static_cast<int>(tauidvsjet_[j]);
-	        if(vsjet >= 4){
-	            ntaus_candidates++;
-	            if(tau_idx_selected < 0) tau_idx_selected = j;
-	        }
+	    if(pass && vsjet >= 4){
+	        ntaus_candidates++;
+	        if(tau_idx_selected < 0) tau_idx_selected = j;
 	    }
 	}
 	
@@ -468,22 +467,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int j = tau_idx_selected;
 	    Float_t taupt = tau_pt_[j];
 	
-	    // riapplica il selector per il peso corretto (dato che modifica taupt e il weight)
-	    Bool_t pass = TauSelector_prompt(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight);
+        Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight_den, O_tauweight_num);
 	
 	    int vsjet = static_cast<int>(tauidvsjet_[j]);
 	    Float_t mT = m_T(taupt, met_pt_, tau_phi_[j], met_phi_);
 	
 	    if(mT <= 50){
 	        if(vsjet >= 4){
-	            h_tau_pt_den->Fill(taupt, O_tauweight);
-	            h_tau_eta_den->Fill(tau_eta_[j], O_tauweight);
-	            h_tau_2d_den->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
+	            h_tau_pt_den->Fill(taupt, O_tauweight_den);
+	            h_tau_eta_den->Fill(tau_eta_[j], O_tauweight_den);
+	            h_tau_2d_den->Fill(taupt, abs(tau_eta_[j]), O_tauweight_den);
 	        }
 	        if(vsjet >= 5){
-	            h_tau_pt_num->Fill(taupt, O_tauweight);
-	            h_tau_eta_num->Fill(tau_eta_[j], O_tauweight);
-	            h_tau_2d_num->Fill(taupt, abs(tau_eta_[j]), O_tauweight);
+	            h_tau_pt_num->Fill(taupt, O_tauweight_num);
+	            h_tau_eta_num->Fill(tau_eta_[j], O_tauweight_num);
+	            h_tau_2d_num->Fill(taupt, abs(tau_eta_[j]), O_tauweight_num);
 	        }
 	    }
 	}
@@ -495,9 +493,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	for(int j=0; j<nelectrons_; j++){
 	    if(static_cast<int>(ele_source_[j]) != 1) continue;
 
-		Float_t fake_weight = 1.;	
+		Float_t fake_weight1 = 1.;
+        Float_t fake_weight2 = 1.;		
 	    Float_t elept = ele_pt_[j];
-	    Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, fake_weight);
+	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, fake_weight1, fake_weight2);
 	
 	    if(pass && ele_mvaid90_[j]){
 	        neles_candidates++;
@@ -509,26 +508,19 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int j = ele_idx_selected;
 	    Float_t elept = ele_pt_[j];
 	
-	    Bool_t pass = ElectronSelector_prompt(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight);
-	
+	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight_den, O_eleweight_num);
 	    Float_t mT = m_T(elept, met_pt_, ele_phi_[j], met_phi_);
 	
-	    if(pass && mT <= 50){
+	    if(mT <= 50){
 	        if(ele_mvaid90_[j]){
-				Float_t O_eleweight90 = O_eleweight;
-				Electron_weightSF(O_eleweight90, ele_eta_[j], elept, ele_phi_[j], false);
-
-	            h_ele_pt_den->Fill(elept, O_eleweight90);
-	            h_ele_eta_den->Fill(ele_eta_[j], O_eleweight90);
-	            h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight90);
+	            h_ele_pt_den->Fill(elept, O_eleweight_den);
+	            h_ele_eta_den->Fill(ele_eta_[j], O_eleweight_den);
+	            h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight_den);
 	        }
 	        if(ele_mvaid80_[j]){
-				Float_t O_eleweight80 = O_eleweight;
-				Electron_weightSF(O_eleweight80, ele_eta_[j], elept, ele_phi_[j], true);
-
-	            h_ele_pt_num->Fill(elept, O_eleweight80);
-	            h_ele_eta_num->Fill(ele_eta_[j], O_eleweight80);
-	            h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight80);
+	            h_ele_pt_num->Fill(elept, O_eleweight_num);
+	            h_ele_eta_num->Fill(ele_eta_[j], O_eleweight_num);
+	            h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight_num);
 	        }
 	    }
 	}
@@ -540,9 +532,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	for(int j=0; j<nmuons_; j++){
 	    if(static_cast<int>(muon_source_[j]) != 1) continue;
 
-		Float_t fake_weight = 1.;	
+		Float_t fake_weight1 = 1.;
+		Float_t fake_weight2 = 1.;	
 	    Float_t muonpt = muon_pt_[j];
-	    Bool_t pass = MuonSelector_prompt(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, fake_weight);
+	    Bool_t pass = MuonSelector_FR(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, fake_weight1, fake_weight2);
 	
 	    if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
 	        nmuons_candidates++;
@@ -554,25 +547,24 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int j = muon_idx_selected;
 	    Float_t muonpt = muon_pt_[j];
 	
-	    Bool_t pass = MuonSelector_prompt(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, O_muonweight);
-	
+	    Bool_t pass = MuonSelector_FR(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, O_muonweight_den, O_muonweight_num);
 	    Float_t mT = m_T(muonpt, met_pt_, muon_phi_[j], met_phi_);
 	
-	    if(pass && mT <= 50){
+	    if(mT <= 50){
 	        if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-	            h_muon_pt_den->Fill(muonpt, O_muonweight);
-	            h_muon_eta_den->Fill(muon_eta_[j], O_muonweight);
-	            h_muon_2d_den->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
+	            h_muon_pt_den->Fill(muonpt, O_muonweight_den);
+	            h_muon_eta_den->Fill(muon_eta_[j], O_muonweight_den);
+	            h_muon_2d_den->Fill(muonpt, abs(muon_eta_[j]), O_muonweight_den);
 	        }
 	        if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-	            h_muon_pt_num->Fill(muonpt, O_muonweight);
-	            h_muon_eta_num->Fill(muon_eta_[j], O_muonweight);
-	            h_muon_2d_num->Fill(muonpt, abs(muon_eta_[j]), O_muonweight);
+	            h_muon_pt_num->Fill(muonpt, O_muonweight_num);
+	            h_muon_eta_num->Fill(muon_eta_[j], O_muonweight_num);
+	            h_muon_2d_num->Fill(muonpt, abs(muon_eta_[j]), O_muonweight_num);
 	        }
 	    }
 	}
 
-	//-----------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------
 
   }  
 

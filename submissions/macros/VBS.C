@@ -120,8 +120,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("Electron_convVeto",&ele_conv_);
   
   tree->SetBranchStatus("Electron_mvaIso_WP80", 1);
-  Bool_t ele_mvaid_[128];
-  tree->SetBranchAddress("Electron_mvaIso_WP80", &ele_mvaid_);
+  Bool_t ele_mvaid80_[128];
+  tree->SetBranchAddress("Electron_mvaIso_WP80", &ele_mvaid80_);
+
+  tree->SetBranchStatus("Electron_mvaIso_WP90", 1);
+  Bool_t ele_mvaid90_[128];
+  tree->SetBranchAddress("Electron_mvaIso_WP90", &ele_mvaid90_);
 
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
@@ -461,7 +465,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     	for(int j=0; j<nelectrons_; j++){
         Float_t elept = ele_pt_[j];
-        Bool_t pass = ElectronSelector(elept, ele_eta_[j], ele_phi_[j], ele_mvaid_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
+        Bool_t pass = ElectronSelector(elept, ele_eta_[j], ele_phi_[j], ele_mvaid80_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
         if(pass){
             nelectrons++;
             eleindex=j;
@@ -530,8 +534,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     else if(typeevent==2) trigpath=eletri_;
     
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
-
-      float puweight=pu_SF->evaluate({npu2_,"nominal"});
 
       ROOT::Math::PtEtaPhiMVector p4=p4lep+p4tau;
       float mvis_ = p4.M(); // (Visible) invariant mass of the e-tau or mu-tau system

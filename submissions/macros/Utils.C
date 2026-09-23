@@ -74,6 +74,8 @@ auto muon_c_set      = CorrectionSet::from_file(muon_idfile);
 auto muon_SF1        = muon_c_set->at("NUM_MediumID_DEN_TrackerMuons");
 auto muon_SF2        = muon_c_set->at("NUM_TightPFIso_DEN_MediumID");  //??? è effettivamente Tight ???
 auto muon_HLT_SF     = muon_c_set->at("NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoTight");
+auto muon_SF1den        = muon_c_set->at("NUM_LooseID_DEN_TrackerMuons");
+auto muon_SF2den        = muon_c_set->at("NUM_LoosePFIso_DEN_LooseID");
 
 string muon_ssfile   = "jsons/muon_scalesmearing.json.gz";
 auto muon_ss_c_set   = CorrectionSet::from_file(muon_ssfile);
@@ -173,7 +175,6 @@ Float_t getBTagEff(Float_t pt, Float_t eta, int flav){
 //Object selectors
 
 Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t vsjet_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight){
-
   int DM = static_cast<int>(DM_);
   if(DM==2 or DM==5 or DM==6) return false;
   int vse = static_cast<int>(vse_);
@@ -327,9 +328,7 @@ Float_t trigpath_Jet(string year, const Bool_t HLT_PFJet40_, const Bool_t HLT_PF
     return max;
 }
 
-/*    // Ancora da guardare questi
-Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight){
-  
+Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight_den, Float_t &weight_num){
   int DM = static_cast<int>(DM_);
   if(DM==2 or DM==5 or DM==6) return false;
   int vse = static_cast<int>(vse_);
@@ -337,78 +336,89 @@ Bool_t TauSelector_prompt(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_,
   
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
+
     //Scale factor for genuine taus
-    weight*=tau_SFvsjet3->evaluate({pt,DM,source,"Loose","Tight","nom","dm"});            //wp Loose per lo studio dei leptoni fake, poi rimettere Medium
+    if(pt <= 140.){
+      weight_den *= tau_SFvsjet->evaluate({pt,DM,source,"Loose","Tight","nom","dm"});
+      weight_num *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","dm"});
+    }
+    else if(pt > 140.){
+      weight_den *= tau_SFvsjet->evaluate({pt,DM,source,"Loose","Tight","nom","pt"});
+      weight_num *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","pt"});     
+    }
+
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
-      weight*=tau_SFvsmu3->evaluate({abs(eta),source,"Tight","Tight","Loose","nom"});
+      weight_den *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Loose","nom"});
+      weight_num *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Medium","nom"});
     }
     else if(source==1 || source==3) {
-      weight*=tau_SFvse3->evaluate({abs(eta),DM,source,"Tight","nom"});
+      weight_den *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
+      weight_num *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
     }
     //Energy scale correction
     else if(source==5){
-      pt*=tau_energyscale3->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","Loose","Tight","nom"});
+      pt *= tau_energyscale->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","Loose","Tight","nom"});  
     }
     return true;
   }
   else return false;
 }
 
-Bool_t ElectronSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight){
+Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight_den, Float_t &weight_num){
   if(pt>30 and abs(eta)<2.5 and abs(dxy)<0.1 and abs(dz)<0.2 and convveto){
+    weight_den *= ele_SF->evaluate({"2024Prompt","sf","wp90iso",eta,pt}); //ID SF
+    weight_num *= ele_SF->evaluate({"2024Prompt","sf","wp80iso",eta,pt}); //ID SF
+
     if(pt<75) {
-      weight*=ele_SF->evaluate({"2023PromptD","sf","Reco20to75",eta,pt,phi}); //reco SF
+      weight_den *= ele_SF->evaluate({"2024Prompt","sf","Reco20to75",eta,pt}); //reco SF
+      weight_num *= ele_SF->evaluate({"2024Prompt","sf","Reco20to75",eta,pt}); //reco SF
     }
     else {
-      weight*=ele_SF->evaluate({"2023PromptD","sf","RecoAbove75",eta,pt,phi});
+      weight_den *= ele_SF->evaluate({"2024Prompt","sf","RecoAbove75",eta,pt});
+      weight_num *= ele_SF->evaluate({"2024Prompt","sf","RecoAbove75",eta,pt});
     }
-    pt*=ele_scale->evaluate({"total_correction",static_cast<int>(gain),static_cast<double>(run),eta,r9,pt}); //Momentum scale correction
-    float sig_smear=ele_smearing->evaluate({"rho",eta,r9});                                                                                                             
-    float ran=gRandom->Gaus(1.,sig_smear);                                                                                                                                          
-    pt*=ran; //Momentum smearing correction
 
+    pt *= ele_scale->evaluate({pt,r9,eta}); //Momentum scale correction
+    float sig_smear = ele_smearing->evaluate({"smear",pt,r9,eta});                                                                                                             
+    float ran = gRandom->Gaus(1.,sig_smear);                                                                                                                                          
+    pt *= ran; //Momentum smearing correction
     return true;
   }
-  else return false;  
+  else return false;   
 }
 
-void Electron_weightSF(Float_t &weight, Float_t eta, Float_t pt, Float_t phi, Bool_t iswp80){
-    if(iswp80){
-        weight *= ele_SF->evaluate({"2023PromptD","sf","wp80iso",eta,pt,phi});
-    }else{
-        weight *= ele_SF->evaluate({"2023PromptD","sf","wp90iso",eta,pt,phi});
-    }
-}
-
-Bool_t MuonSelector_prompt(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight){
+Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float_t dz, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight_den, Float_t &weight_num){
   if(pt > 30 && abs(eta) < 2.4 && abs(dxy)<0.1 && abs(dz)<0.2){
-    weight *= muon_SF1->evaluate({abs(eta),pt,"nominal"}); // ID SF
-    weight *= muon_SF2->evaluate({abs(eta),pt,"nominal"}); // ISO SF
-    float aMC = muon_amc->evaluate({eta,phi,"nom"});
-    float MMC = muon_Mmc->evaluate({eta,phi,"nom"});
+    weight_den *= muon_SF1den->evaluate({eta,pt,"nominal"}); // ID SF
+    weight_den *= muon_SF2den->evaluate({eta,pt,"nominal"}); // ISO SF
+    weight_num *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
+    weight_num *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
+
+    float aMC          = muon_amc->evaluate({eta,phi,"nom"});
+    float MMC          = muon_Mmc->evaluate({eta,phi,"nom"});
     pt = 1/((MMC/pt)+aMC*charge); // Momentum scale correction 
+
     float ntracklayers = static_cast<float>(tracklayers_char);
-    float mean = muon_cbparams->evaluate({abs(eta),ntracklayers,0});
-    float sigma = muon_cbparams->evaluate({abs(eta),ntracklayers,1});
-    float n = muon_cbparams->evaluate({abs(eta),ntracklayers,2});
-    float alpha = muon_cbparams->evaluate({abs(eta),ntracklayers,3});
-    float kDATA = muon_kdata->evaluate({abs(eta),"nom"});
-    float kMC = muon_kmc->evaluate({abs(eta),"nom"});
-    float polyparam0 = muon_polyparams->evaluate({abs(eta),ntracklayers,0});
-    float polyparam1 = muon_polyparams->evaluate({abs(eta),ntracklayers,1});
-    float polyparam2 = muon_polyparams->evaluate({abs(eta),ntracklayers,2});
-    float std = polyparam0+pt*polyparam1+pt*pt*polyparam2;
-    float kfactor=0;
-    if(kDATA>kMC) kfactor=sqrt(kDATA*kDATA-kMC*kMC);
-    float rndm = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
-    pt*=(1+kfactor*std*rndm); // Momentum smearing correction
+    float mean         = muon_cbparams->evaluate({abs(eta),ntracklayers,0});
+    float sigma        = muon_cbparams->evaluate({abs(eta),ntracklayers,1});
+    float n            = muon_cbparams->evaluate({abs(eta),ntracklayers,2});
+    float alpha        = muon_cbparams->evaluate({abs(eta),ntracklayers,3});
+    float kDATA        = muon_kdata->evaluate({abs(eta),"nom"});
+    float kMC          = muon_kmc->evaluate({abs(eta),"nom"});
+    float polyparam0   = muon_polyparams->evaluate({abs(eta),ntracklayers,0});
+    float polyparam1   = muon_polyparams->evaluate({abs(eta),ntracklayers,1});
+    float polyparam2   = muon_polyparams->evaluate({abs(eta),ntracklayers,2});
+    float std          = polyparam0+pt*polyparam1+pt*pt*polyparam2;
+    float kfactor      = 0.;
+    if(kDATA>kMC) kfactor = sqrt(kDATA*kDATA-kMC*kMC);
+    float rndm         = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
+    pt *= (1+kfactor*std*rndm); // Momentum smearing correction
 
     return true;
   }
   else return false;
 }
-*/
 
 Float_t m_T(Float_t leppt, Float_t metpt, Float_t lepphi, Float_t metphi){
     Float_t deltaphi = deltaPhi(lepphi,metphi);
@@ -427,4 +437,9 @@ string Run(TString file) {
     else year = "Run year wasn't found!";
 
     return year;
+}
+
+Bool_t isMC(TString file){
+  if(file.Contains("Summer2024")) return true;
+  else return false;
 }

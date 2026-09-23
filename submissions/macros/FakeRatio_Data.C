@@ -418,53 +418,53 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Bool_t trigpath = (HLT_PFJet40_ || HLT_PFJet60_ || HLT_PFJet80_ || HLT_PFJet110_ || HLT_PFJet140_ || HLT_PFJet200_ || HLT_PFJet260_ || HLT_PFHT180_ || HLT_PFHT250_ || HLT_PFHT350_);
     if(!METfilters || !trigpath) continue;
 
-	Int_t ntaus=0, neles=0, nmuons=0;
+	  Int_t ntaus=0, neles=0, nmuons=0;
 
 	//-------------------------- TAU ----------------------------------------------------------------
-	Int_t ntaus_candidates = 0;
-	Int_t tau_idx_selected = -1;
+	  Int_t ntaus_candidates = 0;
+	  Int_t tau_idx_selected = -1;
 	
-	for(int j=0; j<ntaus_; j++){
+	  for(int j=0; j<ntaus_; j++){
 	    int vse   = static_cast<int>(tauidvse_[j]);
 	    int vsmu  = static_cast<int>(tauidvsmu_[j]);
 	    int vsjet = static_cast<int>(tauidvsjet_[j]);
 	    int DM    = static_cast<int>(tau_decay_[j]);
 	    if(DM==2 || DM==5 || DM==6) continue;
 	
-	    if(vsjet>= 4 && vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
+	    if(vsjet>=4 && vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
 	        ntaus_candidates++;
 	        if(tau_idx_selected < 0) tau_idx_selected = j;  // salva il primo trovato
 	    }
-	}
+	  }
 	
-	if(ntaus_candidates == 1){
+	  if(ntaus_candidates == 1){
 	    int j = tau_idx_selected;
 	    int vsjet = static_cast<int>(tauidvsjet_[j]);
 	
 	    Float_t mT = m_T(tau_pt_[j], met_pt_, tau_phi_[j], met_phi_);
 	    if(mT <= 50){
-	        if(vsjet>=4){
-	            h_tau_pt_den->Fill(tau_pt_[j]);
-	            h_tau_eta_den->Fill(tau_eta_[j]);
-	            h_tau_2d_den->Fill(tau_pt_[j], abs(tau_eta_[j]));
-	        }
-	        if(vsjet>=5){
-	            h_tau_pt_num->Fill(tau_pt_[j]);
-	            h_tau_eta_num->Fill(tau_eta_[j]);
-	            h_tau_2d_num->Fill(tau_pt_[j], abs(tau_eta_[j]));
-	        }
+	      if(vsjet>=4){
+	        h_tau_pt_den->Fill(tau_pt_[j]);
+          h_tau_eta_den->Fill(tau_eta_[j]);
+	        h_tau_2d_den->Fill(tau_pt_[j], abs(tau_eta_[j]));
+	      }
+	      if(vsjet>=5){
+	        h_tau_pt_num->Fill(tau_pt_[j]);
+	        h_tau_eta_num->Fill(tau_eta_[j]);
+          h_tau_2d_num->Fill(tau_pt_[j], abs(tau_eta_[j]));
+        }
 	    }
-	}
+	  }
  
 	//-------------------------- ELECTRON -----------------------------------------------------------
 	Int_t neles_candidates = 0;
 	Int_t ele_idx_selected = -1;
 	
 	for(int j=0; j<nelectrons_; j++){
-	    if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j] && ele_mvaid90_[j]){
-	        neles_candidates++;
-	        if(ele_idx_selected < 0) ele_idx_selected = j;
-	    }
+	  if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j] && ele_mvaid90_[j]){
+	      neles_candidates++;
+        if(ele_idx_selected < 0) ele_idx_selected = j;
+    }
 	}
 	
 	if(neles_candidates == 1){
@@ -489,29 +489,29 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	Int_t muon_idx_selected = -1;
 	
 	for(int j=0; j<nmuons_; j++){
-	    if(muon_pt_[j]>30 && abs(muon_eta_[j])<2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2 && muon_looseid_[j] && muon_isoscore_[j]<0.4){
-	        nmuons_candidates++;
-	        if(muon_idx_selected < 0) muon_idx_selected = j;
-	    }
+	  if(muon_pt_[j]>30 && abs(muon_eta_[j])<2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2 && muon_looseid_[j] && muon_isoscore_[j]<0.4){
+	    nmuons_candidates++;
+	    if(muon_idx_selected < 0) muon_idx_selected = j;
+	  }
 	}
 	
 	if(nmuons_candidates == 1){
-	    int j = muon_idx_selected;
-	    Float_t mT = m_T(muon_pt_[j], met_pt_, muon_phi_[j], met_phi_);
-	    if(mT <= 50){
-	        if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-	            h_muon_pt_den->Fill(muon_pt_[j]);
-	            h_muon_eta_den->Fill(muon_eta_[j]);
-	            h_muon_2d_den->Fill(muon_pt_[j], abs(muon_eta_[j]));
-	        }
-	        if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
-	            h_muon_pt_num->Fill(muon_pt_[j]);
-	            h_muon_eta_num->Fill(muon_eta_[j]);
-	            h_muon_2d_num->Fill(muon_pt_[j], abs(muon_eta_[j]));
-	        }
+	  int j = muon_idx_selected;
+	  Float_t mT = m_T(muon_pt_[j], met_pt_, muon_phi_[j], met_phi_);
+    if(mT <= 50){
+	    if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
+	      h_muon_pt_den->Fill(muon_pt_[j]);
+	      h_muon_eta_den->Fill(muon_eta_[j]);
+	      h_muon_2d_den->Fill(muon_pt_[j], abs(muon_eta_[j]));
 	    }
+	    if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
+	      h_muon_pt_num->Fill(muon_pt_[j]);
+	      h_muon_eta_num->Fill(muon_eta_[j]);
+	      h_muon_2d_num->Fill(muon_pt_[j], abs(muon_eta_[j]));
+	    }
+	  }
 	}
-
+  
 	//-----------------------------------------------------------------------------------------------
 	}
  
