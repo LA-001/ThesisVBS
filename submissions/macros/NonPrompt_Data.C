@@ -399,7 +399,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
 
     bool excflag = 0;
-	bool btagflag = 0;
+	  bool btagflag = 0;
     bool ismuon = false;
     Int_t ntaus=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
 
@@ -409,8 +409,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
 
     Bool_t istauL=false, islepL=false;
-	Bool_t istauT=false, islepT=false; 
-	Float_t taupt,taueta,leppt,lepeta; 
+	  Bool_t istauT=false, islepT=false; 
+	  Float_t taupt,taueta,leppt,lepeta; 
 
     //-------------------------- TAU ----------------------------------------------------------------
     
@@ -419,17 +419,17 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       int vsjet = static_cast<int>(tauidvsjet_[j]);
       int vse = static_cast<int>(tauidvse_[j]);
       int vsmu = static_cast<int>(tauidvsmu_[j]);
-	  int DM    = static_cast<int>(tau_decay_[j]);
-	  if(DM==2 || DM==5 || DM==6) continue;
+	    int DM    = static_cast<int>(tau_decay_[j]);
+	    if(DM==2 || DM==5 || DM==6) continue;
 
       if(vsjet>= 4 && vse>=6 && vsmu>=4 && tau_pt_[j]>20 && abs(tau_eta_[j])<2.3 && abs(tau_dz_[j])<0.2){
-	    ntaus++;
+        ntaus++;
         tauindex=j;
-		taucharge=tau_charge_[j];
-		p4tau = ROOT::Math::PtEtaPhiMVector(tau_pt_[j],tau_eta_[j],tau_phi_[j],tau_mass_[j]);
-		istauL = true;
-		taupt = tau_pt_[j];
-		taueta = tau_eta_[j];
+        taucharge=tau_charge_[j];
+        p4tau = ROOT::Math::PtEtaPhiMVector(tau_pt_[j],tau_eta_[j],tau_phi_[j],tau_mass_[j]);
+        istauL = true;
+        taupt = tau_pt_[j];
+        taueta = tau_eta_[j];
         if(vsjet>=5)  istauT = true;
       }
     }
@@ -447,78 +447,84 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           nelectrons++;
           eleindex = j;
           lepcharge = ele_charge_[j];
-	  	  p4lep = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
-		  islepL = true;
-		  leppt = ele_pt_[j];
-		  lepeta = ele_eta_[j];
-	      if(ele_mvaid80_[j])  islepT=true;
+	  	    p4lep = ROOT::Math::PtEtaPhiMVector(ele_pt_[j],ele_eta_[j],ele_phi_[j],ele_mass_[j]);
+		      islepL = true;
+		      leppt = ele_pt_[j];
+		      lepeta = ele_eta_[j];
+	        if(ele_mvaid80_[j])  islepT=true;
         }
       }
       
       for(int j=0; j<nmuons_; j++){
         if(muon_pt_[j]>30 && abs(muon_eta_[j])<2.4 && abs(muon_dxy_[j])<0.1 && abs(muon_dz_[j])<0.2 && muon_looseid_[j] && muon_isoscore_[j]<0.4){
           nmuons++;
-	  	  muindex = j;
-	  	  lepcharge = muon_charge_[j];
-	  	  p4lep = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
-		  islepL = true;
-		  leppt = muon_pt_[j];
-		  lepeta = muon_eta_[j];
-		  if(muon_mediumid_[j] && muon_isoscore_[j]<0.15) islepT = true;
-         }
-       }
+	  	    muindex = j;
+	  	    lepcharge = muon_charge_[j];
+	  	    p4lep = ROOT::Math::PtEtaPhiMVector(muon_pt_[j],muon_eta_[j],muon_phi_[j],muon_mass_[j]);
+		      islepL = true;
+		      leppt = muon_pt_[j];
+		      lepeta = muon_eta_[j];
+		      if(muon_mediumid_[j] && muon_isoscore_[j]<0.15) islepT = true;
+        }
+      }
 
 		//----------------------- Veto on additional Loose leptons -------------------------------------
 
-		for(int i=0; i<nelectrons_; i++){
-  		  if(i==eleindex) continue;
-  		  if(ele_pt_[i] > 10 && abs(ele_eta_[i]) < 2.4 && static_cast<int>(ele_id_[i])>=1) excflag=1;
- 		}
-		for(int i=0; i<nmuons_; i++){
-  		  if(i==muindex) continue;
-  		  if(muon_pt_[i] > 10 && abs(muon_eta_[i]) < 2.4 && muon_looseid_[i]) excflag=1;
- 		}
+      for(int i=0; i<nelectrons_; i++){
+        if(i==eleindex) continue;
+        if(ele_pt_[i] > 10 && abs(ele_eta_[i]) < 2.4 && static_cast<int>(ele_id_[i])>=1) excflag=1;
+      }
+      for(int i=0; i<nmuons_; i++){
+        if(i==muindex) continue;
+        if(muon_pt_[i] > 10 && abs(muon_eta_[i]) < 2.4 && muon_looseid_[i]) excflag=1;
+      }
 
 		//----------------------------------------------------------------------------------------------
 
-	    if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-	  	  if(nmuons==1){ 
-	      typeevent=1; 
-	      ismuon = true;
-	    }else{ 
-	        typeevent=2;
-	      }
-	   	}
-
-		if(deltaR(p4tau,p4lep) < 0.4) excflag = 1; 
-      
-        for(int j=0; j<njets_; j++){	
-		  ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-		  if(deltaR(p4jet,p4tau) < 0.4) continue;
-		  if(deltaR(p4jet,p4lep) < 0.4) continue;     
-		
-		  if(jet_pt_[j]>30 && abs(jet_eta_[j])<5.1){
-			if(cfg.jetvetomap->evaluate({"jetvetomap",jet_eta_[j],jet_phi_[j]})) continue;
-	        if(jet_pt_[j]<=50 && abs(jet_eta_[j])>2.5 && abs(jet_eta_[j])<3) continue;
-			if(!JetIdTightLepVeto(jet_eta_[j], jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j])) continue;
-			if(jet_btag_[j] >= WP_M && abs(jet_eta_[j]) < 2.5)	btagflag = true;
-	
-		  	njets++;
-		  	if(njets==1){
-			  p4jet1 = ROOT::Math::PtEtaPhiMVector(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-			}else if(njets==2){
-			  p4jet2 = ROOT::Math::PtEtaPhiMVector(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-			}
-		  }
+      if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
+        if(nmuons==1){ 
+          typeevent=1; 
+          ismuon = true;
+        }else{ 
+          typeevent=2;
         }
-	}
+      }
+
+		  if(deltaR(p4tau,p4lep) < 0.4) excflag = 1; 
+      
+      for(int j=0; j<njets_; j++){	
+		    ROOT::Math::PtEtaPhiMVector p4jet(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+		    if(deltaR(p4jet,p4tau) < 0.4) continue;
+		    if(deltaR(p4jet,p4lep) < 0.4) continue;
+        
+        Float_t phi = jet_phi_[j];
+        JetPhi(phi);
+
+		    if(jet_pt_[j]>30 && abs(jet_eta_[j])<5.1){
+          if(jet_pt_[j]<=50 && abs(jet_eta_[j])>2.5 && abs(jet_eta_[j])<3) continue;
+          bool jetid = jet_id_tight_lepveto->evaluate({abs(jet_eta_[j]), jet_chHEF_[j], jet_neHEF_[j], jet_chEmEF_[j], jet_neEmEF_[j], jet_muEF_[j], jet_chMultiplicity_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j]+jet_neMultiplicity_[j]});
+          if(!jetid) continue;
+
+          njets++;
+
+          bool isvetomap = cfg.jetvetomap->evaluate({"jetvetomap",jet_eta_[j],phi});
+          if((jet_chEmEF_[j] + jet_neEmEF_[j])<0.9 && isvetomap){
+            excflag = 1;
+            break;
+          }
+
+          if(jet_btag_[j] >= btag_thr_ && abs(jet_eta_[j]) < 2.5)	btagflag = true;
+    
+          if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+          else if(njets==2) p4jet2 = ROOT::Math::PtEtaPhiMVector(jet_pt_[j],jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+		    }
+      }
+	  }
     
     bool trigpath=false; 
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
-    if(!istauL && !islepL) excflag=1;
-	if(istauT && islepT) excflag=1;
-	//if(!istauT || !islepT) excflag=1;			//For real data selection
+    if(!istauL || !islepL) excflag=1;
     
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
 
@@ -530,32 +536,32 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       float mvis = p4leps.M();
 
       O_istauT   = istauT;
-	  O_islepT   = islepT;
+	    O_islepT   = islepT;
       O_ismuon   = ismuon;
 
       O_taupt    = p4tau.Pt();
-	  O_taueta   = p4tau.Eta();
-	  O_tauphi   = p4tau.Phi();
+	    O_taueta   = p4tau.Eta();
+	    O_tauphi   = p4tau.Phi();
 
       O_leppt    = p4lep.Pt();
-	  O_lepeta   = p4lep.Eta();
-	  O_lepphi   = p4lep.Phi();
+	    O_lepeta   = p4lep.Eta();
+	    O_lepphi   = p4lep.Phi();
 
-	  O_jet1eta  = p4jet1.Eta();
+	    O_jet1eta  = p4jet1.Eta();
       O_jet1phi  = p4jet1.Phi();
       O_jet2eta  = p4jet2.Eta();
       O_jet2phi  = p4jet2.Phi();
 
-	  O_mjj      = mjj;
+	    O_mjj      = mjj;
       O_mvis     = mvis;
       O_deltaRjj = deltaRjj;
-	  O_metpt    = met_pt_;
-	  O_metphi   = met_phi_;
+	    O_metpt    = met_pt_;
+	    O_metphi   = met_phi_;
       O_njets    = njets;
 
-	  outtree->Fill();
+	    outtree->Fill();
     }
- }
+  }
 
   outtree->Write(); 
   f->Close();

@@ -54,6 +54,7 @@ auto lightjet_SF     = bjet_c_set->at("UParTAK4_light");
 auto btag_thr_getter = bjet_c_set->at("UParTAK4_wp_values"); 
 float btag_thr_      = btag_thr_getter->evaluate({"M"});
 
+
 //------------- Electron SFs ----------------------------------------------------
 string ele_idfile  = "jsons/electron.json.gz";
 auto ele_c_set     = CorrectionSet::from_file(ele_idfile);
@@ -67,6 +68,7 @@ string ele_ssfile  = "jsons/electronSS_EtDependent.json.gz";
 auto ele_ss_c_set  = CorrectionSet::from_file(ele_ssfile);
 auto ele_scale     = ele_ss_c_set->at("EGMScale_ElePT_2024");     //???
 auto ele_smearing  = ele_ss_c_set->at("EGMSmearAndSyst_ElePT_2024");  //???
+
 
 //------------- Muon SFs --------------------------------------------------------
 string muon_idfile   = "jsons/muon_Z.json.gz";
@@ -88,6 +90,7 @@ auto muon_kdata      = muon_ss_c_set->at("k_data");
 auto muon_kmc        = muon_ss_c_set->at("k_mc");
 auto muon_polyparams = muon_ss_c_set->at("poly_params");
 
+
 //------------- Tau SFs ---------------------------------------------------------
 string tau_idfile    = "jsons/tau.json.gz";
 auto tau_c_set       = CorrectionSet::from_file(tau_idfile);
@@ -95,6 +98,7 @@ auto tau_SFvsjet     = tau_c_set->at("DeepTau2018v2p5VSjet");
 auto tau_SFvse       = tau_c_set->at("DeepTau2018v2p5VSe");
 auto tau_SFvsmu      = tau_c_set->at("DeepTau2018v2p5VSmu");
 auto tau_energyscale = tau_c_set->at("tau_energy_scale");
+
 
 //-----------------------------------------------------------------------------------------------------------------------------
 
@@ -126,6 +130,13 @@ Float_t deltaPhi(const Float_t& phi1, const Float_t &phi2) {
   while (result > M_PI) result -= 2*M_PI;
   while (result <= -M_PI) result += 2*M_PI;
   return result;
+}
+
+void JetPhi(Float_t &phi){  // Safeguard against cases where the phi is not in the range of the vetomap corrections
+  if(abs(phi)>3.141592653589793){ 
+    if(std::signbit(phi)) phi+=6.2831853;
+    else phi-=6.2831853;
+  }
 }
 
 double deltaR(const ROOT::Math::PtEtaPhiMVector &a, const ROOT::Math::PtEtaPhiMVector &b){
@@ -257,10 +268,7 @@ Bool_t MuonSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dx
 
 Bool_t JetSelector(Float_t &pt, Float_t eta, Float_t &phi, Float_t rawfactor, Float_t rhocalo, Float_t neHEF, Float_t neEmEF, Float_t chEmEF, Float_t muEF, Float_t chHEF, Int_t neMultiplicity, Int_t chMultiplicity){
   if(abs(eta)<5.1){
-    if(abs(phi)>3.141592653589793){ // Safeguard against cases where the phi is not in the range of the vetomap corrections
-      if(std::signbit(phi)) phi+=6.2831853;
-      else phi-=6.2831853;
-    }
+    JetPhi(phi);
 
     pt *= (1-rawfactor);
     pt *= JEC_L2MC->evaluate({eta,phi,pt}); // Jet pt scale correction

@@ -519,11 +519,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         if(deltaR(p4jet,p4lep)<0.4) continue;
 
         Float_t jetpt = jet_pt_[j];
-        Bool_t pass = JetSelector(jetpt,jet_eta_[j],jet_phi_[j],jet_raw_[j],rho_calo_, jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j]);
+        Float_t jetphi = jet_phi_[j];
+        Bool_t pass = JetSelector(jetpt,jet_eta_[j],jetphi,jet_raw_[j],rho_calo_, jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j]);
         if(pass) {
           njets++;
 
-          bool isvetomap = cfg.jetvetomap->evaluate({"jetvetomap",jet_eta_[j],jet_phi_[j]});
+          bool isvetomap = cfg.jetvetomap->evaluate({"jetvetomap",jet_eta_[j],jetphi});
           if ((jet_chEmEF_[j] + jet_neEmEF_[j])<0.9 && isvetomap){
             excflag = 1;
             break;
