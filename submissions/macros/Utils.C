@@ -271,7 +271,7 @@ Bool_t JetSelector(Float_t &pt, Float_t eta, Float_t &phi, Float_t rawfactor, Fl
     pt *= 1+ran*sqrt(JERSF*JERSF-1);
 
     bool jetid = jet_id_tight_lepveto->evaluate({abs(eta), chHEF, neHEF, chEmEF, neEmEF, muEF, chMultiplicity, neMultiplicity, chMultiplicity+neMultiplicity});
-    
+
     if(!jetid) return false;
     if(pt<=50 && abs(eta)>2.5 && abs(eta)<3) return false;    // spikes in that abs(eta) range (for 2025 it should be resolved)    
     
