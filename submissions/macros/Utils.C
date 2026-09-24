@@ -256,15 +256,12 @@ Bool_t MuonSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dx
   else return false;
 }
 
-Bool_t JetSelector(string year, Float_t &pt, Float_t eta, Float_t &phi, Float_t rawfactor, Float_t rhocalo,
-                  Float_t neHEF, Float_t neEmEF, Float_t chEmEF, Float_t muEF, Float_t chHEF, Int_t neMultiplicity, Int_t chMultiplicity){
+Bool_t JetSelector(Float_t &pt, Float_t eta, Float_t &phi, Float_t rawfactor, Float_t rhocalo, Float_t neHEF, Float_t neEmEF, Float_t chEmEF, Float_t muEF, Float_t chHEF, Int_t neMultiplicity, Int_t chMultiplicity){
   if(abs(eta)<5.1){
     if(abs(phi)>3.141592653589793){ // Safeguard against cases where the phi is not in the range of the vetomap corrections
       if(std::signbit(phi)) phi+=6.2831853;
       else phi-=6.2831853;
     }
-    bool jetveto = YearConfig_map[year].jetvetomap->evaluate({"jetvetomap",eta,phi});
-    if(jetveto) return false;
 
     pt *= (1-rawfactor);
     pt *= JEC_L2MC->evaluate({eta,phi,pt}); // Jet pt scale correction
@@ -273,11 +270,11 @@ Bool_t JetSelector(string year, Float_t &pt, Float_t eta, Float_t &phi, Float_t 
     float JERSF = JER_SF->evaluate({eta,pt});
     pt *= 1+ran*sqrt(JERSF*JERSF-1);
 
-    if(pt<=50 && abs(eta)>2.5 && abs(eta)<3) return false;    // spikes in that abs(eta) range (for 2025 it should be resolved)
-
     bool jetid = jet_id_tight_lepveto->evaluate({abs(eta), chHEF, neHEF, chEmEF, neEmEF, muEF, chMultiplicity, neMultiplicity, chMultiplicity+neMultiplicity});
+    
     if(!jetid) return false;
-
+    if(pt<=50 && abs(eta)>2.5 && abs(eta)<3) return false;    // spikes in that abs(eta) range (for 2025 it should be resolved)    
+    
     if(pt>30) return true;
     else return false;
   }
