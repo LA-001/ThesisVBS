@@ -185,8 +185,7 @@ Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_
     int source = static_cast<int>(source_);
 
     //Scale factor for genuine taus
-    if(pt <= 140.) weight *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","dm"});
-    else if(pt > 140.) weight *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","pt"});
+    weight *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","dm"});
 
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
@@ -335,14 +334,8 @@ Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UCh
     int source = static_cast<int>(source_);
 
     //Scale factor for genuine taus
-    if(pt <= 140.){
-      weight_den *= tau_SFvsjet->evaluate({pt,DM,source,"Loose","Tight","nom","dm"});
-      weight_num *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","dm"});
-    }
-    else if(pt > 140.){
-      weight_den *= tau_SFvsjet->evaluate({pt,DM,source,"Loose","Tight","nom","pt"});
-      weight_num *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","pt"});     
-    }
+    weight_den *= tau_SFvsjet->evaluate({pt,DM,source,"Loose","Tight","nom","dm"});
+    weight_num *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","dm"});
 
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
