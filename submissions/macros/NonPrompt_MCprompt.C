@@ -567,7 +567,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
     if(!istauL || !islepL) excflag=1;
-	  if(istauT && islepT) excflag=1;
 
 	  // The lepton (both tau and lep) Loose but not Tight must be prompt 
 	  if(!istauT){
