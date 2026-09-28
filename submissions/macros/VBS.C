@@ -527,6 +527,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         if(pass) {
           njets++;
           
+          bool isvetomap = cfg.jetvetomap->evaluate({"jetvetomap",jet_eta_[j],jetphi});
           if ((jet_chEmEF_[j] + jet_neEmEF_[j])<0.9 && isvetomap){
             excflag = 1;
             break;
