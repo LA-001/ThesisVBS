@@ -49,7 +49,7 @@ std::array<decltype(JEC_c_set->begin()->second), 27> jec_syst = {{
     JEC_c_set->at(MCera+"_V1_MC_PileUpPtEC1_AK4PFPuppi"),
     JEC_c_set->at(MCera+"_V1_MC_PileUpPtEC2_AK4PFPuppi"),
     JEC_c_set->at(MCera+"_V1_MC_PileUpPtHF_AK4PFPuppi")
-  }};
+}};
 
 string JET_vetomap_2023 = "jsons/jetvetomaps_2023BPix.json.gz";
 auto JETveto_c_set_2023 = CorrectionSet::from_file(JET_vetomap_2023);

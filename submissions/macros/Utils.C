@@ -200,7 +200,7 @@ Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_
 
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
-      weight *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","VTight","nom"});
+      weight *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Tight","nom"});
     }
     else if(source==1 || source==3) {
       weight *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
