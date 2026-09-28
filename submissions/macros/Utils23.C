@@ -63,11 +63,9 @@ string JET_vetomap_2025 = "jsons/jetvetomaps_2025.json.gz";
 auto JETveto_c_set_2025 = CorrectionSet::from_file(JET_vetomap_2025);
 auto JET_veto_2025      = JETveto_c_set_2025->at("Summer24Prompt25_RunCDEFG_V1");
 
-string pu_file= "jsons/puWeights_2023BPix.json.gz";
-string pucorr="Collisions2023_369803_370790_eraD_GoldenJson";
-auto pu_c_set = CorrectionSet::from_file(pu_file);
-
-auto pu_SF = pu_c_set->at(pucorr);
+string pu_file = "jsons/puWeights_BCDEFGHI.json.gz";
+auto pu_c_set  = CorrectionSet::from_file(pu_file);
+auto pu_SF     = pu_c_set->at("Collisions24_BCDEFGHI_goldenJSON");
 
 string bjet_file     = "jsons/btagging.json.gz";
 auto bjet_c_set      = CorrectionSet::from_file(bjet_file);                                                                                                                                                    
