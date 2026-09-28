@@ -69,21 +69,20 @@ auto pu_c_set = CorrectionSet::from_file(pu_file);
 
 auto pu_SF = pu_c_set->at(pucorr);
 
-string bjet_file= "jsons/btagging_2023BPix.json.gz";
-auto bjet_c_set = CorrectionSet::from_file(bjet_file);
-auto bjet_SF = bjet_c_set->at("deepJet_comb"); //deepJet                                                                                                                                                    
-auto lightjet_SF = bjet_c_set->at("deepJet_light");
-auto bjet_shape = bjet_c_set->at("deepJet_shape");
+string bjet_file     = "jsons/btagging.json.gz";
+auto bjet_c_set      = CorrectionSet::from_file(bjet_file);                                                                                                                                                    
+auto bjet_SF         = bjet_c_set->at("UParTAK4_comb");                                                                                                                                                    
+auto lightjet_SF     = bjet_c_set->at("UParTAK4_light");      
 
-auto btag_thr_getter=bjet_c_set->at("deepJet_wp_values");
-float btag_thr_=btag_thr_getter->evaluate({"L"});
+auto btag_thr_getter = bjet_c_set->at("UParTAK4_wp_values"); 
+float btag_thr_      = btag_thr_getter->evaluate({"M"});
 
 string ele_idfile = "jsons/electron_2023BPix.json.gz";
 auto ele_c_set = CorrectionSet::from_file(ele_idfile);
 auto ele_SF= ele_c_set->at("Electron-ID-SF");
 
 string ele_ssfile = "jsons/electronSS.json.gz";
-string ele_HLTfile = "jsons_archive_2023/electronHlt_2023BPix.json.gz";
+string ele_HLTfile = "jsons/electronHlt_2023BPix.json.gz";
 string scalecset = "2022Re-recoE+PromptFG_ScaleJSON";
 string smearingcset = "2022Re-recoE+PromptFG_SmearingJSON";
 auto ele_HLT_c_set = CorrectionSet::from_file(ele_HLTfile);
