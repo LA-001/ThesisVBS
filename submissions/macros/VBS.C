@@ -33,6 +33,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   TTree *outtree = new TTree("outtree", "outtree");
 
+  gRandom->SetSeed(1234);
+
   Int_t O_njets, O_sample;
   Float_t O_mvis, O_taupt, O_taueta, O_leppt, O_mjj, O_deltaRjj;
   Float_t O_tauphi, O_lepeta, O_lepphi, O_metpt, O_metphi;
@@ -422,6 +424,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   YearConfig cfg = YearConfig_map[year];
 
+  double wBase=0, wPU=0, wTau=0, wTau1=0, wEle=0, wMu=0; 
+
   for (Long64_t i = 0; i < numEntries; ++i) {
     
     tree->GetEntry(i);
@@ -433,8 +437,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(!METfilters) excflag=1;
 
     Float_t weight_=genweight_*weightscale_;
-
+    
+    wBase += weight_;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
+    weightPU += weight_;
 
     Int_t lepton=0, jets;
 
@@ -458,6 +464,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         if(vsjet >= 7) isvsjetVT = true;
       }
     }
+
+    weightTau += weight_;
         
     int typeevent=0; //1=mutauh, 2=eletauh
     int eleindex=200;
@@ -475,6 +483,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             p4lep = ROOT::Math::PtEtaPhiMVector(elept,ele_eta_[eleindex],ele_phi_[eleindex],ele_mass_[eleindex]);
         }
     	}
+
+      weightEle += weight_;
       
     	for(int j=0; j<nmuons_; j++){
         Float_t muonpt = muon_pt_[j];
@@ -486,6 +496,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           p4lep = ROOT::Math::PtEtaPhiMVector(muonpt,muon_eta_[muindex],muon_phi_[muindex],muon_mass_[muindex]);
         }
     	}
+
+      weightMu += weight_;
 
 		//----------------------- Veto on additional Loose leptons -------------------------------------
 
@@ -577,7 +589,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       outtree->Fill();
 
     }
- }
+  }
+
+  // dopo il loop
+  cout << "<SF pileup> = " << wPU/wBase  << endl;
+  cout << "<SF tau>    = " << wTau/wPU   << endl;
+  cout << "<SF ele>    = " << wEle/wTau1 << endl;
+  cout << "<SF mu>     = " << wMu/wEle   << endl;
   
   outtree->Write();
 
