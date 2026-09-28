@@ -20,7 +20,7 @@ using namespace std;
 #include "correction.h"
 using correction::CorrectionSet;
 
-#include "Utils23.C"
+#include "Utils.C"
 
 void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   cout << "VERSIONE: 28-set, prova SF" << endl;
@@ -425,8 +425,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   YearConfig cfg = YearConfig_map[year];
 
-  double wBase=0, wPU=0, wTau=0, wTau1=0, wEle=0, wMu=0; 
-
   for (Long64_t i = 0; i < numEntries; ++i) {
     
     tree->GetEntry(i);
@@ -439,9 +437,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     Float_t weight_=genweight_*weightscale_;
 
-    wBase += weight_;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
-    wPU += weight_;
 
     Int_t lepton=0, jets;
 
@@ -465,16 +461,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         if(vsjet >= 7) isvsjetVT = true;
       }
     }
-
-    wTau += weight_;
         
     int typeevent=0; //1=mutauh, 2=eletauh
     int eleindex=200;
     int muindex=200;
       
     if(ntaus == 1){
-
-      wTau1 += weight_;
 
     	for(int j=0; j<nelectrons_; j++){
         Float_t elept = ele_pt_[j];
@@ -486,8 +478,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             p4lep = ROOT::Math::PtEtaPhiMVector(elept,ele_eta_[eleindex],ele_phi_[eleindex],ele_mass_[eleindex]);
         }
     	}
-
-      wEle += weight_;
       
     	for(int j=0; j<nmuons_; j++){
         Float_t muonpt = muon_pt_[j];
@@ -499,8 +489,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           p4lep = ROOT::Math::PtEtaPhiMVector(muonpt,muon_eta_[muindex],muon_phi_[muindex],muon_mass_[muindex]);
         }
     	}
-
-      wMu += weight_;
 
 		//----------------------- Veto on additional Loose leptons -------------------------------------
 
@@ -537,15 +525,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         Float_t jetphi = jet_phi_[j];
         Bool_t pass = JetSelector(jetpt,jet_eta_[j],jetphi,jet_raw_[j],rho_calo_, jet_neHEF_[j], jet_neEmEF_[j], jet_chEmEF_[j], jet_muEF_[j], jet_chHEF_[j], jet_neMultiplicity_[j], jet_chMultiplicity_[j]);
         if(pass) {
-          bool isvetomap = cfg.jetvetomap->evaluate({"jetvetomap",jet_eta_[j],jetphi});
-          if(isvetomap) continue;
-
           njets++;
-          /*
+          
           if ((jet_chEmEF_[j] + jet_neEmEF_[j])<0.9 && isvetomap){
             excflag = 1;
             break;
-          }*/
+          }
+
           if(jet_btag_[j] >= btag_thr_ && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
 
           if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
@@ -594,12 +580,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     }
   }
 
-  // dopo il loop
-  cout << "<SF pileup> = " << wPU/wBase  << endl;
-  cout << "<SF tau>    = " << wTau/wPU   << endl;
-  cout << "<SF ele>    = " << wEle/wTau1 << endl;
-  cout << "<SF mu>     = " << wMu/wEle   << endl;
-  
   outtree->Write();
 
   f->Close();
