@@ -192,22 +192,22 @@ Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_
   int vsmu = static_cast<int>(vsmu_);
   int vsjet = static_cast<int>(vsjet_);
 
-  if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and vsjet>=5 and abs(dz)<0.2){
+  if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and vsjet>=7 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
 
     //Scale factor for genuine taus
-    weight *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","dm"});
+    weight *= tau_SFvsjet->evaluate({pt,DM,source,"VTight","Tight","nom","dm"});
 
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
-      weight *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Medium","nom"});
+      weight *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","VTight","nom"});
     }
     else if(source==1 || source==3) {
       weight *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
     }
     //Energy scale correction
     else if(source==5){
-      pt *= tau_energyscale->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","Medium","Tight","nom"});  
+      pt *= tau_energyscale->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","VTight","Tight","nom"});  
     }
     return true;
   }
