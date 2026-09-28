@@ -23,6 +23,7 @@ using correction::CorrectionSet;
 #include "Utils23.C"
 
 void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
+  cout << "VERSIONE: 28-set, prova SF" << endl;
   //TString filename = "root://cms-xrd-global.cern.ch/" + srcfile;
   TString filename = "root://xrootd-cms.infn.it/" + srcfile;
   TFile *f = TFile::Open(filename);
@@ -437,10 +438,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(!METfilters) excflag=1;
 
     Float_t weight_=genweight_*weightscale_;
-    
+
     wBase += weight_;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
-    weightPU += weight_;
+    wPU += weight_;
 
     Int_t lepton=0, jets;
 
@@ -465,13 +466,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       }
     }
 
-    weightTau += weight_;
+    wTau += weight_;
         
     int typeevent=0; //1=mutauh, 2=eletauh
     int eleindex=200;
     int muindex=200;
       
     if(ntaus == 1){
+
+      wTau1 += weight_;
 
     	for(int j=0; j<nelectrons_; j++){
         Float_t elept = ele_pt_[j];
@@ -484,7 +487,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         }
     	}
 
-      weightEle += weight_;
+      wEle += weight_;
       
     	for(int j=0; j<nmuons_; j++){
         Float_t muonpt = muon_pt_[j];
@@ -497,7 +500,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         }
     	}
 
-      weightMu += weight_;
+      wMu += weight_;
 
 		//----------------------- Veto on additional Loose leptons -------------------------------------
 
