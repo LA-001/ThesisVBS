@@ -9,7 +9,7 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-string JEC_json = "jsons_archive_2023/jet_jerc_2023BPix.json.gz";
+string JEC_json = "jsons/jet_jerc_2023BPix.json.gz";
 auto JEC_c_set = CorrectionSet::from_file(JEC_json);
 
 string MCera="Summer23BPixPrompt23";
@@ -63,13 +63,13 @@ string JET_vetomap_2025 = "jsons/jetvetomaps_2025.json.gz";
 auto JETveto_c_set_2025 = CorrectionSet::from_file(JET_vetomap_2025);
 auto JET_veto_2025      = JETveto_c_set_2025->at("Summer24Prompt25_RunCDEFG_V1");
 
-string pu_file= "jsons_archive_2023/puWeights_2023BPix.json.gz";
+string pu_file= "jsons/puWeights_2023BPix.json.gz";
 string pucorr="Collisions2023_369803_370790_eraD_GoldenJson";
 auto pu_c_set = CorrectionSet::from_file(pu_file);
 
 auto pu_SF = pu_c_set->at(pucorr);
 
-string bjet_file= "jsons_archive_2023/btagging_2023BPix.json.gz";
+string bjet_file= "jsons/btagging_2023BPix.json.gz";
 auto bjet_c_set = CorrectionSet::from_file(bjet_file);
 auto bjet_SF = bjet_c_set->at("deepJet_comb"); //deepJet                                                                                                                                                    
 auto lightjet_SF = bjet_c_set->at("deepJet_light");
@@ -78,11 +78,11 @@ auto bjet_shape = bjet_c_set->at("deepJet_shape");
 auto btag_thr_getter=bjet_c_set->at("deepJet_wp_values");
 float btag_thr_=btag_thr_getter->evaluate({"L"});
 
-string ele_idfile = "jsons_archive_2023/electron_2023BPix.json.gz";
+string ele_idfile = "jsons/electron_2023BPix.json.gz";
 auto ele_c_set = CorrectionSet::from_file(ele_idfile);
 auto ele_SF= ele_c_set->at("Electron-ID-SF");
 
-string ele_ssfile = "jsons_archive_2023/electronSS.json.gz";
+string ele_ssfile = "jsons/electronSS.json.gz";
 string ele_HLTfile = "jsons_archive_2023/electronHlt_2023BPix.json.gz";
 string scalecset = "2022Re-recoE+PromptFG_ScaleJSON";
 string smearingcset = "2022Re-recoE+PromptFG_SmearingJSON";
@@ -92,9 +92,9 @@ auto ele_HLT= ele_HLT_c_set->at("Electron-HLT-SF");
 auto ele_scale= ele_ss_c_set->at(scalecset);
 auto ele_smearing= ele_ss_c_set->at(smearingcset);
 
-string muon_idfile = "jsons_archive_2023/muon_2023BPix.json.gz";
-string muon_HLTfile = "jsons_archive_2023/MuTri_2023BPix.json.gz";
-string muon_ssfile = "jsons_archive_2023/muon_scalesmearing_Summer23BPix.json.gz";
+string muon_idfile = "jsons/muon_2023BPix.json.gz";
+string muon_HLTfile = "jsons/MuTri_2023BPix.json.gz";
+string muon_ssfile = "jsons/muon_scalesmearing_Summer23BPix.json.gz";
 auto muon_c_set = CorrectionSet::from_file(muon_idfile);
 auto muon_HLT_c_set = CorrectionSet::from_file(muon_HLTfile);
 auto muon_ss_c_set = CorrectionSet::from_file(muon_ssfile);
@@ -110,9 +110,9 @@ auto muon_kdata = muon_ss_c_set->at("k_data");
 auto muon_kmc = muon_ss_c_set->at("k_mc");
 auto muon_polyparams = muon_ss_c_set->at("poly_params");
 
-string tau_idfile = "jsons_archive_2023/tau_DeepTau2018v2p5_2023_postBPix_FIXED.json.gz";
-string tau_idfile2 = "jsons_archive_2023/test_tau_pt-dm_2023_postBPix.json.gz";
-string tes_file = "jsons_archive_2023/test_tes_tau_pt-dm_2023_postBPix.json.gz";
+string tau_idfile = "jsons/tau_DeepTau2018v2p5_2023_postBPix_FIXED.json.gz";
+string tau_idfile2 = "jsons/test_tau_pt-dm_2023_postBPix.json.gz";
+string tes_file = "jsons/test_tes_tau_pt-dm_2023_postBPix.json.gz";
 auto tau_c_set = CorrectionSet::from_file(tau_idfile);
 auto tau_c_set2 = CorrectionSet::from_file(tau_idfile2);
 auto tes_c_set = CorrectionSet::from_file(tes_file);
@@ -123,7 +123,7 @@ auto tau_SFvse= tau_c_set->at("DeepTau2018v2p5VSe");
 auto tau_SFvsmu= tau_c_set->at("DeepTau2018v2p5VSmu");
 auto tau_energyscale= tau_c_set->at("tau_energy_scale");
 
-string DY_ptfile = "jsons_archive_2023/DY_pTll_weights_2023postBPix.json.gz";
+string DY_ptfile = "jsons/DY_pTll_weights_2023postBPix.json.gz";
 auto DY_c_set = CorrectionSet::from_file(DY_ptfile);
 auto DY_SF= DY_c_set->at("DY_pTll_reweighting");
 
