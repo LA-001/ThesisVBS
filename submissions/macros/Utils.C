@@ -32,7 +32,7 @@ auto JEC_L2MC             = JEC_c_set->at("Summer24Prompt24_V5_MC_L2Relative_AK4
 auto JER                  = JEC_c_set->at("Summer24Prompt24_JRV2_MC_PtResolution_AK4PFPuppi");
 auto JER_SF               = JEC_c_set->at("Summer24Prompt24_JRV2_MC_ScaleFactor_AK4PFPuppi");
 
-auto jet_idfile           = "jsons/jetid.json.gz";
+string jet_idfile           = "jsons/jetid.json.gz";
 auto jet_id_c_set         = CorrectionSet::from_file(jet_idfile);
 auto jet_id_tight_lepveto = jet_id_c_set->at("AK4PUPPI_TightLeptonVeto");
 auto jet_id_tight         = jet_id_c_set->at("AK4PUPPI_Tight");

@@ -127,6 +127,11 @@ string DY_ptfile = "jsons_archive_2023/DY_pTll_weights_2023postBPix.json.gz";
 auto DY_c_set = CorrectionSet::from_file(DY_ptfile);
 auto DY_SF= DY_c_set->at("DY_pTll_reweighting");
 
+string jet_idfile           = "jsons/jetid.json.gz";
+auto jet_id_c_set         = CorrectionSet::from_file(jet_idfile);
+auto jet_id_tight_lepveto = jet_id_c_set->at("AK4PUPPI_TightLeptonVeto");
+auto jet_id_tight         = jet_id_c_set->at("AK4PUPPI_Tight");
+
 
 //-----------------------------------------------------------------------------------------------------------------------------
 
@@ -247,8 +252,9 @@ Bool_t ElectronSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_
     weight*=ele_HLT->evaluate({"2023PromptD","sf","HLT_SF_Ele30_MVAiso80ID",eta,pt}); //Trigger SF
     weight*=ele_SF->evaluate({"2023PromptD","sf","wp80iso",eta,pt,phi}); //ID SF
 
-    if(pt<75) {
-      weight*=ele_SF->evaluate({"2023PromptD","sf","Reco20to75",eta,pt,phi}); //reco SF    }
+    if(pt<75){
+      weight*=ele_SF->evaluate({"2023PromptD","sf","Reco20to75",eta,pt,phi}); //reco SF    
+    }
     else {
       weight*=ele_SF->evaluate({"2023PromptD","sf","RecoAbove75",eta,pt,phi});
     }
