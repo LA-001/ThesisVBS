@@ -428,7 +428,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     Int_t lepton=0, jets;
 
-    Int_t ntaus=0, nbtags=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
+    Int_t ntaus=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
     Float_t selectedtaupt=0., selectedleppt=0.;
 	  Int_t jet1index = -1, jet2index = -1;
 	  Bool_t ismuon = true;
@@ -531,7 +531,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           if(TMath::Abs(jet_eta_[j]) < 2.5){
             int jetflav = static_cast<int>(jet_flav_[j]);
             events_den.push_back({jetflav, jetpt, TMath::Abs(jet_eta_[j])});
-            if(jet_btag_[j] >= btag_thr_)	events_num.push_back({jetflav, jetpt, TMath::Abs(jet_eta_[j])});;
+            if(jet_btag_[j] >= btag_thr_)	events_num.push_back({jetflav, jetpt, TMath::Abs(jet_eta_[j])}); 
           }
 
           if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
