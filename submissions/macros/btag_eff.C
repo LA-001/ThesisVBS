@@ -23,7 +23,6 @@ using correction::CorrectionSet;
 #include "Utils.C"
 
 void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
-  cout << "VERSIONE: 28-set, prova SF" << endl;
   //TString filename = "root://cms-xrd-global.cern.ch/" + srcfile;
   TString filename = "root://xrootd-cms.infn.it/" + srcfile;
   TFile *f = TFile::Open(filename);
@@ -33,37 +32,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TTree* runtree = (TTree*)f->Get("Runs");
 
   TTree *outtree = new TTree("outtree", "outtree");
-
-  Int_t O_njets, O_sample, O_tausource, O_lepsource;
-  Float_t O_mvis, O_taupt, O_taueta, O_leppt, O_mjj, O_deltaRjj;
-  Float_t O_tauphi, O_lepeta, O_lepphi, O_metpt, O_metphi;
-  Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
-  Float_t O_weight;
-  
-  Bool_t O_ismuon, O_excflag;
-
-  outtree->Branch("weight",    &O_weight,    "weight/F");
-  outtree->Branch("mvis",      &O_mvis,      "mvis/F");
-  outtree->Branch("taupt",     &O_taupt,     "taupt/F");
-  outtree->Branch("leppt",     &O_leppt,     "leppt/F");
-  outtree->Branch("njets",     &O_njets,     "njets/I");
-  outtree->Branch("mjj",       &O_mjj,       "mjj/F");
-  outtree->Branch("deltaRjj",  &O_deltaRjj,  "deltaRjj/F");
-  outtree->Branch("sample",    &O_sample,    "sample/I");
-  outtree->Branch("ismuon",    &O_ismuon,    "ismuon/O");
-
-  outtree->Branch("taueta",    &O_taueta,    "taueta/F");
-  outtree->Branch("tauphi",    &O_tauphi,    "tauphi/F");
-  outtree->Branch("lepeta",    &O_lepeta,    "lepeta/F");
-  outtree->Branch("lepphi",    &O_lepphi,    "lepphi/F");
-  outtree->Branch("jet1eta",   &O_jet1eta,   "jet1eta/F");
-  outtree->Branch("jet1phi",   &O_jet1phi,   "jet1phi/F");
-  outtree->Branch("jet2eta",   &O_jet2eta,   "jet2eta/F");
-  outtree->Branch("jet2phi",   &O_jet2phi,   "jet2phi/F");
-  outtree->Branch("metpt",     &O_metpt,     "metpt/F");
-  outtree->Branch("metphi",    &O_metphi,    "metphi/F");
-  outtree->Branch("tausource", &O_tausource, "tausource/I");
-  outtree->Branch("lepsource", &O_lepsource, "lepsource/I");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -424,6 +392,26 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   YearConfig cfg = YearConfig_map[year];
 
+  //-------------------------- OUTPUT HISTOS ------------------------------------------------------------------------------
+
+	Float_t edge_pt[]  = {20.,30.,50.,70.,100.,140.,200.,300.,600.,1000.};
+	Float_t edge_eta[]  = {0.0,0.9,1.5,2.1,2.5};
+
+	const int n_pt  = sizeof(edge_pt)/sizeof(edge_pt[0])  - 1;
+	const int n_eta  = sizeof(edge_eta)/sizeof(edge_eta[0]) - 1;
+	
+
+	TH2F *h_light_2d_den   = new TH2F("h_light_2d_den","h_light_2d_den",n_pt,edge_pt,n_eta,edge_eta);	
+	TH2F *h_light_2d_num   = new TH2F("h_light_2d_num","h_light_2d_num",n_pt,edge_pt,n_eta,edge_eta);
+	
+  TH2F *h_c_2d_den       = new TH2F("h_c_2d_den","h_c_2d_den",n_pt,edge_pt,n_eta,edge_eta);	
+	TH2F *h_c_2d_num       = new TH2F("h_c_2d_num","h_c_2d_num",n_pt,edge_pt,n_eta,edge_eta);
+
+  TH2F *h_b_2d_den       = new TH2F("h_b_2d_den","h_b_2d_den",n_pt,edge_pt,n_eta,edge_eta);	
+	TH2F *h_b_2d_num       = new TH2F("h_b_2d_num","h_b_2d_num",n_pt,edge_pt,n_eta,edge_eta);
+
+//-------------------------------------------------------------------------------------------------------------------------
+
   for (Long64_t i = 0; i < numEntries; ++i) {
     
     tree->GetEntry(i);
@@ -443,9 +431,19 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Int_t ntaus=0, nbtags=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
     Float_t selectedtaupt=0., selectedleppt=0.;
 	  Int_t jet1index = -1, jet2index = -1;
-	  Bool_t ismuon = true, isvsjetVT = false;
+	  Bool_t ismuon = true;
 
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
+    
+    struct event
+    {
+      int flavour;
+      float pt;
+      float eta;
+    };
+    
+    vector<event> events_den;
+    vector<event> events_num;
     
     int tauindex=0;
     for(int j=0; j<ntaus_; j++){
@@ -456,8 +454,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         tauindex=j;
 		    taucharge=tau_charge_[j];
 		    p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
-        Int_t vsjet = static_cast<int>(tauidvsjet_[j]);
-        if(vsjet >= 7) isvsjetVT = true;
       }
     }
         
@@ -532,7 +528,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             break;
           }
 
-          if(jet_btag_[j] >= btag_thr_ && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
+          if(TMath::Abs(jet_eta_[j]) < 2.5){
+            int jetflav = static_cast<int>(jet_flav_[j]);
+            events_den.push_back({jetflav, jetpt, TMath::Abs(jet_eta_[j])});
+            if(jet_btag_[j] >= btag_thr_)	events_num.push_back({jetflav, jetpt, TMath::Abs(jet_eta_[j])});;
+          }
 
           if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
           else if(njets==2) p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
@@ -544,45 +544,26 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
     
-    if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
+    if(trigpath and typeevent>0 and !excflag and njets>=2){
 
-      ROOT::Math::PtEtaPhiMVector p4 = p4lep+p4tau;
-      float mvis_ = p4.M(); 
+      for(const auto& ev : events_den){
+        if(ev.flavour == 0) h_light_2d_den->Fill(ev.pt, ev.eta, weight_);
+        else if(ev.flavour == 4) h_c_2d_den->Fill(ev.pt, ev.eta, weight_);
+        else if(ev.flavour == 5) h_b_2d_den->Fill(ev.pt, ev.eta, weight_);
+      }
 
-      ROOT::Math::PtEtaPhiMVector p4jets = p4jet1+p4jet2;
-      float mjj_ = p4jets.M(); 
-      float deltaRjj_ = deltaR(p4jet1,p4jet2);
-	
-      O_weight   = weight_;
-      O_sample   = sample;
-      O_mvis     = mvis_;
-      O_njets    = njets;
-      O_taupt    = p4tau.Pt();
-      O_leppt    = p4lep.Pt();
-      O_mjj      = mjj_;
-      O_deltaRjj = deltaRjj_;
-	    O_ismuon   = ismuon;
+      for(const auto& ev : events_num){
+        if(ev.flavour == 0) h_light_2d_num->Fill(ev.pt, ev.eta, weight_);
+        else if(ev.flavour == 4) h_c_2d_num->Fill(ev.pt, ev.eta, weight_);
+        else if(ev.flavour == 5) h_b_2d_num->Fill(ev.pt, ev.eta, weight_);
+      }
 
-      O_taueta   = p4tau.Eta();
-      O_tauphi   = p4tau.Phi();
-      O_lepeta   = p4lep.Eta();
-      O_lepphi   = p4lep.Phi();
-      O_metpt    = met_pt_;
-      O_metphi   = met_phi_;
-	    O_jet1eta  = p4jet1.Eta();
-      O_jet1phi  = p4jet1.Phi();
-      O_jet2eta  = p4jet2.Eta();
-      O_jet2phi  = p4jet2.Phi();
-      O_tausource = static_cast<int>(tau_source_[tauindex]);
-
-      if(ismuon) O_lepsource = static_cast<int>(muon_source_[muindex]);
-      else O_lepsource = static_cast<int>(ele_source_[eleindex]);
-      
-      outtree->Fill();
     }
   }
 
-  outtree->Write();
+  h_light_2d_den->Write();  h_light_2d_num->Write();
+  h_c_2d_den->Write();      h_c_2d_num->Write();
+  h_b_2d_den->Write();      h_b_2d_num->Write();
 
   f->Close();
   output->Close();
