@@ -48,7 +48,7 @@ auto pu_SF     = pu_c_set->at("Collisions24_BCDEFGHI_goldenJSON");
 //Non dovrebbero servirmi a nulla poichè veto ogni evento con anche solo un b-jet
 string bjet_file     = "jsons/btagging.json.gz";
 auto bjet_c_set      = CorrectionSet::from_file(bjet_file);                                                                                                                                                    
-auto bjet_SF         = bjet_c_set->at("UParTAK4_comb");                                                                                                                                                    
+auto bcjet_SF        = bjet_c_set->at("UParTAK4_comb");                                                                                                                                                    
 auto lightjet_SF     = bjet_c_set->at("UParTAK4_light");      
 
 auto btag_thr_getter = bjet_c_set->at("UParTAK4_wp_values"); 
@@ -154,33 +154,6 @@ double get_rndm(double mean, double sigma, double n, double alpha, double phi, i
   TRandom3 rnd(seed);
   double rndm = rnd.Rndm();
   return cb.invcdf(rndm);
-}
-
-// B-tagging efficiencies (needed to apply SFs correctly)
-
-Float_t getBTagEff(Float_t pt, Float_t eta, int flav){
-
-  const Double_t ptlimits[]={20.0,30.0,50.0,70.0,100.0,140.0,200.0,300.0,600.0,1000.0};
-  const Double_t etalimits[]={0.0,0.9,1.5,2.1,2.4};
-  
-  float mapb[9][4]={{0.924,0.915,0.911,0.908},{0.930,0.919,0.913,0.903},{0.937,0.927,0.919,0.909},{0.942,0.931,0.924,0.914},{0.946,0.936,0.929,0.919},{0.948,0.939,0.932,0.922},{0.949,0.939,0.932,0.924},{0.946,0.935,0.933,0.924},{0.948,0.941,0.947,0.980}};;
-  float mapc[9][4]={{0.593,0.589,0.606,0.638},{0.551,0.545,0.553,0.570},{0.523,0.523,0.526,0.529},{0.504,0.507,0.510,0.509},{0.492,0.499,0.504,0.505},{0.499,0.504,0.510,0.508},{0.522,0.521,0.533,0.543},{0.566,0.576,0.602,0.631},{0.639,0.655,0.714,0.817}};;
-  float maplight[9][4]={{0.184,0.220,0.286,0.384},{0.109,0.138,0.184,0.253},{0.077,0.101,0.136,0.186},{0.062,0.082,0.112,0.157},{0.056,0.073,0.104,0.151},{0.058,0.078,0.114,0.162},{0.074,0.102,0.148,0.214},{0.121,0.171,0.248,0.350},{0.232,0.339,0.471,0.625}};;
-
-  for(int i=0; i<9;i++){
-    if(pt<ptlimits[i+1]){
-      for(int j=0; j<4;j++){
-        if(eta<etalimits[j+1]){
-          if(flav==5) return mapb[i][j];
-          else if(flav==4) return mapc[i][j];
-          else if(flav==0) return maplight[i][j];
-          break;}
-      }
-      break;
-    }
-
-  }
-  return 0.;
 }
 
 //Object selectors
@@ -440,4 +413,46 @@ string Run(TString file) {
 Bool_t isMC(TString file){
   if(file.Contains("Summer2024")) return true;
   else return false;
+}
+
+TFile *f_btag_eff = new TFile("fileroot/btag_eff.root"); 
+TEfficiency *eff_b_2d     = (TEfficiency*)f_btag_eff->Get("eff_b_2d");
+TEfficiency *eff_c_2d     = (TEfficiency*)f_btag_eff->Get("eff_c_2d");
+TEfficiency *eff_light_2d = (TEfficiency*)f_btag_eff->Get("eff_light_2d");
+
+void bvetoSelector(Float_t jet_btag, UChar_t flavour_, Float_t pt, Float_t eta, Float_t &weight, Bool_t &btagflag){
+  Int_t flavour = static_cast<int>(flavour_);
+  Float_t eff = 0.;
+  Int_t bin;
+  Float_t SF = 0.;
+
+  if(flavour == 5){
+    bin = eff_b_2d->FindFixBin(pt, abs(eta));
+    eff = eff_b_2d->GetEfficiency(bin);
+  }else if(flavour == 4){
+    bin = eff_c_2d->FindFixBin(pt, abs(eta));
+    eff = eff_c_2d->GetEfficiency(bin);
+  }else if(flavour == 0){
+    bin = eff_light_2d->FindFixBin(pt, abs(eta));
+    eff = eff_light_2d->GetEfficiency(bin);   
+  }else{
+    cout<< "Error: Unknown jet flavour " << flavour <<endl;
+    btagflag = true;
+    return;
+  }
+
+  if(jet_btag >= btag_thr_){
+    btagflag = true;
+    return;
+  }else{
+    if(flavour == 5 || flavour == 4){
+      SF = bcjet_SF->evaluate({"central","M",flavour,abs(eta),pt});
+      weight *= (1 - SF*eff)/(1 - eff);
+    }else if(flavour == 0){
+      SF = lightjet_SF->evaluate({"central","M",flavour,abs(eta),pt});
+      weight *= (1 - SF*eff)/(1 - eff);
+    }
+    return;
+  }
+
 }
