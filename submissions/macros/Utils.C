@@ -156,6 +156,7 @@ double get_rndm(double mean, double sigma, double n, double alpha, double phi, i
   return cb.invcdf(rndm);
 }
 
+
 //Object selectors
 
 Bool_t TauSelector(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t vsjet_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight){
@@ -415,27 +416,39 @@ Bool_t isMC(TString file){
   else return false;
 }
 
-TFile *f_btag_eff = new TFile("fileroot/btag_eff.root"); 
-TEfficiency *eff_b_2d     = (TEfficiency*)f_btag_eff->Get("eff_b_2d");
-TEfficiency *eff_c_2d     = (TEfficiency*)f_btag_eff->Get("eff_c_2d");
-TEfficiency *eff_light_2d = (TEfficiency*)f_btag_eff->Get("eff_light_2d");
+Float_t getBTagEff(Float_t pt, Float_t eta, int flav){
+
+  const Double_t ptlimits[]={20.0,30.0,50.0,70.0,100.0,140.0,200.0,300.0,600.0,1000.0};
+  const Double_t etalimits[]={0.0,0.9,1.5,2.1,2.4};
+  
+  float mapb[9][4]={{0.783,0.765,0.742,0.710},{0.837,0.817,0.798,0.771},{0.869,0.849,0.834,0.811},{0.884,0.865,0.853,0.830},{0.891,0.874,0.863,0.844},{0.896,0.881,0.868,0.848},{0.893,0.878,0.861,0.837},{0.886,0.867,0.843,0.813},{0.878,0.853,0.824,0.766}};
+  float mapc[9][4]={{0.119,0.136,0.144,0.154},{0.085,0.101,0.111,0.125},{0.072,0.085,0.095,0.107},{0.067,0.079,0.087,0.099},{0.064,0.076,0.083,0.098},{0.065,0.078,0.086,0.103},{0.075,0.090,0.098,0.117},{0.106,0.127,0.137,0.154},{0.173,0.194,0.202,0.189}};
+  float maplight[9][4]={{0.013,0.016,0.021,0.028},{0.008,0.010,0.014,0.019},{0.006,0.008,0.011,0.014},{0.005,0.007,0.009,0.012},{0.005,0.006,0.009,0.012},{0.005,0.006,0.009,0.012},{0.005,0.007,0.010,0.015},{0.008,0.013,0.017,0.023},{0.019,0.028,0.033,0.038}};
+
+  for(int i=0; i<9;i++){
+    if(pt<ptlimits[i+1]){
+      for(int j=0; j<4;j++){
+        if(eta<etalimits[j+1]){
+          if(flav==5) return mapb[i][j];
+          else if(flav==4) return mapc[i][j];
+          else if(flav==0) return maplight[i][j];
+          break;
+        }
+      }
+      break;
+    }
+
+  }
+  return 0.;
+}
 
 void bvetoSelector(Float_t jet_btag, UChar_t flavour_, Float_t pt, Float_t eta, Float_t &weight, Bool_t &btagflag){
   Int_t flavour = static_cast<int>(flavour_);
   Float_t eff = 0.;
-  Int_t bin;
   Float_t SF = 0.;
 
-  if(flavour == 5){
-    bin = eff_b_2d->FindFixBin(pt, abs(eta));
-    eff = eff_b_2d->GetEfficiency(bin);
-  }else if(flavour == 4){
-    bin = eff_c_2d->FindFixBin(pt, abs(eta));
-    eff = eff_c_2d->GetEfficiency(bin);
-  }else if(flavour == 0){
-    bin = eff_light_2d->FindFixBin(pt, abs(eta));
-    eff = eff_light_2d->GetEfficiency(bin);   
-  }else{
+  eff = getBTagEff(pt, eta, flavour);
+  if(eff == 0.){
     cout<< "Error: Unknown jet flavour " << flavour <<endl;
     btagflag = true;
     return;
@@ -454,5 +467,4 @@ void bvetoSelector(Float_t jet_btag, UChar_t flavour_, Float_t pt, Float_t eta, 
     }
     return;
   }
-
 }
