@@ -555,7 +555,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             break;
           }
 
-          if(jet_btag_[j] >= btag_thr_ && TMath::Abs(jet_eta_[j]) < 2.5)	btagflag = 1;
+          if(TMath::Abs(jet_eta_[j]) < 2.5) bvetoSelector(jet_btag_[j], jet_flav_[j], jetpt, jet_eta_[j], weight_, btagflag);
 
           if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
           else if(njets==2) p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
