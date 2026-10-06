@@ -7,6 +7,8 @@
 #include <fstream>
 #include <algorithm>
 #include <nlohmann/json.hpp>
+#include <cmath>
+#include <variant>
 using json = nlohmann::json;
 
 // Scale Factors for the analysis, where the year is not specified is for 2024 
@@ -311,6 +313,12 @@ Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UCh
   if(DM==2 or DM==5 or DM==6) return false;
   int vse = static_cast<int>(vse_);
   int vsmu = static_cast<int>(vsmu_);
+  float energy_SF = 0.;
+
+  if(!std::isfinite(pt) || !std::isfinite(eta) || !std::isfinite(dz)){
+    cout << "TauSelector_FR: ingresso non finito pt=" << pt_in << " eta=" << eta << " dz=" << dz << endl;
+    return false;
+  }
   
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
@@ -330,8 +338,15 @@ Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UCh
     }
     //Energy scale correction
     else if(source==5){
-      pt *= tau_energyscale->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","Loose","Tight","nom"});  
+      energy_SF = tau_energyscale->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","Loose","Tight","nom"});
+      pt *= energy_SF;
     }
+
+    if(!std::isfinite(pt)){
+    cout << "TauSelector_FR: uscita non finito pt =" << pt_in << endl;
+    cout << "Energy SF = " << energy_SF << endl;      
+    }
+
     return true;
   }
   else return false;
