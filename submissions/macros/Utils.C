@@ -362,12 +362,16 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
       weight_num *= ele_SF->evaluate({"2024Prompt","sf","RecoAbove75",eta,pt});
     }
 
-    pt *= ele_scale->evaluate({pt,r9,eta}); //Momentum scale correction
-    float sig_smear = ele_smearing->evaluate({"smear",pt,r9,eta});                                                                                                             
-    float energy_SF = gRandom->Gaus(1.,sig_smear);                                                                                                                                          
+    float energy_SF = ele_scale->evaluate({pt,r9,eta}); //Momentum scale correction
     if(!std::isfinite(energy_SF)) energy_SF = 1.;
-    
+
     pt *= energy_SF;
+
+    float sig_smear = ele_smearing->evaluate({"smear",pt,r9,eta});                                                                                                             
+    float energy_smear = gRandom->Gaus(1.,sig_smear);                                                                                                                                          
+    if(!std::isfinite(energy_smear)) energy_smear = 1.;
+    
+    pt *= energy_smear;
 
 
     return true;
@@ -381,10 +385,13 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     weight_den *= muon_SF2den->evaluate({eta,pt,"nominal"}); // ISO SF
     weight_num *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
     weight_num *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
+    float pt_in = pt;
 
     float aMC          = muon_amc->evaluate({eta,phi,"nom"});
     float MMC          = muon_Mmc->evaluate({eta,phi,"nom"});
     pt = 1/((MMC/pt)+aMC*charge); // Momentum scale correction 
+
+    if(pt < 0. || !std::isfinite(pt)) pt = pt_in;
 
     float ntracklayers = static_cast<float>(tracklayers_char);
     float mean         = muon_cbparams->evaluate({abs(eta),ntracklayers,0});
