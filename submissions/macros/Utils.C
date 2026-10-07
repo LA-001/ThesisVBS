@@ -459,9 +459,9 @@ Float_t getBTagEff(Float_t pt, Float_t eta, int flav){
   float maplight[9][4]={{0.013,0.016,0.021,0.028},{0.008,0.010,0.014,0.019},{0.006,0.008,0.011,0.014},{0.005,0.007,0.009,0.012},{0.005,0.006,0.009,0.012},{0.005,0.006,0.009,0.012},{0.005,0.007,0.010,0.015},{0.008,0.013,0.017,0.023},{0.019,0.028,0.033,0.038}};
 
   for(int i=0; i<9;i++){
-    if(pt<ptlimits[i+1]){
+    if(pt < ptlimits[i+1]){
       for(int j=0; j<4;j++){
-        if(eta<etalimits[j+1]){
+        if(eta < etalimits[j+1]){
           if(flav==5) return mapb[i][j];
           else if(flav==4) return mapc[i][j];
           else if(flav==0) return maplight[i][j];
