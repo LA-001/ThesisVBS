@@ -454,9 +454,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     for(int j=0; j<ntaus_; j++){
       int vsjet = static_cast<int>(tauidvsjet_[j]);
       Float_t pt = tau_pt_[j];
-      Bool_t pass = TauSelector_FR(pt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], weight_, fake_weight);
+      Bool_t pass = TauSelector_FR(pt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], weight_, fake_weight);
 
-      if(pass && vsjet>=4){
+      if(pass){
 	      ntaus++;
         tauindex = j;
 		    taucharge = tau_charge_[j];
@@ -478,9 +478,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     	for(int j=0; j<nelectrons_; j++){
           Float_t pt = ele_pt_[j];
-          Bool_t pass = ElectronSelector_FR(pt, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_, fake_weight);        
+          Bool_t pass = ElectronSelector_FR(pt, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_, fake_weight);        
           
-          if(pass && ele_mvaid90_[j]){
+          if(pass){
           weight_ *= ele_HLT->evaluate({"2024Prompt","sf","HLT_SF_Ele30_MVAiso80ID",ele_eta_[j],pt});          
           nelectrons++;
           eleindex = j;
@@ -495,9 +495,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       
     	for(int j=0; j<nmuons_; j++){
         Float_t pt = muon_pt_[j];
-        Bool_t pass = MuonSelector_FR(pt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, weight_, fake_weight);
+        Bool_t pass = MuonSelector_FR(pt, muon_eta_[j], muon_phi_[j], muon_looseid_[j], muon_dxy_[j], muon_dz_[j], muon_isoscore_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, weight_, fake_weight);
 
-        if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
+        if(pass){
 		      weight_ *= muon_HLT_SF->evaluate({muon_eta_[j],pt,"nominal"});
           nmuons++;
 	  		  muindex = j;
@@ -555,7 +555,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             break;
           }
 
-          if(TMath::Abs(jet_eta_[j]) < 2.5) bvetoSelector(jet_btag_[j], jet_flav_[j], jetpt, jet_eta_[j], weight_, btagflag);
+          if(TMath::Abs(jet_eta_[j]) < 2.4) bvetoSelector(jet_btag_[j], jet_flav_[j], jetpt, jet_eta_[j], weight_, btagflag);
 
           if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
           else if(njets==2) p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
