@@ -308,7 +308,7 @@ Float_t trigpath_Jet(string year, const Bool_t HLT_PFJet40_, const Bool_t HLT_PF
     return max;
 }
 
-Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t UChar_t vsmu_, UChar_t vsjet_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight_den, Float_t &weight_num){
+Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t vsjet_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight_den, Float_t &weight_num){
   int DM = static_cast<int>(DM_);
   if(DM==2 or DM==5 or DM==6) return false;
   int vse = static_cast<int>(vse_);
