@@ -431,7 +431,7 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     }
 
     pt *= energy_SF;
-
+    
     return true;
   }
   else return false;
