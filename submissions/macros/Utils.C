@@ -314,11 +314,6 @@ Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UCh
   int vse = static_cast<int>(vse_);
   int vsmu = static_cast<int>(vsmu_);
   int vsjet = static_cast<int>(vsjet_);
-  float energy_SF = 0.;
-
-  if(!std::isfinite(pt) || !std::isfinite(eta) || !std::isfinite(dz)){
-    cout << "TauSelector_FR: ingresso non finito pt=" << pt << " eta=" << eta << " dz=" << dz << endl;
-  }
   
   if(pt>20 and abs(eta)<2.3 and vse>=6 and vsmu>=4 and vsjet>=4 and abs(dz)<0.2){
     int source = static_cast<int>(source_);
@@ -338,12 +333,9 @@ Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UCh
     }
     //Energy scale correction
     else if(source==5){
-      energy_SF = tau_energyscale->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","Loose","Tight","nom"});
+      float energy_SF = tau_energyscale->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","Loose","Tight","nom"});
+      if(!std::isfinite(energy_SF)) energy_SF = 1.;
 
-      if(!std::isfinite(energy_SF)){
-        cout << "TauSelector_FR: Energy SF non finito =" << energy_SF << endl;
-        cout << "Tau in entrata: pt= " << pt << " , " << "eta= " << eta << " , " << "DM= " << DM << " , " << "source= " << source << endl;      
-      }
       pt *= energy_SF;
     }
 
@@ -372,13 +364,11 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
 
     pt *= ele_scale->evaluate({pt,r9,eta}); //Momentum scale correction
     float sig_smear = ele_smearing->evaluate({"smear",pt,r9,eta});                                                                                                             
-    float ran = gRandom->Gaus(1.,sig_smear);                                                                                                                                          
-    pt *= ran; //Momentum smearing correction
+    float energy_SF = gRandom->Gaus(1.,sig_smear);                                                                                                                                          
+    if(!std::isfinite(energy_SF)) energy_SF = 1.;
+    
+    pt *= energy_SF;
 
-    if(!std::isfinite(pt)){
-      cout << "ElectronSelector_FR: uscita non finito pt =" << pt << endl;
-      cout << "Energy SF = " << ran << endl;      
-    }
 
     return true;
   }
@@ -391,11 +381,6 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     weight_den *= muon_SF2den->evaluate({eta,pt,"nominal"}); // ISO SF
     weight_num *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
     weight_num *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
-    float energy_SF = 0.;
-
-    if(!std::isfinite(pt) || !std::isfinite(eta) || !std::isfinite(dz)){
-      cout << "MuonSelector_FR: ingresso non finito pt=" << pt << " eta=" << eta << " dz=" << dz << endl;
-    }
 
     float aMC          = muon_amc->evaluate({eta,phi,"nom"});
     float MMC          = muon_Mmc->evaluate({eta,phi,"nom"});
@@ -416,22 +401,11 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     if(kDATA>kMC) kfactor = sqrt(kDATA*kDATA-kMC*kMC);
     float rndm         = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
 
-    energy_SF =(1+kfactor*std*rndm); // Momentum smearing correction
-    if(!std::isfinite(energy_SF)){
-      cout << "MUON_NONFINITE"
-          << " ev=" << event << " ls=" << ls
-          << " pt_in=" << pt_in << " pt_scal=" << pt
-          << " eta=" << eta << " phi=" << phi << " q=" << charge
-          << " nl=" << ntracklayers
-          << " aMC=" << aMC << " MMC=" << MMC
-          << " mean=" << mean << " sigma=" << sigma << " n=" << n << " alpha=" << alpha
-          << " kD=" << kDATA << " kMC=" << kMC << " kf=" << kfactor
-          << " poly=" << polyparam0 << "," << polyparam1 << "," << polyparam2
-          << " std=" << std << " rndm=" << rndm << " SF=" << energy_SF << endl;
-    }
+    float energy_SF =(1+kfactor*std*rndm); // Momentum smearing correction
+    if(!std::isfinite(energy_SF)) energy_SF = 1.;
 
     pt *= energy_SF;
-    
+
     return true;
   }
   else return false;
