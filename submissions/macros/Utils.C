@@ -376,7 +376,7 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, F
 
     if(!std::isfinite(pt)){
       cout << "TauSelector_FR: uscita non finito pt =" << pt << endl;
-      cout << "Energy SF = " << energy_SF << endl;      
+      cout << "Energy SF = " << ran << endl;      
     }
 
     return true;
@@ -417,7 +417,7 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Float_t dxy, Float
 
     if(!std::isfinite(pt)){
       cout << "TauSelector_FR: uscita non finito pt =" << pt << endl;
-      cout << "Energy SF = " << energy_SF << endl;      
+      cout << "Energy SF = " << (1+kfactor*std*rndm) << endl;      
     }
 
     return true;
