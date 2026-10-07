@@ -358,7 +358,7 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
     weight_num *= ele_SF->evaluate({"2024Prompt","sf","wp80iso",eta,pt}); //ID SF
 
     if(!std::isfinite(pt) || !std::isfinite(eta) || !std::isfinite(dz)){
-      cout << "TauSelector_FR: ingresso non finito pt=" << pt << " eta=" << eta << " dz=" << dz << endl;
+      cout << "ElectronSelector_FR: ingresso non finito pt=" << pt << " eta=" << eta << " dz=" << dz << endl;
     }
 
     if(pt<75) {
@@ -376,7 +376,7 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
     pt *= ran; //Momentum smearing correction
 
     if(!std::isfinite(pt)){
-      cout << "TauSelector_FR: uscita non finito pt =" << pt << endl;
+      cout << "ElectronSelector_FR: uscita non finito pt =" << pt << endl;
       cout << "Energy SF = " << ran << endl;      
     }
 
@@ -393,7 +393,7 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     weight_num *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
 
     if(!std::isfinite(pt) || !std::isfinite(eta) || !std::isfinite(dz)){
-      cout << "TauSelector_FR: ingresso non finito pt=" << pt << " eta=" << eta << " dz=" << dz << endl;
+      cout << "MuonSelector_FR: ingresso non finito pt=" << pt << " eta=" << eta << " dz=" << dz << endl;
     }
 
     float aMC          = muon_amc->evaluate({eta,phi,"nom"});
@@ -417,7 +417,7 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     pt *= (1+kfactor*std*rndm); // Momentum smearing correction
 
     if(!std::isfinite(pt)){
-      cout << "TauSelector_FR: uscita non finito pt =" << pt << endl;
+      cout << "MuonSelector_FR: uscita non finito pt =" << pt << endl;
       cout << "Energy SF = " << (1+kfactor*std*rndm) << endl;      
     }
 
