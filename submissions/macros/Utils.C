@@ -339,12 +339,12 @@ Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UCh
     //Energy scale correction
     else if(source==5){
       energy_SF = tau_energyscale->evaluate({pt,abs(eta),DM,source,"DeepTau2018v2p5","Loose","Tight","nom"});
-      pt *= energy_SF;
-    }
 
-    if(!std::isfinite(pt)){
-    cout << "TauSelector_FR: uscita non finito pt =" << pt << endl;
-    cout << "Energy SF = " << energy_SF << endl;      
+      if(!std::isfinite(energy_SF)){
+        cout << "TauSelector_FR: Energy SF non finito =" << energy_SF << endl;
+        cout << "Tau in entrata: pt= " << pt << " , " << "eta= " << eta << " , " << "DM= " << DM << " , " << "source= " << source << endl;      
+      }
+      pt *= energy_SF;
     }
 
     return true;
