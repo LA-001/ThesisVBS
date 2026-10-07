@@ -391,6 +391,7 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     weight_den *= muon_SF2den->evaluate({eta,pt,"nominal"}); // ISO SF
     weight_num *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
     weight_num *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
+    float energy_SF = 0.;
 
     if(!std::isfinite(pt) || !std::isfinite(eta) || !std::isfinite(dz)){
       cout << "MuonSelector_FR: ingresso non finito pt=" << pt << " eta=" << eta << " dz=" << dz << endl;
@@ -414,12 +415,14 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     float kfactor      = 0.;
     if(kDATA>kMC) kfactor = sqrt(kDATA*kDATA-kMC*kMC);
     float rndm         = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
-    pt *= (1+kfactor*std*rndm); // Momentum smearing correction
 
-    if(!std::isfinite(pt)){
-      cout << "MuonSelector_FR: uscita non finito pt =" << pt << endl;
-      cout << "Energy SF = " << (1+kfactor*std*rndm) << endl;      
+    energy_SF =(1+kfactor*std*rndm); // Momentum smearing correction
+    if(!std::isfinite(energy_SF)){
+      cout << "MuonSelector_FR: Energy SF = " << (1+kfactor*std*rndm) << endl; 
+      cout << "Tau in entrata: pt= " << pt << " , " << "eta= " << eta << " , " << "Isoscore= " << Isoscore << " , " << "dz= " << dz << endl;      
     }
+
+    pt *= energy_SF;
 
     return true;
   }
@@ -483,7 +486,7 @@ void bvetoSelector(Float_t jet_btag, UChar_t flavour_, Float_t pt, Float_t eta, 
 
   eff = getBTagEff(pt, abs(eta), flavour);
   if(eff == 0.){
-    cout<< "Error: Unknown jet flavour " << flavour << "|" << " or pt out of bounds " << pt << endl;
+    //cout<< "Error: Unknown jet flavour " << flavour << "|" << " or pt out of bounds " << pt << endl;
     btagflag = true;
     return;
   }
