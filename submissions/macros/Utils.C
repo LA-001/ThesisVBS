@@ -480,7 +480,7 @@ void bvetoSelector(Float_t jet_btag, UChar_t flavour_, Float_t pt, Float_t eta, 
   Float_t eff = 0.;
   Float_t SF = 0.;
 
-  eff = getBTagEff(pt, eta, flavour);
+  eff = getBTagEff(pt, abs(eta), flavour);
   if(eff == 0.){
     cout<< "Error: Unknown jet flavour " << flavour << "|" << " or pt out of bounds " << pt << endl;
     btagflag = true;
