@@ -418,8 +418,16 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
 
     energy_SF =(1+kfactor*std*rndm); // Momentum smearing correction
     if(!std::isfinite(energy_SF)){
-      cout << "MuonSelector_FR: Energy SF = " << (1+kfactor*std*rndm) << endl; 
-      cout << "Tau in entrata: pt= " << pt << " , " << "eta= " << eta << " , " << "Isoscore= " << Isoscore << " , " << "dz= " << dz << endl;      
+      cout << "MUON_NONFINITE"
+          << " ev=" << event << " ls=" << ls
+          << " pt_in=" << pt_in << " pt_scal=" << pt
+          << " eta=" << eta << " phi=" << phi << " q=" << charge
+          << " nl=" << ntracklayers
+          << " aMC=" << aMC << " MMC=" << MMC
+          << " mean=" << mean << " sigma=" << sigma << " n=" << n << " alpha=" << alpha
+          << " kD=" << kDATA << " kMC=" << kMC << " kf=" << kfactor
+          << " poly=" << polyparam0 << "," << polyparam1 << "," << polyparam2
+          << " std=" << std << " rndm=" << rndm << " SF=" << energy_SF << endl;
     }
 
     pt *= energy_SF;
