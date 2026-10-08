@@ -216,6 +216,7 @@ Bool_t MuonSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dx
     weight *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
     weight *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
     weight *= muon_HLT_SF->evaluate({eta,pt,"nominal"}); // TRIG SF
+    float pt_in = pt;
 
     float aMC          = muon_amc->evaluate({eta,phi,"nom"});
     float MMC          = muon_Mmc->evaluate({eta,phi,"nom"});
@@ -235,7 +236,10 @@ Bool_t MuonSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dx
     float kfactor      = 0.;
     if(kDATA>kMC) kfactor = sqrt(kDATA*kDATA-kMC*kMC);
     float rndm         = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
-    pt *= (1+kfactor*std*rndm); // Momentum smearing correction
+
+    float energy_SF =(1+kfactor*std*rndm); // Momentum smearing correction
+    if(pt < 0. || !std::isfinite(energy_SF)) pt = pt_in;
+    else pt *= energy_SF;
 
     return true;
   }
@@ -348,6 +352,7 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
   if(pt>30 and abs(eta)<2.5 and abs(dxy)<0.1 and abs(dz)<0.2 and convveto and id){
     weight_den *= ele_SF->evaluate({"2024Prompt","sf","wp90iso",eta,pt}); //ID SF
     weight_num *= ele_SF->evaluate({"2024Prompt","sf","wp80iso",eta,pt}); //ID SF
+    float pt_in = pt;
 
     if(!std::isfinite(pt) || !std::isfinite(eta) || !std::isfinite(dz)){
       cout << "ElectronSelector_FR: ingresso non finito pt=" << pt << " eta=" << eta << " dz=" << dz << endl;
@@ -363,16 +368,13 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
     }
 
     float energy_SF = ele_scale->evaluate({pt,r9,eta}); //Momentum scale correction
-    if(!std::isfinite(energy_SF)) energy_SF = 1.;
-
     pt *= energy_SF;
 
     float sig_smear = ele_smearing->evaluate({"smear",pt,r9,eta});                                                                                                             
-    float energy_smear = gRandom->Gaus(1.,sig_smear);                                                                                                                                          
-    if(!std::isfinite(energy_smear)) energy_smear = 1.;
-    
-    pt *= energy_smear;
+    float energy_smear = gRandom->Gaus(1.,sig_smear);
 
+    if(pt < 0. || !std::isfinite(energy_SF) || !std::isfinite(energy_smear)) pt = pt_in;
+    else pt *= energy_smear;                                                                                                                                          
 
     return true;
   }
@@ -391,8 +393,6 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     float MMC          = muon_Mmc->evaluate({eta,phi,"nom"});
     pt = 1/((MMC/pt)+aMC*charge); // Momentum scale correction 
 
-    if(pt < 0. || !std::isfinite(pt)) pt = pt_in;
-
     float ntracklayers = static_cast<float>(tracklayers_char);
     float mean         = muon_cbparams->evaluate({abs(eta),ntracklayers,0});
     float sigma        = muon_cbparams->evaluate({abs(eta),ntracklayers,1});
@@ -409,9 +409,8 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     float rndm         = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
 
     float energy_SF =(1+kfactor*std*rndm); // Momentum smearing correction
-    if(!std::isfinite(energy_SF)) energy_SF = 1.;
-
-    pt *= energy_SF;
+    if(pt < 0. || !std::isfinite(energy_SF)) pt = pt_in;
+    else pt *= energy_SF;
 
     return true;
   }
