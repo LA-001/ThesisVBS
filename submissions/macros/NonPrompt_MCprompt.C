@@ -381,6 +381,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   weightscale_*=numEntries/(float)sampleevents_;
   Float_t lumi = cfg.lumi_recorded; //(in fb^-1)
+  cout<< "Luminosity: " << lumi << endl;
   weightscale_*=lumi*xsec_*1000;
 
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
@@ -420,8 +421,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("metphi",  	&O_metphi,  	"metphi/F");
   outtree->Branch("mvis",       &O_mvis,        "mvis/F");
   outtree->Branch("njets",      &O_njets,       "njets/I");
-  outtree->Branch("weight",     &O_weight,      "weight/F");
-  
+  outtree->Branch("weight",     &O_weight,      "weight/F");  
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -524,15 +524,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 		//----------------------------------------------------------------------------------------------
 
-      O_tausource = static_cast<int>(tau_source_[tauindex]);
       if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
         if(nmuons==1){ 
           typeevent=1; 
           ismuon = true;
-          O_lepsource = static_cast<int>(muon_source_[muindex]);
         }else{ 
           typeevent=2;
-          O_lepsource = static_cast<int>(ele_source_[eleindex]);
         }
       }
 
@@ -567,19 +564,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
     if(!istauL || !islepL) excflag=1;
-
-	  // The lepton (both tau and lep) Loose but not Tight must be prompt 
-	  if(!istauT){
-    	if(static_cast<int>(tau_source_[tauindex]) != 5) excflag=1;
-    }
-
-	  if(!islepT){
-		  if(ismuon){
-    	  if(static_cast<int>(muon_source_[muindex]) != 1) excflag=1;
-		  }else{
-			  if(static_cast<int>(ele_source_[eleindex]) != 1) excflag=1;
-		  }
-    }
 	
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
 
@@ -614,6 +598,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    O_metphi   = met_phi_;
       O_njets    = njets;
 	    O_weight   = weight_;
+      O_tausource = static_cast<int>(tau_source_[tauindex]);
+
+      if(ismuon) O_lepsource = static_cast<int>(muon_source_[muindex]);
+      else O_lepsource = static_cast<int>(ele_source_[eleindex]);
+      
 
 	    outtree->Fill();
     }
