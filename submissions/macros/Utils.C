@@ -114,7 +114,7 @@ struct YearConfig{
 // lumi_eff array = {PFjet40,PFJet60,PFjet80,PFJet110,PFjet140,PFJet200,PFjet260,PFHT180,PFHT250,PFHT350}
 map<string, YearConfig> YearConfig_map = {
     {"2024", {"jsons/Cert_Collisions2024_378981_386951_Golden.json",
-              109.95,
+              109.82,
               JET_veto_2024,
               {0.00022,0.00166,0.00640,0.02428,0.07285,0.31221,0.85371,0.00959,0.02665,0.42686}}
     },

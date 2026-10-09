@@ -407,22 +407,22 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   runtree->GetEntry(0);
 
-  float weightscale_=1/sumgenw_;
-
-  float lumi = 220.79; //2024+2025 luminosity (in fb^-1)
-
-  weightscale_*=lumi*xsec_*1000;
-  Long64_t numEntries = tree->GetEntries();
-  weightscale_*=numEntries/(float)sampleevents_;
-
   string year = Run(srcfile);
   cout<<"Year: Run"<<year<<endl;
   if(YearConfig_map.find(year) == YearConfig_map.end()){
     cout << "ERROR: no configuration found for year: " << year << " (file: " << srcfile << ")" << endl;
     return;
   }
-
   YearConfig cfg = YearConfig_map[year];
+
+  float weightscale_=1/sumgenw_;
+
+  float lumi = cfg.lumi_recorded; //(in fb^-1)
+  cout<< "Luminosity: " << lumi << endl; 
+
+  weightscale_*=lumi*xsec_*1000;
+  Long64_t numEntries = tree->GetEntries();
+  weightscale_*=numEntries/(float)sampleevents_;
 
   for (Long64_t i = 0; i < numEntries; ++i) {
     
