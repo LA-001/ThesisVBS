@@ -34,10 +34,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   TTree *outtree = new TTree("outtree", "outtree");
 
-  Int_t O_njets, O_sample, O_tausource, O_lepsource;
+  Int_t O_njets, O_sample, O_tausource, O_lepsource, O_vsjet;
   Float_t O_mvis, O_taupt, O_taueta, O_leppt, O_mjj, O_deltaRjj;
   Float_t O_tauphi, O_lepeta, O_lepphi, O_metpt, O_metphi;
-  Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
+  Float_t O_jet1pt, O_jet1eta, O_jet1phi, O_jet2pt,O_jet2eta, O_jet2phi;
   Float_t O_weight;
   
   Bool_t O_ismuon, O_excflag;
@@ -56,14 +56,17 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("tauphi",    &O_tauphi,    "tauphi/F");
   outtree->Branch("lepeta",    &O_lepeta,    "lepeta/F");
   outtree->Branch("lepphi",    &O_lepphi,    "lepphi/F");
+  outtree->Branch("jet1pt",    &O_jet1pt,    "jet1pt/F");
   outtree->Branch("jet1eta",   &O_jet1eta,   "jet1eta/F");
   outtree->Branch("jet1phi",   &O_jet1phi,   "jet1phi/F");
+  outtree->Branch("jet2pt",    &O_jet2pt,    "jet2pt/F");
   outtree->Branch("jet2eta",   &O_jet2eta,   "jet2eta/F");
   outtree->Branch("jet2phi",   &O_jet2phi,   "jet2phi/F");
   outtree->Branch("metpt",     &O_metpt,     "metpt/F");
   outtree->Branch("metphi",    &O_metphi,    "metphi/F");
   outtree->Branch("tausource", &O_tausource, "tausource/I");
   outtree->Branch("lepsource", &O_lepsource, "lepsource/I");
+  outtree->Branch("vsjet",     &O_vsjet,     "vsjet/I");
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -570,14 +573,18 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       O_lepphi   = p4lep.Phi();
       O_metpt    = met_pt_;
       O_metphi   = met_phi_;
+      O_jet1pt   = p4jet1.Pt();
 	    O_jet1eta  = p4jet1.Eta();
       O_jet1phi  = p4jet1.Phi();
+      O_jet2pt   = p4jet2.Pt();
       O_jet2eta  = p4jet2.Eta();
       O_jet2phi  = p4jet2.Phi();
       O_tausource = static_cast<int>(tau_source_[tauindex]);
 
       if(ismuon) O_lepsource = static_cast<int>(muon_source_[muindex]);
       else O_lepsource = static_cast<int>(ele_source_[eleindex]);
+
+      O_vsjet = static_cast<int>(tauidvsjet_[tauindex]);
       
       outtree->Fill();
     }
