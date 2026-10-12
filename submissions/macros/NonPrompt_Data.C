@@ -354,34 +354,38 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_taupt, O_taueta, O_tauphi;
   Float_t O_leppt, O_lepeta, O_lepphi;
   Float_t O_jet1eta, O_jet1phi, O_jet2eta, O_jet2phi;
-  Float_t O_mjj, O_deltaRjj;
+  Float_t O_mjj, O_deltaRjj, O_jet1pt, O_jet2pt;
   Float_t O_mvis, O_metpt, O_metphi;
-  Int_t O_njets;
+  Int_t O_njets, O_vsjet;
 
   TTree *outtree = new TTree("outtree", "outtree");
   outtree->Branch("istauT",		&O_istauT,		"istauT/O");
   outtree->Branch("islepT",		&O_islepT,		"islepT/O");
   outtree->Branch("ismuon",		&O_ismuon,		"ismuon/O");
 
-  outtree->Branch("taupt",		&O_taupt,		"taupt/F");
+  outtree->Branch("taupt",		&O_taupt,		  "taupt/F");
   outtree->Branch("taueta",		&O_taueta,		"taueta/F");
   outtree->Branch("tauphi",		&O_tauphi,		"tauphi/F");
 
-  outtree->Branch("leppt",		&O_leppt,		"leppt/F");
+  outtree->Branch("leppt",		&O_leppt,		  "leppt/F");
   outtree->Branch("lepeta",		&O_lepeta,		"lepeta/F");
   outtree->Branch("lepphi",		&O_lepphi,		"lepphi/F");
 
-  outtree->Branch("jet1eta",    &O_jet1eta, 	"jet1eta/F");
+  outtree->Branch("jet1pt",   &O_jet1pt,    "jet1pt/F");
+  outtree->Branch("jet1eta",  &O_jet1eta, 	"jet1eta/F");
   outtree->Branch("jet1phi", 	&O_jet1phi, 	"jet1phi/F");
+
+  outtree->Branch("jet2pt",   &O_jet2pt,    "jet2pt/F");
   outtree->Branch("jet2eta", 	&O_jet2eta, 	"jet2eta/F");
   outtree->Branch("jet2phi", 	&O_jet2phi, 	"jet2phi/F");
 
-  outtree->Branch("mjj",		&O_mjj,			"mjj/F");
+  outtree->Branch("mjj",		  &O_mjj,			  "mjj/F");
   outtree->Branch("deltaRjj",	&O_deltaRjj,	"deltaRjj/F");
   outtree->Branch("metpt",   	&O_metpt,   	"metpt/F");
   outtree->Branch("metphi",  	&O_metphi,  	"metphi/F");
-  outtree->Branch("mvis",       &O_mvis,        "mvis/F");
-  outtree->Branch("njets",      &O_njets,       "njets/I");
+  outtree->Branch("mvis",     &O_mvis,      "mvis/F");
+  outtree->Branch("njets",    &O_njets,     "njets/I");  
+  outtree->Branch("vsjet",    &O_vsjet,     "vsjet/I");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -529,7 +533,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
 
       ROOT::Math::PtEtaPhiMVector p4jets = p4jet1+p4jet2;
-      Float_t mjj = p4jets.M(); // Invariant mass of the dijet system
+      Float_t mjj = p4jets.M(); 
       Float_t deltaRjj = deltaR(p4jet1,p4jet2);
 
       ROOT::Math::PtEtaPhiMVector p4leps = p4lep+p4tau;
@@ -547,8 +551,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    O_lepeta   = p4lep.Eta();
 	    O_lepphi   = p4lep.Phi();
 
+      O_jet1pt   = p4jet1.Pt();
 	    O_jet1eta  = p4jet1.Eta();
       O_jet1phi  = p4jet1.Phi();
+
+      O_jet2pt   = p4jet2.Pt();
       O_jet2eta  = p4jet2.Eta();
       O_jet2phi  = p4jet2.Phi();
 
@@ -558,6 +565,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
       O_njets    = njets;
+
+      O_vsjet = static_cast<int>(tauidvsjet_[tauindex]);
 
 	    outtree->Fill();
     }
