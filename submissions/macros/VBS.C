@@ -34,7 +34,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   TTree *outtree = new TTree("outtree", "outtree");
 
-  Int_t O_njets, O_tausource, O_lepsource, O_vsjet;
+  Int_t O_njets, O_tausource, O_lepsource, O_vsjet, O_weight;
   Bool_t  O_ismuon;
   Float_t O_taupt,  O_taueta,  O_tauphi,  O_taum,  O_tauDM;
   Float_t O_leppt,  O_lepeta,  O_lepphi,  O_lepm;
@@ -462,7 +462,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  Int_t jet1index = -1, jet2index = -1;
 	  Bool_t ismuon = true, isvsjetVT = false;
 
-    ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2;
+    ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2, p4jet3;
     
     int tauindex=0;
     for(int j=0; j<ntaus_; j++){
@@ -605,9 +605,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       O_jet3phi  = p4jet3.Phi();
       O_jet3m    = p4jet3.M();
 
-	    O_mjj      = mjj;
-      O_mvis     = mvis;
-      O_deltaRjj = deltaRjj;
+	    O_mjj      = mjj_;
+      O_mvis     = mvis_;
+      O_deltaRjj = deltaRjj_;
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
       O_njets    = njets;
