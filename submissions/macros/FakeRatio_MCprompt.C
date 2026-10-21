@@ -403,14 +403,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	const int n_eta1  = sizeof(edge_eta1)/sizeof(edge_eta1[0]) - 1;
 	const int n_eta2  = sizeof(edge_eta2)/sizeof(edge_eta2[0]) - 1;
 	
-	TH1F *h_tau_pt_den   = new TH1F("h_tau_pt_den","h_tau_pt_den",18,20,200);
-	TH1F *h_tau_eta_den  = new TH1F("h_tau_eta_den","h_tau_eta_den",n_eta1,edge_eta1);
-	TH2F *h_tau_2d_den   = new TH2F("h_tau_2d_den","h_tau_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
-	
-	TH1F *h_tau_pt_num   = new TH1F("h_tau_pt_num","h_tau_pt_num",18,20,200);
-	TH1F *h_tau_eta_num  = new TH1F("h_tau_eta_num","h_tau_eta_num",n_eta1,edge_eta1);
-	TH2F *h_tau_2d_num   = new TH2F("h_tau_2d_num","h_tau_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
-	
 	TH1F *h_ele_pt_den   = new TH1F("h_ele_pt_den","h_ele_pt_den",18,20,200);
 	TH1F *h_ele_eta_den  = new TH1F("h_ele_eta_den","h_ele_eta_den",n_eta1,edge_eta1);
 	TH2F *h_ele_2d_den   = new TH2F("h_ele_2d_den","h_ele_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
@@ -426,6 +418,19 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	TH1F *h_muon_pt_num  = new TH1F("h_muon_pt_num","h_muon_pt_num",18,20,200);
 	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
 	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
+
+    Float_t O_taupt, O_taueta, O_vsjet, O_tauweight_L, O_tauweight_M, O_tauweight_T, O_tauweight_VT;
+    Int_t   O_tauDM;
+
+    TTree *outtree = new TTree("outtree", "outtree");
+    outtree->Branch("weight_L",     &O_tauweight_L,       "weight_L/F");
+    outtree->Branch("weight_M",     &O_tauweight_M,       "weight_M/F");
+    outtree->Branch("weight_T",     &O_tauweight_T,       "weight_T/F");
+    outtree->Branch("weight_VT",    &O_tauweight_VT,     "weight_VT/F");
+    outtree->Branch("taupt",		&O_taupt,		         "taupt/F");
+    outtree->Branch("taueta",		&O_taueta,		        "taueta/F");
+    outtree->Branch("vsjet",		&O_vsjet,		         "vsjet/F");
+    outtree->Branch("tauDM",		&O_tauDM,		         "tauDM/I");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -443,7 +448,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t weight_=genweight_*weightscale_*lumi_eff*xsec_*1000;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
 
-    Float_t O_tauweight_den  = weight_;    Float_t O_tauweight_num  = weight_;
+    Float_t tauweight_L  = weight_;        Float_t tauweight_M  = weight_;          Float_t tauweight_T  = weight_;       Float_t tauweight_VT  = weight_;
     Float_t O_eleweight_den  = weight_;    Float_t O_eleweight_num  = weight_;
     Float_t O_muonweight_den = weight_;    Float_t O_muonweight_num = weight_;
     Int_t njets = 0;
@@ -457,9 +462,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int vsjet = static_cast<int>(tauidvsjet_[j]);
 
 		Float_t fake_weight1 = 1.;
-        Float_t fake_weight2 = 1.;		
+        Float_t fake_weight2 = 1.;
+        Float_t fake_weight3 = 1.;
+        Float_t fake_weight4 = 1.;		
 	    Float_t taupt = tau_pt_[j];
-	    Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], fake_weight1, fake_weight2);
+	    Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], fake_weight1, fake_weight2, fake_weight3, fake_weight4);
 	
 	    if(pass && vsjet >= 4){
 	        ntaus_candidates++;
@@ -471,21 +478,23 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int j = tau_idx_selected;
 	    Float_t taupt = tau_pt_[j];
 	
-        Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], O_tauweight_den, O_tauweight_num);
+        Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight_L, tauweight_M, tauweight_T, tauweight_VT);
 	
 	    int vsjet = static_cast<int>(tauidvsjet_[j]);
 	    Float_t mT = m_T(taupt, met_pt_, tau_phi_[j], met_phi_);
 	
 	    if(mT <= 50){
-	        if(vsjet >= 4){
-	            h_tau_pt_den->Fill(taupt, O_tauweight_den);
-	            h_tau_eta_den->Fill(tau_eta_[j], O_tauweight_den);
-	            h_tau_2d_den->Fill(taupt, abs(tau_eta_[j]), O_tauweight_den);
-	        }
-	        if(vsjet >= 5){
-	            h_tau_pt_num->Fill(taupt, O_tauweight_num);
-	            h_tau_eta_num->Fill(tau_eta_[j], O_tauweight_num);
-	            h_tau_2d_num->Fill(taupt, abs(tau_eta_[j]), O_tauweight_num);
+            if(vsjet>=4){
+                O_tauweight_L  = tauweight_L;
+                O_tauweight_M  = tauweight_M;
+                O_tauweight_T  = tauweight_T;
+                O_tauweight_VT = tauweight_VT;
+	            O_taupt = taupt; 
+                O_taueta = tau_eta_[j];
+                O_tauDM = static_cast<int>(tau_decay_[j]);
+                O_vsjet = static_cast<int>(tauidvsjet_[j]);
+
+                outtree->Fill();
 	        }
 	    }
 	}

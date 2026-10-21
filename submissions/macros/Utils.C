@@ -312,7 +312,7 @@ Float_t trigpath_Jet(string year, const Bool_t HLT_PFJet40_, const Bool_t HLT_PF
     return max;
 }
 
-Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t vsjet_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight_den, Float_t &weight_num){
+Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UChar_t vsjet_, UChar_t source_, UChar_t DM_, Float_t dz, Float_t &weight_L, Float_t &weight_M, Float_t &weight_T, Float_t &weight_VT){
   int DM = static_cast<int>(DM_);
   if(DM==2 or DM==5 or DM==6) return false;
   int vse = static_cast<int>(vse_);
@@ -323,17 +323,23 @@ Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UCh
     int source = static_cast<int>(source_);
 
     //Scale factor for genuine taus
-    weight_den *= tau_SFvsjet->evaluate({pt,DM,source,"Loose","Tight","nom","dm"});
-    weight_num *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","dm"});
+    weight_L *= tau_SFvsjet->evaluate({pt,DM,source,"Loose","Tight","nom","dm"});
+    weight_M *= tau_SFvsjet->evaluate({pt,DM,source,"Medium","Tight","nom","dm"});
+    weight_T *= tau_SFvsjet->evaluate({pt,DM,source,"Tight","Tight","nom","dm"});
+    weight_VT *= tau_SFvsjet->evaluate({pt,DM,source,"VTight","Tight","nom","dm"});
 
     //Scale factors for misidentified taus
     if(source==2 || source==4) {
-      weight_den *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Loose","nom"});
-      weight_num *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Medium","nom"});
+      weight_L *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Loose","nom"});
+      weight_M *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Medium","nom"});
+      weight_T *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Tight","nom"});
+      weight_VT *= tau_SFvsmu->evaluate({abs(eta),source,"Tight","Tight","Tight","nom"});   // Non c'è il VT per il vsjet in vsmu, solo "Loose, Medium, Tight"
     }
     else if(source==1 || source==3) {
-      weight_den *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
-      weight_num *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
+      weight_L *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
+      weight_M *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
+      weight_T *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
+      weight_VT *= tau_SFvse->evaluate({abs(eta),DM,source,"Tight","nom"});
     }
     //Energy scale correction
     else if(source==5){

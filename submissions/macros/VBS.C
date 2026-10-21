@@ -34,14 +34,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   TTree *outtree = new TTree("outtree", "outtree");
 
-  Int_t O_njets, O_tausource, O_lepsource, O_vsjet, O_weight;
+  Int_t O_njets, O_tausource, O_lepsource, O_vsjet;
   Bool_t  O_ismuon;
   Float_t O_taupt,  O_taueta,  O_tauphi,  O_taum,  O_tauDM;
   Float_t O_leppt,  O_lepeta,  O_lepphi,  O_lepm;
   Float_t O_jet1pt, O_jet1eta, O_jet1phi, O_jet1m;
   Float_t O_jet2pt, O_jet2eta, O_jet2phi, O_jet2m;
   Float_t O_jet3pt, O_jet3eta, O_jet3phi, O_jet3m;
-  Float_t O_mjj, O_deltaRjj, O_mvis, O_metpt, O_metphi;
+  Float_t O_mjj, O_deltaRjj, O_mvis, O_metpt, O_metphi, O_weight;
 
   outtree->Branch("weight",    &O_weight,    "weight/F");
   outtree->Branch("ismuon",		&O_ismuon,		 "ismuon/O");

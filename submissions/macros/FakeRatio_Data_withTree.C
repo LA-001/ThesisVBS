@@ -30,8 +30,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TTree* tree = (TTree*)f->Get("Events");
   TTree* runtree = (TTree*)f->Get("Runs");
 
-  TTree *outtree = new TTree("outtree", "outtree");
-
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
   tree->SetBranchStatus("run", 1);
