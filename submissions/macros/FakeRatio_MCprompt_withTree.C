@@ -585,6 +585,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   h_muon_pt_den->Write();  h_muon_eta_den->Write();  h_muon_2d_den->Write();
   h_muon_pt_num->Write();  h_muon_eta_num->Write();  h_muon_2d_num->Write();
 
+  outtree->Write();
+
   f->Close();
   output->Close();
 }
