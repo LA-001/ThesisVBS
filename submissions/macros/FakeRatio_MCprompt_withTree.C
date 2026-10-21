@@ -459,16 +459,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	
 	for(int j=0; j<ntaus_; j++){
 	    if(static_cast<int>(tau_source_[j]) != 5) continue;
-	    int vsjet = static_cast<int>(tauidvsjet_[j]);
 
 		Float_t fake_weight1 = 1.;
         Float_t fake_weight2 = 1.;
         Float_t fake_weight3 = 1.;
         Float_t fake_weight4 = 1.;		
 	    Float_t taupt = tau_pt_[j];
-	    Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], fake_weight1, fake_weight2, fake_weight3, fake_weight4);
+	    Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j],  tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], fake_weight1, fake_weight2, fake_weight3, fake_weight4);
 	
-	    if(pass && vsjet >= 4){
+	    if(pass){
 	        ntaus_candidates++;
 	        if(tau_idx_selected < 0) tau_idx_selected = j;
 	    }
@@ -478,7 +477,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int j = tau_idx_selected;
 	    Float_t taupt = tau_pt_[j];
 	
-        Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight_L, tauweight_M, tauweight_T, tauweight_VT);
+        Bool_t pass = TauSelector_FR(taupt, tau_eta_[j], tauidvse_[j], tauidvsmu_[j],   tauidvsjet_[j], tau_source_[j], tau_decay_[j], tau_dz_[j], tauweight_L, tauweight_M, tauweight_T, tauweight_VT);
 	
 	    int vsjet = static_cast<int>(tauidvsjet_[j]);
 	    Float_t mT = m_T(taupt, met_pt_, tau_phi_[j], met_phi_);
@@ -509,9 +508,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		Float_t fake_weight1 = 1.;
         Float_t fake_weight2 = 1.;		
 	    Float_t elept = ele_pt_[j];
-	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, fake_weight1, fake_weight2);
+	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, fake_weight1, fake_weight2);
 	
-	    if(pass && ele_mvaid90_[j]){
+	    if(pass){
 	        neles_candidates++;
 	        if(ele_idx_selected < 0) ele_idx_selected = j;
 	    }
@@ -521,7 +520,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int j = ele_idx_selected;
 	    Float_t elept = ele_pt_[j];
 	
-	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight_den, O_eleweight_num);
+	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight_den, O_eleweight_num);
 	    Float_t mT = m_T(elept, met_pt_, ele_phi_[j], met_phi_);
 	
 	    if(mT <= 50){
@@ -548,9 +547,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		Float_t fake_weight1 = 1.;
 		Float_t fake_weight2 = 1.;	
 	    Float_t muonpt = muon_pt_[j];
-	    Bool_t pass = MuonSelector_FR(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, fake_weight1, fake_weight2);
+	    Bool_t pass = MuonSelector_FR(muonpt, muon_eta_[j], muon_phi_[j], muon_looseid_[j], muon_dxy_[j], muon_dz_[j], muon_isoscore_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, fake_weight1, fake_weight2);
 	
-	    if(pass && muon_looseid_[j] && muon_isoscore_[j]<0.4){
+	    if(pass){
 	        nmuons_candidates++;
 	        if(muon_idx_selected < 0) muon_idx_selected = j;
 	    }
@@ -560,7 +559,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int j = muon_idx_selected;
 	    Float_t muonpt = muon_pt_[j];
 	
-	    Bool_t pass = MuonSelector_FR(muonpt, muon_eta_[j], muon_phi_[j], muon_dxy_[j], muon_dz_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, O_muonweight_den, O_muonweight_num);
+	    Bool_t pass = MuonSelector_FR(muonpt, muon_eta_[j], muon_phi_[j], muon_looseid_[j], muon_dxy_[j], muon_dz_[j], muon_isoscore_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, O_muonweight_den, O_muonweight_num);
 	    Float_t mT = m_T(muonpt, met_pt_, muon_phi_[j], met_phi_);
 	
 	    if(mT <= 50){
@@ -581,8 +580,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   }  
 
-  h_tau_pt_den->Write();   h_tau_eta_den->Write();   h_tau_2d_den->Write();
-  h_tau_pt_num->Write();   h_tau_eta_num->Write();   h_tau_2d_num->Write();
   h_ele_pt_den->Write();   h_ele_eta_den->Write();   h_ele_2d_den->Write();
   h_ele_pt_num->Write();   h_ele_eta_num->Write();   h_ele_2d_num->Write();
   h_muon_pt_den->Write();  h_muon_eta_den->Write();  h_muon_2d_den->Write();
