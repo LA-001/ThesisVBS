@@ -394,7 +394,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_jet3pt, O_jet3eta, O_jet3phi, O_jet3m;
   Float_t O_mjj, O_deltaRjj;
   Float_t O_mvis, O_metpt, O_metphi, O_weight;
-  Int_t O_njets, O_vsjet;
+  Int_t O_njets, O_vsjet, O_tausource, O_lepsource;
 
   TTree *outtree = new TTree("outtree", "outtree");
   outtree->Branch("weight",		&O_weight,		"weight/F");
