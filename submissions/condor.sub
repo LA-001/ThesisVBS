@@ -1,5 +1,5 @@
 executable              = $(directory)/batchScript.sh
-arguments               = /afs/cern.ch/user/l/allasia/CMSSW_14_0_9/src/ThesisVBS/submissions/$(directory) $(ClusterId)$(ProcId) a b  
+arguments               = /afs/cern.ch/user/l/lallasia/CMSSW_14_0_9/src/ThesisVBS/submissions/$(directory) $(ClusterId)$(ProcId) a b  
 output                  = log/$(ClusterId).$(ProcId).out
 error                   = log/$(ClusterId).$(ProcId).err
 log                     = log/$(ClusterId).log
