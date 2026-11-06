@@ -631,9 +631,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         O_jetsm[id]   = jetsm[id];
       }
 
-	    O_mjj      = mjj_;
       O_mvis     = mvis_;
-      O_deltaRjj = deltaRjj_;
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
       O_nbjets   = nbjets;
