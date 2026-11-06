@@ -654,6 +654,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
       O_njets    = njets;
+      O_nbjets   = nbjets;
       
       outtree->Fill();
     }
