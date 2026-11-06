@@ -45,9 +45,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t  O_ismuon;
   Float_t O_taupt,  O_taueta,  O_tauphi,  O_taum,  O_tauDM;
   Float_t O_leppt,  O_lepeta,  O_lepphi,  O_lepm;
-  Float_t O_jet1pt, O_jet1eta, O_jet1phi, O_jet1m;
-  Float_t O_jet2pt, O_jet2eta, O_jet2phi, O_jet2m;
-  Float_t O_jet3pt, O_jet3eta, O_jet3phi, O_jet3m;
+  Float_t O_jetspt[128], O_jetseta[128], O_jetsphi[128], O_jetsm[128];
   Float_t O_mjj, O_deltaRjj, O_mvis, O_metpt, O_metphi, O_weight;
 
   auto setBranches = [&](TTree* t){
@@ -68,29 +66,17 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     t->Branch("lepm",		  &O_lepm,		   "lepm/F");
     t->Branch("lepsource", &O_lepsource, "lepsource/I");
 
-    t->Branch("jet1pt",   &O_jet1pt,    "jet1pt/F");
-    t->Branch("jet1eta",  &O_jet1eta, 	"jet1eta/F");
-    t->Branch("jet1phi", 	&O_jet1phi, 	"jet1phi/F");
-    t->Branch("jet1m", 	  &O_jet1m, 	  "jet1m/F");  
+    t->Branch("njets",    &O_njets,      "njets/I"); 
+    t->Branch("jetspt",   O_jetspt,      "jetspt[njets]/F");
+    t->Branch("jetseta",  O_jetseta, 	   "jetseta[njets]/F");
+    t->Branch("jetsphi", 	O_jetsphi, 	   "jetsphi[njets]/F");
+    t->Branch("jetsm", 	  O_jetsm, 	     "jetsm[njets]/F");  
 
-    t->Branch("jet2pt",   &O_jet2pt,    "jet2pt/F");
-    t->Branch("jet2eta",  &O_jet2eta, 	"jet2eta/F");
-    t->Branch("jet2phi", 	&O_jet2phi, 	"jet2phi/F");
-    t->Branch("jet2m", 	  &O_jet2m, 	  "jet2m/F"); 
-
-    t->Branch("jet3pt",   &O_jet3pt,    "jet3pt/F");
-    t->Branch("jet3eta",  &O_jet3eta, 	"jet3eta/F");
-    t->Branch("jet3phi", 	&O_jet3phi, 	"jet3phi/F");
-    t->Branch("jet3m", 	  &O_jet3m, 	  "jet3m/F"); 
-
-    t->Branch("mjj",		  &O_mjj,			  "mjj/F");
-    t->Branch("deltaRjj",	&O_deltaRjj,	"deltaRjj/F");
-    t->Branch("metpt",   	&O_metpt,   	"metpt/F");
-    t->Branch("metphi",  	&O_metphi,  	"metphi/F");
-    t->Branch("mvis",     &O_mvis,      "mvis/F");
-    t->Branch("njets",    &O_njets,     "njets/I"); 
-    t->Branch("nbjets",    &O_nbjets,   "nbjets/I");  
-  }
+    t->Branch("metpt",   	&O_metpt,   	 "metpt/F");
+    t->Branch("metphi",  	&O_metphi,  	 "metphi/F");
+    t->Branch("mvis",     &O_mvis,       "mvis/F");
+    t->Branch("nbjets",   &O_nbjets,     "nbjets/I");  
+  };
 
   setBranches(outtree_bveto);
   setBranches(outtree_2b);
@@ -490,6 +476,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t selectedtaupt=0., selectedleppt=0.;
 	  Int_t jet1index = -1, jet2index = -1;
 	  Bool_t ismuon = true;
+    Float_t jetspt[128], jetseta[128], jetsphi[128], jetsm[128];
 
     if(sample==3 || sample==4 || sample==5){
       Float_t O_topreweight=1.;
@@ -600,10 +587,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           }
 
           if(nbjets>2) break;
-          
-          if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-          else if(njets==2) p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-          else if(njets==3) p4jet3 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+
+          jetspt[njets-1] = jetpt;
+          jetseta[njets-1] = jet_eta_[j];
+          jetsphi[njets-1] = jet_phi_[j];
+          jetsm[njets-1] = jet_mass_[j];
         }
     	}
 	  }
@@ -616,10 +604,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
       ROOT::Math::PtEtaPhiMVector p4 = p4lep+p4tau;
       float mvis_ = p4.M(); 
-
-      ROOT::Math::PtEtaPhiMVector p4jets = p4jet1+p4jet2;
-      float mjj_ = p4jets.M(); 
-      float deltaRjj_ = deltaR(p4jet1,p4jet2);
 	
       O_weight   = weight_;
       O_ismuon   = ismuon;
@@ -639,27 +623,19 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(ismuon) O_lepsource = static_cast<int>(muon_source_[muindex]);
       else O_lepsource = static_cast<int>(ele_source_[eleindex]);
 
-      O_jet1pt   = p4jet1.Pt();
-	    O_jet1eta  = p4jet1.Eta();
-      O_jet1phi  = p4jet1.Phi();
-      O_jet1m    = p4jet1.M();
-
-      O_jet2pt   = p4jet2.Pt();
-      O_jet2eta  = p4jet2.Eta();
-      O_jet2phi  = p4jet2.Phi();
-      O_jet2m    = p4jet2.M();
-
-      O_jet3pt   = p4jet3.Pt();
-      O_jet3eta  = p4jet3.Eta();
-      O_jet3phi  = p4jet3.Phi();
-      O_jet3m    = p4jet3.M();
+      O_njets    = njets;
+      for(int id=0; id<njets; id++){
+        O_jetspt[id]  = jetspt[id];
+        O_jetseta[id] = jetseta[id];
+        O_jetsphi[id] = jetsphi[id];
+        O_jetsm[id]   = jetsm[id];
+      }
 
 	    O_mjj      = mjj_;
       O_mvis     = mvis_;
       O_deltaRjj = deltaRjj_;
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
-      O_njets    = njets;
       O_nbjets   = nbjets;
       
       if(nbjets==0) outtree_bveto->Fill();
@@ -668,7 +644,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   }
 
   output->cd();
-  
+
   dir1->cd(); 
   outtree_bveto->Write();
   dir2->cd(); 
