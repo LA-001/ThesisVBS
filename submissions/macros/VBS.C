@@ -269,15 +269,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 //-------------------------- MC TRUTH -------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Tau_genPartFlav", 1);
-  UChar_t tau_source_[128];
+  UChar_t tau_source_[1024];
   tree->SetBranchAddress("Tau_genPartFlav",&tau_source_);
 
   tree->SetBranchStatus("Electron_genPartFlav", 1);
-  UChar_t ele_source_[128];
+  UChar_t ele_source_[1024];
   tree->SetBranchAddress("Electron_genPartFlav",&ele_source_);
 
   tree->SetBranchStatus("Muon_genPartFlav", 1);
-  UChar_t muon_source_[128];
+  UChar_t muon_source_[1024];
   tree->SetBranchAddress("Muon_genPartFlav",&muon_source_);
 
   tree->SetBranchStatus("nGenPart", 1);
@@ -285,15 +285,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("nGenPart",&ngenparts_);
 
   tree->SetBranchStatus("GenPart_pdgId", 1);
-  Int_t genpart_id_[128];
+  Int_t genpart_id_[1024];
   tree->SetBranchAddress("GenPart_pdgId",&genpart_id_);
 
   tree->SetBranchStatus("GenPart_statusFlags", 1);
-  Int_t genpart_statusFlags_[128];
+  UShort_t genpart_statusFlags_[1024];
   tree->SetBranchAddress("GenPart_statusFlags",&genpart_statusFlags_);
 
   tree->SetBranchStatus("GenPart_pt", 1);
-  Int_t GenPart_pt_[128];
+  Float_t GenPart_pt_[1024];
   tree->SetBranchAddress("GenPart_pt",&GenPart_pt_);
 
 //-------------------------- JETS -----------------------------------------------------------------------------------------
