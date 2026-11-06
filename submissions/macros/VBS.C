@@ -38,7 +38,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
   TTree *outtree = new TTree("outtree", "outtree");
 
-  Int_t O_njets, O_tausource, O_lepsource, O_vsjet;
+  Int_t O_njets, O_nbjets, O_tausource, O_lepsource, O_vsjet;
   Bool_t  O_ismuon;
   Float_t O_taupt,  O_taueta,  O_tauphi,  O_taum,  O_tauDM;
   Float_t O_leppt,  O_lepeta,  O_lepphi,  O_lepm;
@@ -84,7 +84,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("metpt",   	&O_metpt,   	"metpt/F");
   outtree->Branch("metphi",  	&O_metphi,  	"metphi/F");
   outtree->Branch("mvis",     &O_mvis,      "mvis/F");
-  outtree->Branch("njets",    &O_njets,     "njets/I");  
+  outtree->Branch("njets",    &O_njets,     "njets/I"); 
+  outtree->Branch("nbjets",    &O_nbjets,   "nbjets/I");  
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -293,8 +294,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchAddress("GenPart_statusFlags",&genpart_statusFlags_);
 
   tree->SetBranchStatus("GenPart_pt", 1);
-  Float_t GenPart_pt_[1024];
-  tree->SetBranchAddress("GenPart_pt",&GenPart_pt_);
+  Float_t genpart_pt_[1024];
+  tree->SetBranchAddress("GenPart_pt",&genpart_pt_);
 
 //-------------------------- JETS -----------------------------------------------------------------------------------------
 
@@ -483,7 +484,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  Bool_t ismuon = true;
 
     if(sample==3 || sample==4 || sample==5){
-      O_topreweight=1.;
+      int O_topreweight=1.;
       int ntops=0;
 
       for(int j=0; j<ngenparts_; j++){
@@ -585,8 +586,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             break;
           }
 
-          if(TMath::Abs(eta) < 2.5){
-            if(btagSelector(jet_btag_[j])) nbjet++;
+          if(TMath::Abs(jet_eta_[j]) < 2.5){
+            if(btagSelector(jet_btag_[j])) nbjets++;
             btagSF(jet_btag_[j], jet_flav_[j], jetpt, jet_eta_[j], weight_, excflag);
           }
 
