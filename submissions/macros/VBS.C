@@ -3,6 +3,7 @@
 #include <vector>
 #include "TString.h"
 #include "TFile.h"
+#include "TDirectory.h"
 #include "TTree.h"
 #include "TH1F.h"
 #include "TH2F.h"
@@ -28,9 +29,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TString filename = "root://xrootd-cms.infn.it/" + srcfile;
   TFile *f = TFile::Open(filename);
   if(f) cout<<"File has been opened!"<<endl;
-  TFile *output = new TFile("testoutput.root","RECREATE");
   TTree* tree = (TTree*)f->Get("Events");
   TTree* runtree = (TTree*)f->Get("Runs");
+
+  TFile *output = new TFile("testoutput.root","RECREATE");
+  TDirectory *dir1 = output->mkdir("bveto");
+  TDirectory *dir2 = output->mkdir("2b");
 
   TTree *outtree = new TTree("outtree", "outtree");
 
@@ -276,6 +280,22 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   UChar_t muon_source_[128];
   tree->SetBranchAddress("Muon_genPartFlav",&muon_source_);
 
+  tree->SetBranchStatus("nGenPart", 1);
+  Int_t ngenparts_;
+  tree->SetBranchAddress("nGenPart",&ngenparts_);
+
+  tree->SetBranchStatus("GenPart_pdgId", 1);
+  Int_t genpart_id_[128];
+  tree->SetBranchAddress("GenPart_pdgId",&genpart_id_);
+
+  tree->SetBranchStatus("GenPart_statusFlags", 1);
+  Int_t genpart_statusFlags_[128];
+  tree->SetBranchAddress("GenPart_statusFlags",&genpart_statusFlags_);
+
+  tree->SetBranchStatus("GenPart_pt", 1);
+  Int_t GenPart_pt_[128];
+  tree->SetBranchAddress("GenPart_pt",&GenPart_pt_);
+
 //-------------------------- JETS -----------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Jet_pt", 1);
@@ -457,10 +477,28 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     Int_t lepton=0, jets;
 
-    Int_t ntaus=0, nbtags=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
+    Int_t ntaus=0, nbtags=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0, nbjets=0;
     Float_t selectedtaupt=0., selectedleppt=0.;
 	  Int_t jet1index = -1, jet2index = -1;
-	  Bool_t ismuon = true, isvsjetVT = false;
+	  Bool_t ismuon = true;
+
+    if(sample==3 || sample==4 || sample==5){
+      O_topreweight=1.;
+      int ntops=0;
+
+      for(int j=0; j<ngenparts_; j++){
+        if(abs(genpart_id_[j])==6 && (genpart_statusFlags_[j]/8192)%2){
+          ntops++;
+          float pt=genpart_pt_[j];
+          O_topreweight*=0.103*exp(-0.0118*pt)-0.000134*pt+0.973;
+          O_topreweight*=0.991+0.000075*pt;
+        }
+      }
+      if(ntops>1){
+        O_topreweight=sqrt(O_topreweight);
+        weight_*=O_topreweight;
+      }
+    }
 
     ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2, p4jet3;
     
@@ -473,8 +511,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         tauindex=j;
 		    taucharge=tau_charge_[j];
 		    p4tau = ROOT::Math::PtEtaPhiMVector(taupt,tau_eta_[j],tau_phi_[j],tau_mass_[j]);
-        Int_t vsjet = static_cast<int>(tauidvsjet_[j]);
-        if(vsjet >= 7) isvsjetVT = true;
       }
     }
         
@@ -549,8 +585,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             break;
           }
 
-          if(TMath::Abs(jet_eta_[j]) < 2.5) bvetoSelector(jet_btag_[j], jet_flav_[j], jetpt, jet_eta_[j], weight_, btagflag);
-          //if(TMath::Abs(jet_eta_[j]) < 2.5 && jet_btag_[j] >= btag_thr_) btagflag = 1;
+          if(TMath::Abs(eta) < 2.5){
+            if(btagSelector(jet_btag_[j])) nbjet++;
+            btagSF(jet_btag_[j], jet_flav_[j], jetpt, jet_eta_[j], weight_, excflag);
+          }
+
+          if(nbjets>2) break;
           
           if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
           else if(njets==2) p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
@@ -563,7 +603,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     if(typeevent==1) trigpath=mutri_; 
     else if(typeevent==2) trigpath=eletri_;
     
-    if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
+    if(trigpath and typeevent>0 and !excflag and njets>=2 and nbjets < 3 and nbjets != 1){
+      if(nbjets==0) dir1->cd();
+      if(nbjets==2) dir2->cd();
 
       ROOT::Math::PtEtaPhiMVector p4 = p4lep+p4tau;
       float mvis_ = p4.M(); 

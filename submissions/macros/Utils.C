@@ -499,3 +499,30 @@ void bvetoSelector(Float_t jet_btag, UChar_t flavour_, Float_t pt, Float_t eta, 
     return;
   }
 }
+
+Bool_t btagSelector(Float_t jet_btag){
+
+  if(jet_btag >= btag_thr_) return true;
+  return false;
+}
+
+void btagSF(Float_t jet_btag, UChar_t flavour_, Float_t pt, Float_t eta, Float_t &weight, Bool_t &excflag){
+  Int_t flavour = static_cast<int>(flavour_);
+  Float_t eff = 0.;
+  Float_t SF = 0.;
+
+  eff = getBTagEff(pt, abs(eta), flavour);
+  if(eff == 0.) excflag = true;
+
+  if(flavour == 5 || flavour == 4) SF = bcjet_SF->evaluate({"central","M",flavour,abs(eta),pt});
+  else if(flavour == 0) SF = lightjet_SF->evaluate({"central","M",flavour,abs(eta),pt});
+  else excflag = true;
+
+  if(jet_btag >= btag_thr_){
+    weight *= SF;
+    return;
+  }else{
+    weight *= (1 - SF*eff)/(1 - eff);
+    return;
+  }
+}
