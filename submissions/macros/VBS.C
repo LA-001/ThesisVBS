@@ -36,7 +36,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TDirectory *dir1 = output->mkdir("bveto");
   TDirectory *dir2 = output->mkdir("2b");
 
-  TTree *outtree = new TTree("outtree", "outtree");
+  dir1->cd();
+  TTree *outtree_bveto = new TTree("outtree","outtree");
+  dir2->cd();
+  TTree *outtree_2b = new TTree("outtree","outtree");
 
   Int_t O_njets, O_nbjets, O_tausource, O_lepsource, O_vsjet;
   Bool_t  O_ismuon;
@@ -47,45 +50,50 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_jet3pt, O_jet3eta, O_jet3phi, O_jet3m;
   Float_t O_mjj, O_deltaRjj, O_mvis, O_metpt, O_metphi, O_weight;
 
-  outtree->Branch("weight",    &O_weight,    "weight/F");
-  outtree->Branch("ismuon",		&O_ismuon,		 "ismuon/O");
+  auto setBranches = [&](TTree* t){
+    t->Branch("weight",    &O_weight,    "weight/F");
+    t->Branch("ismuon",		&O_ismuon,		 "ismuon/O");
 
-  outtree->Branch("taupt",		&O_taupt,		   "taupt/F");
-  outtree->Branch("taueta",		&O_taueta,		 "taueta/F");
-  outtree->Branch("tauphi",		&O_tauphi,		 "tauphi/F");
-  outtree->Branch("taum",		  &O_taum,		   "taum/F");
-  outtree->Branch("tauDM",		&O_tauDM,		   "tauDM/F");
-  outtree->Branch("tausource", &O_tausource, "tausource/I");
-  outtree->Branch("vsjet",    &O_vsjet,      "vsjet/I");
+    t->Branch("taupt",		&O_taupt,		   "taupt/F");
+    t->Branch("taueta",		&O_taueta,		 "taueta/F");
+    t->Branch("tauphi",		&O_tauphi,		 "tauphi/F");
+    t->Branch("taum",		  &O_taum,		   "taum/F");
+    t->Branch("tauDM",		&O_tauDM,		   "tauDM/F");
+    t->Branch("tausource", &O_tausource, "tausource/I");
+    t->Branch("vsjet",    &O_vsjet,      "vsjet/I");
 
-  outtree->Branch("leppt",		&O_leppt,		   "leppt/F");
-  outtree->Branch("lepeta",		&O_lepeta,		 "lepeta/F");
-  outtree->Branch("lepphi",		&O_lepphi,		 "lepphi/F");
-  outtree->Branch("lepm",		  &O_lepm,		   "lepm/F");
-  outtree->Branch("lepsource", &O_lepsource, "lepsource/I");
+    t->Branch("leppt",		&O_leppt,		   "leppt/F");
+    t->Branch("lepeta",		&O_lepeta,		 "lepeta/F");
+    t->Branch("lepphi",		&O_lepphi,		 "lepphi/F");
+    t->Branch("lepm",		  &O_lepm,		   "lepm/F");
+    t->Branch("lepsource", &O_lepsource, "lepsource/I");
 
-  outtree->Branch("jet1pt",   &O_jet1pt,    "jet1pt/F");
-  outtree->Branch("jet1eta",  &O_jet1eta, 	"jet1eta/F");
-  outtree->Branch("jet1phi", 	&O_jet1phi, 	"jet1phi/F");
-  outtree->Branch("jet1m", 	  &O_jet1m, 	  "jet1m/F");  
+    t->Branch("jet1pt",   &O_jet1pt,    "jet1pt/F");
+    t->Branch("jet1eta",  &O_jet1eta, 	"jet1eta/F");
+    t->Branch("jet1phi", 	&O_jet1phi, 	"jet1phi/F");
+    t->Branch("jet1m", 	  &O_jet1m, 	  "jet1m/F");  
 
-  outtree->Branch("jet2pt",   &O_jet2pt,    "jet2pt/F");
-  outtree->Branch("jet2eta",  &O_jet2eta, 	"jet2eta/F");
-  outtree->Branch("jet2phi", 	&O_jet2phi, 	"jet2phi/F");
-  outtree->Branch("jet2m", 	  &O_jet2m, 	  "jet2m/F"); 
+    t->Branch("jet2pt",   &O_jet2pt,    "jet2pt/F");
+    t->Branch("jet2eta",  &O_jet2eta, 	"jet2eta/F");
+    t->Branch("jet2phi", 	&O_jet2phi, 	"jet2phi/F");
+    t->Branch("jet2m", 	  &O_jet2m, 	  "jet2m/F"); 
 
-  outtree->Branch("jet3pt",   &O_jet3pt,    "jet3pt/F");
-  outtree->Branch("jet3eta",  &O_jet3eta, 	"jet3eta/F");
-  outtree->Branch("jet3phi", 	&O_jet3phi, 	"jet3phi/F");
-  outtree->Branch("jet3m", 	  &O_jet3m, 	  "jet3m/F"); 
+    t->Branch("jet3pt",   &O_jet3pt,    "jet3pt/F");
+    t->Branch("jet3eta",  &O_jet3eta, 	"jet3eta/F");
+    t->Branch("jet3phi", 	&O_jet3phi, 	"jet3phi/F");
+    t->Branch("jet3m", 	  &O_jet3m, 	  "jet3m/F"); 
 
-  outtree->Branch("mjj",		  &O_mjj,			  "mjj/F");
-  outtree->Branch("deltaRjj",	&O_deltaRjj,	"deltaRjj/F");
-  outtree->Branch("metpt",   	&O_metpt,   	"metpt/F");
-  outtree->Branch("metphi",  	&O_metphi,  	"metphi/F");
-  outtree->Branch("mvis",     &O_mvis,      "mvis/F");
-  outtree->Branch("njets",    &O_njets,     "njets/I"); 
-  outtree->Branch("nbjets",    &O_nbjets,   "nbjets/I");  
+    t->Branch("mjj",		  &O_mjj,			  "mjj/F");
+    t->Branch("deltaRjj",	&O_deltaRjj,	"deltaRjj/F");
+    t->Branch("metpt",   	&O_metpt,   	"metpt/F");
+    t->Branch("metphi",  	&O_metphi,  	"metphi/F");
+    t->Branch("mvis",     &O_mvis,      "mvis/F");
+    t->Branch("njets",    &O_njets,     "njets/I"); 
+    t->Branch("nbjets",    &O_nbjets,   "nbjets/I");  
+  }
+
+  setBranches(outtree_bveto);
+  setBranches(outtree_2b);
 
   tree->SetBranchStatus("*", 0);	//Turn off all the Branches and after turn on only what i need
 
@@ -484,13 +492,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  Bool_t ismuon = true;
 
     if(sample==3 || sample==4 || sample==5){
-      int O_topreweight=1.;
-      int ntops=0;
+      Float_t O_topreweight=1.;
+      Int_t ntops=0;
 
       for(int j=0; j<ngenparts_; j++){
         if(abs(genpart_id_[j])==6 && (genpart_statusFlags_[j]/8192)%2){
           ntops++;
-          float pt=genpart_pt_[j];
+          Float_t pt=genpart_pt_[j];
           O_topreweight*=0.103*exp(-0.0118*pt)-0.000134*pt+0.973;
           O_topreweight*=0.991+0.000075*pt;
         }
@@ -605,8 +613,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     else if(typeevent==2) trigpath=eletri_;
     
     if(trigpath and typeevent>0 and !excflag and njets>=2 and nbjets < 3 and nbjets != 1){
-      if(nbjets==0) dir1->cd();
-      if(nbjets==2) dir2->cd();
 
       ROOT::Math::PtEtaPhiMVector p4 = p4lep+p4tau;
       float mvis_ = p4.M(); 
@@ -656,11 +662,17 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       O_njets    = njets;
       O_nbjets   = nbjets;
       
-      outtree->Fill();
+      if(nbjets==0) outtree_bveto->Fill();
+      if(nbjets==2) outtree_2b->Fill();
     }
   }
 
-  outtree->Write();
+  output->cd();
+  
+  dir1->cd(); 
+  outtree_bveto->Write();
+  dir2->cd(); 
+  outtree_2b->Write();
 
   f->Close();
   output->Close();
