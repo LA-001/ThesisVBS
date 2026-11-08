@@ -530,7 +530,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
           if(TMath::Abs(jet_eta_[j]) < 2.5){
             if(jet_pt_[j] > 1000.) excflag = 1;
-            if((jet_btag_[j])) nbjets++;
+            if(btagSelector(jet_btag_[j])) nbjets++;
           }
 
           if(nbjets>2) break;
@@ -579,6 +579,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       O_mvis     = mvis;
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
+      O_nbjets   = nbjets;
 
       if(nbjets==0) outtree_bveto->Fill();
       if(nbjets==2) outtree_2b->Fill();
