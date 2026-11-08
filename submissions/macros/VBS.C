@@ -496,7 +496,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       }
     }
 
-    ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2, p4jet3;
+    ROOT::Math::PtEtaPhiMVector p4tau, p4lep;
     
     int tauindex=0;
     for(int j=0; j<ntaus_; j++){
