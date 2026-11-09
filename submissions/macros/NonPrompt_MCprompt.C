@@ -27,7 +27,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   TString filename = "root://xrootd-cms.infn.it/" + srcfile;
   TFile *f = TFile::Open(filename);
   if(f) cout<<"File has been opened!"<<endl;
-  TFile *output= new TFile("testoutput.root","RECREATE");
   TTree* tree = (TTree*)f->Get("Events");
   TTree* runtree = (TTree*)f->Get("Runs");
 
@@ -225,6 +224,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   UChar_t muon_source_[128];
   tree->SetBranchAddress("Muon_genPartFlav",&muon_source_);
 
+  tree->SetBranchStatus("nGenPart", 1);
+  Int_t ngenparts_;
+  tree->SetBranchAddress("nGenPart",&ngenparts_);
+
+  tree->SetBranchStatus("GenPart_pdgId", 1);
+  Int_t genpart_id_[1024];
+  tree->SetBranchAddress("GenPart_pdgId",&genpart_id_);
+
+  tree->SetBranchStatus("GenPart_statusFlags", 1);
+  UShort_t genpart_statusFlags_[1024];
+  tree->SetBranchAddress("GenPart_statusFlags",&genpart_statusFlags_);
+
+  tree->SetBranchStatus("GenPart_pt", 1);
+  Float_t genpart_pt_[1024];
+  tree->SetBranchAddress("GenPart_pt",&genpart_pt_);
 
 //-------------------------- JETS -----------------------------------------------------------------------------------------
 
@@ -385,58 +399,55 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   weightscale_*=lumi*xsec_*1000;
 
 //-------------------------- OUTPUT ---------------------------------------------------------------------------------------
+  TFile *output = new TFile("testoutput.root","RECREATE");
+  TDirectory *dir1 = output->mkdir("bveto");
+  TDirectory *dir2 = output->mkdir("2b");
 
-  Bool_t  O_istauT, O_islepT,  O_ismuon;
+  dir1->cd();
+  TTree *outtree_bveto = new TTree("outtree","outtree");
+  dir2->cd();
+  TTree *outtree_2b = new TTree("outtree","outtree");
+
+  Int_t O_njets, O_nbjets, O_tausource, O_lepsource, O_vsjet;
+  Bool_t  O_ismuon, O_islepT;
   Float_t O_taupt,  O_taueta,  O_tauphi,  O_taum,  O_tauDM;
   Float_t O_leppt,  O_lepeta,  O_lepphi,  O_lepm;
-  Float_t O_jet1pt, O_jet1eta, O_jet1phi, O_jet1m;
-  Float_t O_jet2pt, O_jet2eta, O_jet2phi, O_jet2m;
-  Float_t O_jet3pt, O_jet3eta, O_jet3phi, O_jet3m;
-  Float_t O_mjj, O_deltaRjj;
-  Float_t O_mvis, O_metpt, O_metphi, O_weight;
-  Int_t O_njets, O_vsjet, O_tausource, O_lepsource;
+  Float_t O_jetspt[128], O_jetseta[128], O_jetsphi[128], O_jetsm[128];
+  Float_t O_mjj, O_deltaRjj, O_mvis, O_metpt, O_metphi, O_weight;
 
-  TTree *outtree = new TTree("outtree", "outtree");
-  outtree->Branch("weight",		&O_weight,		"weight/F");
-  outtree->Branch("istauT",		&O_istauT,		"istauT/O");
-  outtree->Branch("islepT",		&O_islepT,		"islepT/O");
-  outtree->Branch("ismuon",		&O_ismuon,		"ismuon/O");
+  auto setBranches = [&](TTree* t){
+    t->Branch("weight",   &O_weight,    "weight/F");
+    t->Branch("ismuon",		&O_ismuon,		 "ismuon/O");
+    t->Branch("islepT",		&O_islepT,		"islepT/O");
 
-  outtree->Branch("taupt",		&O_taupt,		  "taupt/F");
-  outtree->Branch("taueta",		&O_taueta,		"taueta/F");
-  outtree->Branch("tauphi",		&O_tauphi,		"tauphi/F");
-  outtree->Branch("taum",		  &O_taum,		  "taum/F");
-  outtree->Branch("tauDM",		&O_tauDM,		  "tauDM/F");
-  outtree->Branch("tausource",  &O_tausource,       "tausource/I");
+    t->Branch("taupt",		&O_taupt,		   "taupt/F");
+    t->Branch("taueta",		&O_taueta,		 "taueta/F");
+    t->Branch("tauphi",		&O_tauphi,		 "tauphi/F");
+    t->Branch("taum",		  &O_taum,		   "taum/F");
+    t->Branch("tauDM",		&O_tauDM,		   "tauDM/F");
+    t->Branch("tausource", &O_tausource, "tausource/I");
+    t->Branch("vsjet",    &O_vsjet,      "vsjet/I");
 
-  outtree->Branch("leppt",		&O_leppt,		  "leppt/F");
-  outtree->Branch("lepeta",		&O_lepeta,		"lepeta/F");
-  outtree->Branch("lepphi",		&O_lepphi,		"lepphi/F");
-  outtree->Branch("lepm",		  &O_lepm,		  "lepm/F");
-  outtree->Branch("lepsource",  &O_lepsource,       "lepsource/I");
+    t->Branch("leppt",		&O_leppt,		   "leppt/F");
+    t->Branch("lepeta",		&O_lepeta,		 "lepeta/F");
+    t->Branch("lepphi",		&O_lepphi,		 "lepphi/F");
+    t->Branch("lepm",		  &O_lepm,		   "lepm/F");
+    t->Branch("lepsource", &O_lepsource, "lepsource/I");
 
-  outtree->Branch("jet1pt",   &O_jet1pt,    "jet1pt/F");
-  outtree->Branch("jet1eta",  &O_jet1eta, 	"jet1eta/F");
-  outtree->Branch("jet1phi", 	&O_jet1phi, 	"jet1phi/F");
-  outtree->Branch("jet1m", 	  &O_jet1m, 	  "jet1m/F");  
+    t->Branch("njets",    &O_njets,      "njets/I"); 
+    t->Branch("jetspt",   O_jetspt,      "jetspt[njets]/F");
+    t->Branch("jetseta",  O_jetseta, 	   "jetseta[njets]/F");
+    t->Branch("jetsphi", 	O_jetsphi, 	   "jetsphi[njets]/F");
+    t->Branch("jetsm", 	  O_jetsm, 	     "jetsm[njets]/F");  
 
-  outtree->Branch("jet2pt",   &O_jet2pt,    "jet2pt/F");
-  outtree->Branch("jet2eta",  &O_jet2eta, 	"jet2eta/F");
-  outtree->Branch("jet2phi", 	&O_jet2phi, 	"jet2phi/F");
-  outtree->Branch("jet2m", 	  &O_jet2m, 	  "jet2m/F"); 
+    t->Branch("metpt",   	&O_metpt,   	 "metpt/F");
+    t->Branch("metphi",  	&O_metphi,  	 "metphi/F");
+    t->Branch("mvis",     &O_mvis,       "mvis/F");
+    t->Branch("nbjets",   &O_nbjets,     "nbjets/I");  
+  };
 
-  outtree->Branch("jet3pt",   &O_jet3pt,    "jet3pt/F");
-  outtree->Branch("jet3eta",  &O_jet3eta, 	"jet3eta/F");
-  outtree->Branch("jet3phi", 	&O_jet3phi, 	"jet3phi/F");
-  outtree->Branch("jet3m", 	  &O_jet3m, 	  "jet3m/F"); 
-
-  outtree->Branch("mjj",		  &O_mjj,			  "mjj/F");
-  outtree->Branch("deltaRjj",	&O_deltaRjj,	"deltaRjj/F");
-  outtree->Branch("metpt",   	&O_metpt,   	"metpt/F");
-  outtree->Branch("metphi",  	&O_metphi,  	"metphi/F");
-  outtree->Branch("mvis",     &O_mvis,      "mvis/F");
-  outtree->Branch("njets",    &O_njets,     "njets/I");  
-  outtree->Branch("vsjet",    &O_vsjet,     "vsjet/I");
+  setBranches(outtree_bveto);
+  setBranches(outtree_2b);
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -451,17 +462,36 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     bool excflag = 0;
 	  bool btagflag = 0;
     bool ismuon = false;
-    Int_t ntaus=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0;
+    Int_t ntaus=0, taucharge=0, nelectrons=0, nmuons=0, lepcharge=0, njets=0, nbjets=0;
+    Float_t jetspt[128], jetseta[128], jetsphi[128], jetsm[128];
 
     Bool_t METfilters= (flag1_ && flag2_ && flag3_ && flag4_ && flag5_ && flag6_ && flag7_ && flag8_);
     if(!METfilters) excflag=1;
 
-    ROOT::Math::PtEtaPhiMVector p4tau, p4lep, p4jet1, p4jet2, p4jet3;
+    ROOT::Math::PtEtaPhiMVector p4tau, p4lep;
 
     Bool_t istauL=false, islepL=false;
 	  Bool_t istauT=false, islepT=false; 
 	  Float_t taupt,taueta,leppt,lepeta;
     Float_t  fake_weight=1., fake_weight2=1., fake_weight3=1.;
+
+    if(sample==3 || sample==4 || sample==5){
+      Float_t O_topreweight=1.;
+      Int_t ntops=0;
+
+      for(int j=0; j<ngenparts_; j++){
+        if(abs(genpart_id_[j])==6 && (genpart_statusFlags_[j]/8192)%2){
+          ntops++;
+          Float_t pt=genpart_pt_[j];
+          O_topreweight*=0.103*exp(-0.0118*pt)-0.000134*pt+0.973;
+          O_topreweight*=0.991+0.000075*pt;
+        }
+      }
+      if(ntops>1){
+        O_topreweight=sqrt(O_topreweight);
+        weight_*=O_topreweight;
+      }
+    }
 
     //-------------------------- TAU ----------------------------------------------------------------
     
@@ -479,7 +509,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	      istauL = true;
         taupt = pt;
 		    taueta = tau_eta_[j];
-        if(vsjet>=5)  istauT = true;
       }
     }
 
@@ -567,11 +596,17 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
             break;
           }
 
-          if(TMath::Abs(jet_eta_[j]) < 2.5) bvetoSelector(jet_btag_[j], jet_flav_[j], jetpt, jet_eta_[j], weight_, btagflag);
+          if(TMath::Abs(jet_eta_[j]) < 2.5){
+            if(btagSelector(jet_btag_[j])) nbjets++;
+            btagSF(jet_btag_[j], jet_flav_[j], jetpt, jet_eta_[j], weight_, excflag);
+          }
 
-          if(njets==1) p4jet1 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-          else if(njets==2) p4jet2 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
-          else if(njets==3) p4jet3 = ROOT::Math::PtEtaPhiMVector(jetpt,jet_eta_[j],jet_phi_[j],jet_mass_[j]);
+          if(nbjets>2) break;
+
+          jetspt[njets-1] = jetpt;
+          jetseta[njets-1] = jet_eta_[j];
+          jetsphi[njets-1] = jet_phi_[j];
+          jetsm[njets-1] = jet_mass_[j];
         }
     	}
     }
@@ -581,19 +616,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     else if(typeevent==2) trigpath=eletri_;
     if(!istauL || !islepL) excflag=1;
 	
-    if(trigpath and typeevent>0 and !excflag and njets>=2 and !btagflag){
+    if(trigpath and typeevent>0 and !excflag and njets>=2 and nbjets < 3 and nbjets != 1){
 
-      ROOT::Math::PtEtaPhiMVector p4jets = p4jet1+p4jet2;
-      Float_t mjj = p4jets.M(); // Invariant mass of the dijet system
-      Float_t deltaRjj = deltaR(p4jet1,p4jet2);
-
-      ROOT::Math::PtEtaPhiMVector p4leps = p4lep+p4tau;
-      float mvis = p4leps.M();
-
+      ROOT::Math::PtEtaPhiMVector p4 = p4lep+p4tau;
+      float mvis_ = p4.M(); 
+	
       O_weight   = weight_;
-      O_istauT   = istauT;
-	    O_islepT   = islepT;
       O_ismuon   = ismuon;
+      O_islepT   = islepT;
 
       O_taupt    = p4tau.Pt();
 	    O_taueta   = p4tau.Eta();
@@ -601,6 +631,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       O_taum     = p4tau.M();
       O_tauDM    = static_cast<int>(tau_decay_[tauindex]);
       O_tausource = static_cast<int>(tau_source_[tauindex]);
+      O_vsjet = static_cast<int>(tauidvsjet_[tauindex]);
 
       O_leppt    = p4lep.Pt();
       O_lepeta   = p4lep.Eta();
@@ -609,35 +640,31 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
       if(ismuon) O_lepsource = static_cast<int>(muon_source_[muindex]);
       else O_lepsource = static_cast<int>(ele_source_[eleindex]);
 
-      O_jet1pt   = p4jet1.Pt();
-	    O_jet1eta  = p4jet1.Eta();
-      O_jet1phi  = p4jet1.Phi();
-      O_jet1m    = p4jet1.M();
+      O_njets    = njets;
+      for(int id=0; id<njets; id++){
+        O_jetspt[id]  = jetspt[id];
+        O_jetseta[id] = jetseta[id];
+        O_jetsphi[id] = jetsphi[id];
+        O_jetsm[id]   = jetsm[id];
+      }
 
-      O_jet2pt   = p4jet2.Pt();
-      O_jet2eta  = p4jet2.Eta();
-      O_jet2phi  = p4jet2.Phi();
-      O_jet2m    = p4jet2.M();
-
-      O_jet3pt   = p4jet3.Pt();
-      O_jet3eta  = p4jet3.Eta();
-      O_jet3phi  = p4jet3.Phi();
-      O_jet3m    = p4jet3.M();
-
-	    O_mjj      = mjj;
-      O_mvis     = mvis;
-      O_deltaRjj = deltaRjj;
+      O_mvis     = mvis_;
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
-      O_njets    = njets;
-
-      O_vsjet = static_cast<int>(tauidvsjet_[tauindex]);
+      O_nbjets   = nbjets;
       
-	    outtree->Fill();
+      if(nbjets==0) outtree_bveto->Fill();
+      if(nbjets==2) outtree_2b->Fill();
     }
   }
 
-  outtree->Write(); 
+  output->cd();
+
+  dir1->cd(); 
+  outtree_bveto->Write();
+  dir2->cd(); 
+  outtree_2b->Write();
+
   f->Close();
   output->Close();
 }
