@@ -496,13 +496,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 		//----------------------------------------------------------------------------------------------
 
-      if(nelectrons+nmuons==1 and tau_charge_[tauindex]==lepcharge){
-        if(nmuons==1){ 
-          typeevent=1; 
-          ismuon = true;
-        }else{ 
-          typeevent=2;
-        }
+      if(nmuons==1 && nelectrons==0){ 
+        typeevent=1; //Mu-tauh events
+        ismuon = true;
+      }else if(nelectrons==1 && nmuons==0){ 
+        typeevent=2; //E-tauh events
+        ismuon = false;
       }
 
 		  if(deltaR(p4tau,p4lep) < 0.4) excflag = 1; 
@@ -581,8 +580,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    O_metphi   = met_phi_;
       O_nbjets   = nbjets;
 
-      if(nbjets==0) outtree_bveto->Fill();
-      if(nbjets==2) outtree_2b->Fill();
+      if(nbjets==0 && tau_charge_[tauindex]==lepcharge) outtree_bveto->Fill();
+      if(nbjets==2 && tau_charge_[tauindex]!=lepcharge) outtree_2b->Fill();
     }
   }
   output->cd();

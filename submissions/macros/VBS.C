@@ -552,10 +552,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 		//----------------------------------------------------------------------------------------------
 
-      if(nmuons==1){ 
+      if(nmuons==1 && nelectrons==0){ 
         typeevent=1; //Mu-tauh events
         ismuon = true;
-      }else if(nelectrons==1){ 
+      }else if(nelectrons==1 && nmuons==0){ 
         typeevent=2; //E-tauh events
         ismuon = false;
       }
