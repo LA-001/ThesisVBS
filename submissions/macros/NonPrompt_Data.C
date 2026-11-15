@@ -90,6 +90,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t ele_mvaid90_[128];
   tree->SetBranchAddress("Electron_mvaIso_WP90", &ele_mvaid90_);
 
+  tree->SetBranchStatus("Electron_promptMVA",1);    // wp VT >0.9
+  Float_t ele_promptmva_[128];
+  tree->SetBranchAddress("Electron_promptMVA", &ele_promptmva_);
+
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
   tree->SetBranchAddress("Electron_r9",&ele_r9_);
@@ -135,6 +139,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Muon_mediumId", 1);
   Bool_t muon_mediumid_[128];
   tree->SetBranchAddress("Muon_mediumId", &muon_mediumid_);
+
+  tree->SetBranchStatus("Muon_promptMVA",1);    // wp VT >0.64
+  Float_t muon_promptmva_[128];
+  tree->SetBranchAddress("Muon_promptMVA", &muon_promptmva_);
   
   tree->SetBranchStatus("Muon_dxy", 1);
   Float_t muon_dxy_[128];
@@ -363,7 +371,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t O_taupt,  O_taueta,  O_tauphi,  O_taum,  O_tauDM;
   Float_t O_leppt,  O_lepeta,  O_lepphi,  O_lepm;
   Float_t O_jetspt[128], O_jetseta[128], O_jetsphi[128], O_jetsm[128];
-  Float_t O_mjj, O_deltaRjj, O_mvis, O_metpt, O_metphi;
+  Float_t O_mjj, O_deltaRjj, O_mvis, O_metpt, O_metphi, O_promptMVA;
 
   auto setBranches = [&](TTree* t){
     t->Branch("islepT",		&O_islepT,		 "islepT/O");
@@ -393,6 +401,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     t->Branch("metphi",  	&O_metphi,  	 "metphi/F");
     t->Branch("mvis",     &O_mvis,       "mvis/F");
     t->Branch("nbjets",   &O_nbjets,     "nbjets/I");  
+    t->Branch("promptMVA", &O_promptMVA, "promptMVA/F");
   };
 
   setBranches(outtree_bveto);
@@ -579,6 +588,9 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
       O_nbjets   = nbjets;
+
+      if(ismuon) O_promptMVA = muon_promptmva_[muindex];
+      else O_promptMVA = ele_promptmva_[eleindex];
 
       if(nbjets==0 && tau_charge_[tauindex]==lepcharge) outtree_bveto->Fill();
       if(nbjets==2 && tau_charge_[tauindex]!=lepcharge) outtree_2b->Fill();
