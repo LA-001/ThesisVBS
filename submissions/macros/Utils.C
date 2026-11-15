@@ -77,6 +77,7 @@ string muon_idfile   = "jsons/muon_Z.json.gz";
 auto muon_c_set      = CorrectionSet::from_file(muon_idfile);
 auto muon_SF1        = muon_c_set->at("NUM_MediumID_DEN_TrackerMuons");
 auto muon_SF2        = muon_c_set->at("NUM_TightPFIso_DEN_MediumID");  //??? è effettivamente Tight ???
+auto muon_SFprompt   = muon_c_set->at("NUM_promptMVA_WP64ID_DEN_MediumID");
 auto muon_HLT_SF     = muon_c_set->at("NUM_IsoMu24_DEN_CutBasedIdMedium_and_PFIsoTight");
 auto muon_SF1den        = muon_c_set->at("NUM_LooseID_DEN_TrackerMuons");
 auto muon_SF2den        = muon_c_set->at("NUM_LoosePFIso_DEN_LooseID");
@@ -211,9 +212,65 @@ Bool_t ElectronSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_
   else return false;  
 }
 
+Bool_t ElectronSelectorPromptMVA(Float_t &pt, Float_t eta, Float_t phi, Float_t id, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight){
+  if(pt>30 && abs(eta)<2.5 && id > 0.9 && abs(dxy)<0.1 && abs(dz)<0.2 && convveto){
+    weight *= ele_HLT->evaluate({"2024Prompt","sf","HLT_SF_Ele30_MVAiso80ID",eta,pt}); //Trigger SF
+    weight *= ele_SF->evaluate({"2024Prompt","sf","PromptMVA-Tight",eta,pt}); //ID SF
+
+    if(pt<75) {
+      weight *= ele_SF->evaluate({"2024Prompt","sf","Reco20to75",eta,pt}); //reco SF
+    }
+    else {
+      weight *= ele_SF->evaluate({"2024Prompt","sf","RecoAbove75",eta,pt});
+    }
+
+    pt *= ele_scale->evaluate({pt,r9,eta}); //Momentum scale correction
+    float sig_smear = ele_smearing->evaluate({"smear",pt,r9,eta});                                                                                                             
+    float ran = gRandom->Gaus(1.,sig_smear);                                                                                                                                          
+    pt *= ran; //Momentum smearing correction
+    return true;
+  }
+  else return false;  
+}
+
 Bool_t MuonSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dxy, Float_t dz, Float_t isoscore, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight){
   if(pt > 30 && abs(eta) < 2.4 && id && abs(dxy)<0.1 && abs(dz)<0.2 && isoscore<0.15){
     weight *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
+    weight *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
+    weight *= muon_HLT_SF->evaluate({eta,pt,"nominal"}); // TRIG SF
+    float pt_in = pt;
+
+    float aMC          = muon_amc->evaluate({eta,phi,"nom"});
+    float MMC          = muon_Mmc->evaluate({eta,phi,"nom"});
+    pt = 1/((MMC/pt)+aMC*charge); // Momentum scale correction 
+
+    float ntracklayers = static_cast<float>(tracklayers_char);
+    float mean         = muon_cbparams->evaluate({abs(eta),ntracklayers,0});
+    float sigma        = muon_cbparams->evaluate({abs(eta),ntracklayers,1});
+    float n            = muon_cbparams->evaluate({abs(eta),ntracklayers,2});
+    float alpha        = muon_cbparams->evaluate({abs(eta),ntracklayers,3});
+    float kDATA        = muon_kdata->evaluate({abs(eta),"nom"});
+    float kMC          = muon_kmc->evaluate({abs(eta),"nom"});
+    float polyparam0   = muon_polyparams->evaluate({abs(eta),ntracklayers,0});
+    float polyparam1   = muon_polyparams->evaluate({abs(eta),ntracklayers,1});
+    float polyparam2   = muon_polyparams->evaluate({abs(eta),ntracklayers,2});
+    float std          = polyparam0+pt*polyparam1+pt*pt*polyparam2;
+    float kfactor      = 0.;
+    if(kDATA>kMC) kfactor = sqrt(kDATA*kDATA-kMC*kMC);
+    float rndm         = get_rndm(mean, sigma, n, alpha, phi, static_cast<int>(event), ls);
+
+    float energy_SF =(1+kfactor*std*rndm); // Momentum smearing correction
+    if(pt < 0. || !std::isfinite(energy_SF)) pt = pt_in;
+    else pt *= energy_SF;
+
+    return true;
+  }
+  else return false;
+}
+
+Bool_t MuonSelectorPromptMVA(Float_t &pt, Float_t eta, Float_t phi, Float_t id, Float_t dxy, Float_t dz, Float_t isoscore, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight){
+  if(pt > 30 && abs(eta) < 2.4 && id > 0.64 && abs(dxy)<0.1 && abs(dz)<0.2 && isoscore<0.15){
+    weight *= muon_SFprompt->evaluate({eta,pt,"nominal"}); // ID SF
     weight *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
     weight *= muon_HLT_SF->evaluate({eta,pt,"nominal"}); // TRIG SF
     float pt_in = pt;
