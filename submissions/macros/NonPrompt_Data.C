@@ -401,7 +401,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     t->Branch("metphi",  	&O_metphi,  	 "metphi/F");
     t->Branch("mvis",     &O_mvis,       "mvis/F");
     t->Branch("nbjets",   &O_nbjets,     "nbjets/I");  
-    t->Branch("promptMVA", &O_promptMVA, "promptMVA/F");
   };
 
   setBranches(outtree_bveto);
@@ -588,9 +587,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    O_metpt    = met_pt_;
 	    O_metphi   = met_phi_;
       O_nbjets   = nbjets;
-
-      if(ismuon) O_promptMVA = muon_promptmva_[muindex];
-      else O_promptMVA = ele_promptmva_[eleindex];
 
       if(nbjets==0 && tau_charge_[tauindex]==lepcharge) outtree_bveto->Fill();
       if(nbjets==2 && tau_charge_[tauindex]!=lepcharge) outtree_2b->Fill();
