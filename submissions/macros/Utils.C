@@ -446,12 +446,13 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
   else return false;   
 }
 
+
 Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dxy, Float_t dz, Float_t isoscore, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight_den, Float_t &weight_num){
   if(pt > 30 && abs(eta) < 2.4 && abs(dxy)<0.1 && abs(dz)<0.2 && id && isoscore<0.4){
     weight_den *= muon_SF1den->evaluate({eta,pt,"nominal"}); // ID SF
     weight_den *= muon_SF2den->evaluate({eta,pt,"nominal"}); // ISO SF
     //weight_num *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
-    weight_num *= muon_SFprompt->evaluate({eta,pt,"nominal"}); // ID SF
+    weight *= muon_SFprompt->evaluate({eta,pt,"nominal"}); // ID SF
     weight_num *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
     float pt_in = pt;
 

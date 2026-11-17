@@ -97,6 +97,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t ele_mvaid90_[128];
   tree->SetBranchAddress("Electron_mvaIso_WP90", &ele_mvaid90_);
 
+  tree->SetBranchStatus("Electron_promptMVA",1);    // wp VT >0.9
+  Float_t ele_promptmva_[128];
+  tree->SetBranchAddress("Electron_promptMVA", &ele_promptmva_);
+
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
   tree->SetBranchAddress("Electron_r9",&ele_r9_);
@@ -142,6 +146,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Muon_mediumId", 1);
   Bool_t muon_mediumid_[128];
   tree->SetBranchAddress("Muon_mediumId", &muon_mediumid_);
+
+  tree->SetBranchStatus("Muon_promptMVA",1);    // wp VT >0.64
+  Float_t muon_promptmva_[128];
+  tree->SetBranchAddress("Muon_promptMVA", &muon_promptmva_);
   
   tree->SetBranchStatus("Muon_dxy", 1);
   Float_t muon_dxy_[128];
@@ -529,7 +537,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	            h_ele_eta_den->Fill(ele_eta_[j], O_eleweight_den);
 	            h_ele_2d_den->Fill(elept, abs(ele_eta_[j]), O_eleweight_den);
 	        }
-	        if(ele_mvaid80_[j]){
+	        //if(ele_mvaid80_[j]){
+            if(ele_promptmva_[j] > 0.9){
 	            h_ele_pt_num->Fill(elept, O_eleweight_num);
 	            h_ele_eta_num->Fill(ele_eta_[j], O_eleweight_num);
 	            h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight_num);
@@ -568,7 +577,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	            h_muon_eta_den->Fill(muon_eta_[j], O_muonweight_den);
 	            h_muon_2d_den->Fill(muonpt, abs(muon_eta_[j]), O_muonweight_den);
 	        }
-	        if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
+	        //if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
+            if(muon_promptmva_[j] > 0.64 && muon_isoscore_[j]<0.15){
 	            h_muon_pt_num->Fill(muonpt, O_muonweight_num);
 	            h_muon_eta_num->Fill(muon_eta_[j], O_muonweight_num);
 	            h_muon_2d_num->Fill(muonpt, abs(muon_eta_[j]), O_muonweight_num);
