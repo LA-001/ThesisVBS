@@ -456,6 +456,24 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     Float_t weight_=genweight_*weightscale_*lumi_eff*xsec_*1000;
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
 
+    if(sample==3 || sample==4 || sample==5){
+      Float_t O_topreweight=1.;
+      Int_t ntops=0;
+
+      for(int j=0; j<ngenparts_; j++){
+        if(abs(genpart_id_[j])==6 && (genpart_statusFlags_[j]/8192)%2){
+          ntops++;
+          Float_t pt=genpart_pt_[j];
+          O_topreweight*=0.103*exp(-0.0118*pt)-0.000134*pt+0.973;
+          O_topreweight*=0.991+0.000075*pt;
+        }
+      }
+      if(ntops>1){
+        O_topreweight=sqrt(O_topreweight);
+        weight_*=O_topreweight;
+      }
+    }
+
     Float_t tauweight_L  = weight_;        Float_t tauweight_M  = weight_;          Float_t tauweight_T  = weight_;       Float_t tauweight_VT  = weight_;
     Float_t O_eleweight_den  = weight_;    Float_t O_eleweight_num  = weight_;
     Float_t O_muonweight_den = weight_;    Float_t O_muonweight_num = weight_;
