@@ -235,6 +235,22 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   UChar_t muon_source_[128];
   tree->SetBranchAddress("Muon_genPartFlav",&muon_source_);
 
+  tree->SetBranchStatus("nGenPart", 1);
+  Int_t ngenparts_;
+  tree->SetBranchAddress("nGenPart",&ngenparts_);
+
+  tree->SetBranchStatus("GenPart_pdgId", 1);
+  Int_t genpart_id_[1024];
+  tree->SetBranchAddress("GenPart_pdgId",&genpart_id_);
+
+  tree->SetBranchStatus("GenPart_statusFlags", 1);
+  UShort_t genpart_statusFlags_[1024];
+  tree->SetBranchAddress("GenPart_statusFlags",&genpart_statusFlags_);
+
+  tree->SetBranchStatus("GenPart_pt", 1);
+  Float_t genpart_pt_[1024];
+  tree->SetBranchAddress("GenPart_pt",&genpart_pt_);
+
 //-------------------------- JETS -----------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("Jet_pt", 1);
