@@ -390,11 +390,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   eletree->Branch("eleeta", &O_eleeta, "eleeta/F");
   eletree->Branch("eleMVA", &O_eleMVA, "eleMVA/F");
 
-  Float_t O_mupt, O_mueta, O_muMVA;
+  Float_t O_mupt, O_mueta, O_muMVA, O_muiso;
   TTree *mutree = new TTree("mutree", "mutree");
   mutree->Branch("mupt",  &O_mupt,  "mupt/F");
   mutree->Branch("mueta", &O_mueta, "mueta/F");
   mutree->Branch("muMVA", &O_muMVA, "muMVA/F");
+  mutree->Branch("muiso", &O_muiso, "muiso/F");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -490,6 +491,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         O_mupt = muon_pt_[j];
         O_mueta = muon_eta_[j];
         O_muMVA = muon_promptmva_[j];
+        O_muiso = muon_isoscore_[j];
 
         mutree->Fill();
 	    }
