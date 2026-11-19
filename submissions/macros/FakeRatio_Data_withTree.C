@@ -462,7 +462,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  Float_t mT = m_T(ele_pt_[j], met_pt_, ele_phi_[j], met_phi_);
 	  if(mT <= 50){
 	    if(ele_mvaid90_[j]){
-        O_elept = ele_pt[j];
+        O_elept = ele_pt_[j];
         O_eleeta = ele_eta_[j];
         O_eleMVA = ele_promptmva_[j];
 
