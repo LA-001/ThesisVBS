@@ -471,6 +471,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
         O_elept = ele_pt_[j];
         O_eleeta = ele_eta_[j];
         O_eleMVA = ele_promptmva_[j];
+        O_eleiso = ele_iso_[j];
 
         eletree->Fill();
       //}
