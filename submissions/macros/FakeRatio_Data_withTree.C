@@ -98,6 +98,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t ele_r9_[128];
   tree->SetBranchAddress("Electron_r9",&ele_r9_);
 
+  tree->SetBranchStatus("Electron_miniPFRelIso_all", 1);
+  Float_t ele_iso_[128];
+  tree->SetBranchAddress("Electron_miniPFRelIso_all",&ele_iso_);  
+
   tree->SetBranchStatus("Electron_seedGain", 1);
   UChar_t ele_gain_[128];
   tree->SetBranchAddress("Electron_seedGain",&ele_gain_);
@@ -384,11 +388,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tautree->Branch("vsjet",  &O_vsjet,  "vsjet/F");
   tautree->Branch("tauDM",  &O_tauDM,  "tauDM/I");
 
-  Float_t O_elept, O_eleeta, O_eleMVA;
+  Float_t O_elept, O_eleeta, O_eleMVA, O_eleiso;
   TTree *eletree = new TTree("eletree", "eletree");
   eletree->Branch("elept",  &O_elept,  "elept/F");
   eletree->Branch("eleeta", &O_eleeta, "eleeta/F");
   eletree->Branch("eleMVA", &O_eleMVA, "eleMVA/F");
+  eletree->Branch("eleiso", &O_eleiso, "eleiso/F");
 
   Float_t O_mupt, O_mueta, O_muMVA, O_muiso;
   TTree *mutree = new TTree("mutree", "mutree");
@@ -452,7 +457,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	Int_t ele_idx_selected = -1;
 	
 	for(int j=0; j<nelectrons_; j++){
-	  if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j] && ele_mvaid90_[j]){
+	  if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j]){ //&& ele_mvaid90_[j]){
 	      neles_candidates++;
         if(ele_idx_selected < 0) ele_idx_selected = j;
     }
@@ -462,13 +467,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  int j = ele_idx_selected;
 	  Float_t mT = m_T(ele_pt_[j], met_pt_, ele_phi_[j], met_phi_);
 	  if(mT <= 50){
-	    if(ele_mvaid90_[j]){
+	    //if(ele_mvaid90_[j]){
         O_elept = ele_pt_[j];
         O_eleeta = ele_eta_[j];
         O_eleMVA = ele_promptmva_[j];
 
         eletree->Fill();
-      }
+      //}
     }
 	}
  
