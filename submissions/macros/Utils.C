@@ -453,7 +453,7 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
     weight_den *= muon_SF1den->evaluate({eta,pt,"nominal"}); // ID SF
     weight_den *= muon_SF2den->evaluate({eta,pt,"nominal"}); // ISO SF
     //weight_num *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
-    weight *= muon_SFprompt->evaluate({eta,pt,"nominal"}); // ID SF
+    weight_num *= muon_SFprompt->evaluate({eta,pt,"nominal"}); // ID SF
     weight_num *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
     float pt_in = pt;
 

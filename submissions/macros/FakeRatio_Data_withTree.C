@@ -380,6 +380,32 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 //-------------------------- OUTPUTS -------------------------------------------------------------------------------------
 
+	Float_t edge_pt1[]  = {20.,25.,30.,35.,40.,45.,50.,55.,60.,70.,80.,100.,120.,140.,160.,180.,200.};
+	Float_t edge_pt2[]  = {20.,40.,60.,80.,100.,120.,145.,200.};
+	Float_t edge_eta1[]  = {-2.5,-2.,-1.479,-1.,0.,1.,1.479,2.,2.5};
+	Float_t edge_eta2[]  = {0.,1.,1.479,2.,2.5};
+
+	const int n_pt1  = sizeof(edge_pt1)/sizeof(edge_pt1[0]) - 1;
+	const int n_pt2  = sizeof(edge_pt2)/sizeof(edge_pt2[0]) - 1;
+	const int n_eta1  = sizeof(edge_eta1)/sizeof(edge_eta1[0]) - 1;
+	const int n_eta2  = sizeof(edge_eta2)/sizeof(edge_eta2[0]) - 1;
+	
+	TH1F *h_ele_pt_den   = new TH1F("h_ele_pt_den","h_ele_pt_den",18,20,200);
+	TH1F *h_ele_eta_den  = new TH1F("h_ele_eta_den","h_ele_eta_den",n_eta1,edge_eta1);
+	TH2F *h_ele_2d_den   = new TH2F("h_ele_2d_den","h_ele_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_ele_pt_num   = new TH1F("h_ele_pt_num","h_ele_pt_num",18,20,200);
+	TH1F *h_ele_eta_num  = new TH1F("h_ele_eta_num","h_ele_eta_num",n_eta1,edge_eta1);
+	TH2F *h_ele_2d_num   = new TH2F("h_ele_2d_num","h_ele_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_muon_pt_den  = new TH1F("h_muon_pt_den","h_muon_pt_den",18,20,200);
+	TH1F *h_muon_eta_den = new TH1F("h_muon_eta_den","h_muon_eta_den",n_eta1,edge_eta1);
+	TH2F *h_muon_2d_den  = new TH2F("h_muon_2d_den","h_muon_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
+	
+	TH1F *h_muon_pt_num  = new TH1F("h_muon_pt_num","h_muon_pt_num",18,20,200);
+	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
+	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
+
   Float_t O_taupt, O_taueta, O_vsjet;
   Int_t   O_tauDM;
   TTree *tautree = new TTree("tautree", "tautree");
@@ -387,20 +413,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tautree->Branch("taueta", &O_taueta, "taueta/F");
   tautree->Branch("vsjet",  &O_vsjet,  "vsjet/F");
   tautree->Branch("tauDM",  &O_tauDM,  "tauDM/I");
-
-  Float_t O_elept, O_eleeta, O_eleMVA, O_eleiso;
-  TTree *eletree = new TTree("eletree", "eletree");
-  eletree->Branch("elept",  &O_elept,  "elept/F");
-  eletree->Branch("eleeta", &O_eleeta, "eleeta/F");
-  eletree->Branch("eleMVA", &O_eleMVA, "eleMVA/F");
-  eletree->Branch("eleiso", &O_eleiso, "eleiso/F");
-
-  Float_t O_mupt, O_mueta, O_muMVA, O_muiso;
-  TTree *mutree = new TTree("mutree", "mutree");
-  mutree->Branch("mupt",  &O_mupt,  "mupt/F");
-  mutree->Branch("mueta", &O_mueta, "mueta/F");
-  mutree->Branch("muMVA", &O_muMVA, "muMVA/F");
-  mutree->Branch("muiso", &O_muiso, "muiso/F");
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -419,6 +431,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  Int_t ntaus=0, neles=0, nmuons=0;
 
 	//-------------------------- TAU ----------------------------------------------------------------
+
+  /*
 	  Int_t ntaus_candidates = 0;
 	  Int_t tau_idx_selected = -1;
 	
@@ -451,13 +465,14 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	      }
 	    }
 	  }
- 
+  */
+
 	//-------------------------- ELECTRON -----------------------------------------------------------
 	Int_t neles_candidates = 0;
 	Int_t ele_idx_selected = -1;
 	
 	for(int j=0; j<nelectrons_; j++){
-	  if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j]){ //&& ele_mvaid90_[j]){
+	  if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j] && ele_mvaid90_[j]){
 	      neles_candidates++;
         if(ele_idx_selected < 0) ele_idx_selected = j;
     }
@@ -467,14 +482,17 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  int j = ele_idx_selected;
 	  Float_t mT = m_T(ele_pt_[j], met_pt_, ele_phi_[j], met_phi_);
 	  if(mT <= 50){
-	    //if(ele_mvaid90_[j]){
-        O_elept = ele_pt_[j];
-        O_eleeta = ele_eta_[j];
-        O_eleMVA = ele_promptmva_[j];
-        O_eleiso = ele_iso_[j];
-
-        eletree->Fill();
-      //}
+      if(ele_mvaid90_[j]){
+	      h_ele_pt_den->Fill(ele_pt_[j]);
+	      h_ele_eta_den->Fill(ele_eta_[j]);
+	      h_ele_2d_den->Fill(ele_pt_[j], abs(ele_eta_[j]));
+	    }
+	    //if(ele_mvaid80_[j]){
+      if(ele_promptmva_[j] > 0.9){
+	      h_ele_pt_num->Fill(ele_pt_[j]);
+	      h_ele_eta_num->Fill(ele_eta_[j]);
+	      h_ele_2d_num->Fill(ele_pt_[j], abs(ele_eta_[j]));
+	    }
     }
 	}
  
@@ -494,12 +512,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  Float_t mT = m_T(muon_pt_[j], met_pt_, muon_phi_[j], met_phi_);
     if(mT <= 50){
 	    if(muon_looseid_[j] && muon_isoscore_[j]<0.4){
-        O_mupt = muon_pt_[j];
-        O_mueta = muon_eta_[j];
-        O_muMVA = muon_promptmva_[j];
-        O_muiso = muon_isoscore_[j];
-
-        mutree->Fill();
+	      h_muon_pt_den->Fill(muon_pt_[j]);
+	      h_muon_eta_den->Fill(muon_eta_[j]);
+	      h_muon_2d_den->Fill(muon_pt_[j], abs(muon_eta_[j]));
+	    }
+	    //if(muon_mediumid_[j] && muon_isoscore_[j]<0.15){
+      if(muon_promptmva_[j] > 0.64 && muon_isoscore_[j]<0.15){
+	      h_muon_pt_num->Fill(muon_pt_[j]);
+	      h_muon_eta_num->Fill(muon_eta_[j]);
+	      h_muon_2d_num->Fill(muon_pt_[j], abs(muon_eta_[j]));
 	    }
 	  }
 	}
@@ -507,9 +528,12 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	//-----------------------------------------------------------------------------------------------
 	}
  
-  eletree->Write();
-  mutree->Write();
-  tautree->Write();
+  h_ele_pt_den->Write();   h_ele_eta_den->Write();   h_ele_2d_den->Write();
+  h_ele_pt_num->Write();   h_ele_eta_num->Write();   h_ele_2d_num->Write();
+  h_muon_pt_den->Write();  h_muon_eta_den->Write();  h_muon_2d_den->Write();
+  h_muon_pt_num->Write();  h_muon_eta_num->Write();  h_muon_2d_num->Write();
+
+  //outtree->Write();
 
   f->Close();
   output->Close();
