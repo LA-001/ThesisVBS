@@ -71,7 +71,7 @@ auto ele_ss_c_set  = CorrectionSet::from_file(ele_ssfile);
 auto ele_scale     = ele_ss_c_set->at("EGMScale_ElePT_2024");     //???
 auto ele_smearing  = ele_ss_c_set->at("EGMSmearAndSyst_ElePT_2024");  //???
 
-string ele_promptidfile = "electron_promptMVA-EGM_2024.json.gz";
+string ele_promptidfile = "jsons/electron_promptMVA-EGM_2024.json.gz";
 auto ele_prompt_c_set = CorrectionSet::from_file(ele_promptidfile);
 auto ele_promptSF     = ele_prompt_c_set->at("Electron-ID-SF");
 
