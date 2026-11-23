@@ -431,6 +431,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	TH1F *h_ele_eta_den  = new TH1F("h_ele_eta_den","h_ele_eta_den",n_eta1,edge_eta1);
 	TH2F *h_ele_2d_den   = new TH2F("h_ele_2d_den","h_ele_2d_den",n_pt2,edge_pt2,n_eta2,edge_eta2);
 	
+    TH1F *h_ele_pt_num_newSF = new TH1F("h_ele_pt_num_newSF","h_ele_pt_num_newSF",18,20,200);
 	TH1F *h_ele_pt_num   = new TH1F("h_ele_pt_num","h_ele_pt_num",18,20,200);
 	TH1F *h_ele_eta_num  = new TH1F("h_ele_eta_num","h_ele_eta_num",n_eta1,edge_eta1);
 	TH2F *h_ele_2d_num   = new TH2F("h_ele_2d_num","h_ele_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
@@ -443,6 +444,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
 	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 
+    /*
     Float_t O_taupt, O_taueta, O_vsjet, O_tauweight_L, O_tauweight_M, O_tauweight_T, O_tauweight_VT;
     Int_t   O_tauDM;
 
@@ -455,6 +457,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     outtree->Branch("taueta",		&O_taueta,		        "taueta/F");
     outtree->Branch("vsjet",		&O_vsjet,		         "vsjet/F");
     outtree->Branch("tauDM",		&O_tauDM,		         "tauDM/I");
+    */
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -473,29 +476,30 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     weight_*=pu_SF->evaluate({npu2_,"nominal"});
 
     if(sample==3 || sample==4 || sample==5){
-      Float_t O_topreweight=1.;
-      Int_t ntops=0;
+      Float_t O_topreweight = 1.;
+      Int_t ntops = 0;
 
       for(int j=0; j<ngenparts_; j++){
         if(abs(genpart_id_[j])==6 && (genpart_statusFlags_[j]/8192)%2){
           ntops++;
-          Float_t pt=genpart_pt_[j];
-          O_topreweight*=0.103*exp(-0.0118*pt)-0.000134*pt+0.973;
-          O_topreweight*=0.991+0.000075*pt;
+          Float_t pt = genpart_pt_[j];
+          O_topreweight *= 0.103*exp(-0.0118*pt)-0.000134*pt+0.973;
+          O_topreweight *= 0.991+0.000075*pt;
         }
       }
       if(ntops>1){
-        O_topreweight=sqrt(O_topreweight);
-        weight_*=O_topreweight;
+        O_topreweight = sqrt(O_topreweight);
+        weight_ *= O_topreweight;
       }
     }
 
     Float_t tauweight_L  = weight_;        Float_t tauweight_M  = weight_;          Float_t tauweight_T  = weight_;       Float_t tauweight_VT  = weight_;
-    Float_t O_eleweight_den  = weight_;    Float_t O_eleweight_num  = weight_;
+    Float_t O_eleweight_den  = weight_;    Float_t O_eleweight_num  = weight_;      Float_t O_eleweight_num_newSF  = weight_;
     Float_t O_muonweight_den = weight_;    Float_t O_muonweight_num = weight_;
     Int_t njets = 0;
 
 	//-------------------------- TAU ----------------------------------------------------------------
+    /*
 	Int_t ntaus_candidates = 0;
 	Int_t tau_idx_selected = -1;
 	
@@ -539,18 +543,21 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	        }
 	    }
 	}
+    */
 
 	//-------------------------- ELECTRON -----------------------------------------------------------
 	Int_t neles_candidates = 0;
 	Int_t ele_idx_selected = -1;
 	
 	for(int j=0; j<nelectrons_; j++){
-	    if(static_cast<int>(ele_source_[j]) != 1) continue;
+        Int_t source = static_cast<int>(ele_source_[j]);
+	    if(source != 1 && source != 15) continue;
 
 		Float_t fake_weight1 = 1.;
-        Float_t fake_weight2 = 1.;		
+        Float_t fake_weight2 = 1.;
+        Float_t fake_weight3 = 1.;			
 	    Float_t elept = ele_pt_[j];
-	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, fake_weight1, fake_weight2);
+	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, fake_weight1, fake_weight2, fake_weight3);
 	
 	    if(pass){
 	        neles_candidates++;
@@ -562,7 +569,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	    int j = ele_idx_selected;
 	    Float_t elept = ele_pt_[j];
 	
-	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight_den, O_eleweight_num);
+	    Bool_t pass = ElectronSelector_FR(elept, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, O_eleweight_den, O_eleweight_num, O_eleweight_num_newSF);
 	    Float_t mT = m_T(elept, met_pt_, ele_phi_[j], met_phi_);
 	
 	    if(mT <= 50){
@@ -574,6 +581,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	        //if(ele_mvaid80_[j]){
             if(ele_promptmva_[j] > 0.9){
 	            h_ele_pt_num->Fill(elept, O_eleweight_num);
+                h_ele_pt_num_newSF->Fill(elept, O_eleweight_num_newSF);
 	            h_ele_eta_num->Fill(ele_eta_[j], O_eleweight_num);
 	            h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight_num);
 	        }
@@ -585,7 +593,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	Int_t muon_idx_selected = -1;
 	
 	for(int j=0; j<nmuons_; j++){
-	    if(static_cast<int>(muon_source_[j]) != 1) continue;
+        Int_t source = static_cast<int>(muon_source_[j]);
+	    if(source != 1 && source != 15) continue;
 
 		Float_t fake_weight1 = 1.;
 		Float_t fake_weight2 = 1.;	
@@ -625,11 +634,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   }  
 
   h_ele_pt_den->Write();   h_ele_eta_den->Write();   h_ele_2d_den->Write();
-  h_ele_pt_num->Write();   h_ele_eta_num->Write();   h_ele_2d_num->Write();
+  h_ele_pt_num->Write();   h_ele_eta_num->Write();   h_ele_2d_num->Write();   h_ele_pt_num_newSF->Write();
   h_muon_pt_den->Write();  h_muon_eta_den->Write();  h_muon_2d_den->Write();
   h_muon_pt_num->Write();  h_muon_eta_num->Write();  h_muon_2d_num->Write();
 
-  outtree->Write();
+  //outtree->Write();
 
   f->Close();
   output->Close();

@@ -26,6 +26,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   //TString filename = "root://cms-xrd-global.cern.ch/" + srcfile;
   TString filename = "root://xrootd-cms.infn.it/" + srcfile;
   TFile *f = TFile::Open(filename);
+  if(f) cout<<"File has been opened!"<<endl;
   TFile *output= new TFile("testoutput.root","RECREATE");
   TTree* tree = (TTree*)f->Get("Events");
   TTree* runtree = (TTree*)f->Get("Runs");
@@ -406,13 +407,15 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
 	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 
+  /*
   Float_t O_taupt, O_taueta, O_vsjet;
   Int_t   O_tauDM;
-  TTree *tautree = new TTree("tautree", "tautree");
-  tautree->Branch("taupt",  &O_taupt,  "taupt/F");
-  tautree->Branch("taueta", &O_taueta, "taueta/F");
-  tautree->Branch("vsjet",  &O_vsjet,  "vsjet/F");
-  tautree->Branch("tauDM",  &O_tauDM,  "tauDM/I");
+  TTree *outtree = new TTree("outtree", "outtree");
+  outtree->Branch("taupt",  &O_taupt,  "taupt/F");
+  outtree->Branch("taueta", &O_taueta, "taueta/F");
+  outtree->Branch("vsjet",  &O_vsjet,  "vsjet/F");
+  outtree->Branch("tauDM",  &O_tauDM,  "tauDM/I");
+  */
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -461,7 +464,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
           O_tauDM = static_cast<int>(tau_decay_[j]);
           O_vsjet = static_cast<int>(tauidvsjet_[j]);
 
-          tautree->Fill();
+          outtree->Fill();
 	      }
 	    }
 	  }

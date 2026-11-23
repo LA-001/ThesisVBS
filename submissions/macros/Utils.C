@@ -71,6 +71,9 @@ auto ele_ss_c_set  = CorrectionSet::from_file(ele_ssfile);
 auto ele_scale     = ele_ss_c_set->at("EGMScale_ElePT_2024");     //???
 auto ele_smearing  = ele_ss_c_set->at("EGMSmearAndSyst_ElePT_2024");  //???
 
+string ele_promptidfile = "electron_promptMVA-EGM_2024.json.gz";
+auto ele_prompt_c_set = CorrectionSet::from_file(ele_promptidfile);
+auto ele_promptSF     = ele_prompt_c_set->at("Electron-ID-SF");
 
 //------------- Muon SFs --------------------------------------------------------
 string muon_idfile   = "jsons/muon_Z.json.gz";
@@ -411,12 +414,15 @@ Bool_t TauSelector_FR(Float_t &pt, Float_t eta, UChar_t vse_, UChar_t vsmu_, UCh
   else return false;
 }
 
-Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight_den, Float_t &weight_num){  
+Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight_den, Float_t &weight_num, Float_t &weight_num_newSF){  
   if(pt>30 and abs(eta)<2.5 and abs(dxy)<0.1 and abs(dz)<0.2 and convveto and id){
     weight_den *= ele_SF->evaluate({"2024Prompt","sf","wp90iso",eta,pt}); //ID SF
 
     weight_num *= ele_SF->evaluate({"2024Prompt","sf","wp90iso",eta,pt}); //ID SF
     weight_num *= ele_SF->evaluate({"2024Prompt","sf","PromptMVA-Tight",eta,pt}); //ID SF
+
+    weight_num_newSF *= ele_SF->evaluate({"2024Prompt","sf","wp90iso",eta,pt}); //ID SF
+    weight_num_newSF *= ele_promptSF->evaluate({"2024Prompt","sf","PromptMVA-Tight",eta,pt}); //ID SF
 
     float pt_in = pt;
 
@@ -427,10 +433,12 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
     if(pt<75) {
       weight_den *= ele_SF->evaluate({"2024Prompt","sf","Reco20to75",eta,pt}); //reco SF
       weight_num *= ele_SF->evaluate({"2024Prompt","sf","Reco20to75",eta,pt}); //reco SF
+      weight_num_newSF *= ele_SF->evaluate({"2024Prompt","sf","Reco20to75",eta,pt}); //reco SF
     }
     else {
       weight_den *= ele_SF->evaluate({"2024Prompt","sf","RecoAbove75",eta,pt});
       weight_num *= ele_SF->evaluate({"2024Prompt","sf","RecoAbove75",eta,pt});
+      weight_num_newSF *= ele_SF->evaluate({"2024Prompt","sf","RecoAbove75",eta,pt});
     }
 
     float energy_SF = ele_scale->evaluate({pt,r9,eta}); //Momentum scale correction
@@ -452,7 +460,8 @@ Bool_t MuonSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t
   if(pt > 30 && abs(eta) < 2.4 && abs(dxy)<0.1 && abs(dz)<0.2 && id && isoscore<0.4){
     weight_den *= muon_SF1den->evaluate({eta,pt,"nominal"}); // ID SF
     weight_den *= muon_SF2den->evaluate({eta,pt,"nominal"}); // ISO SF
-    //weight_num *= muon_SF1->evaluate({eta,pt,"nominal"}); // ID SF
+
+    weight_num *= muon_SF1den->evaluate({eta,pt,"nominal"}); // ID SF
     weight_num *= muon_SFprompt->evaluate({eta,pt,"nominal"}); // ID SF
     weight_num *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
     float pt_in = pt;
