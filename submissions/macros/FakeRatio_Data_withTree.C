@@ -145,7 +145,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t muon_mediumid_[128];
   tree->SetBranchAddress("Muon_mediumId", &muon_mediumid_);
 
-  tree->SetBranchStatus("Muon_promptMVA",1);    // wp VT >0.64
+  tree->SetBranchStatus("Muon_promptMVA",1);    // wp T >0.64
   Float_t muon_promptmva_[128];
   tree->SetBranchAddress("Muon_promptMVA", &muon_promptmva_);
   

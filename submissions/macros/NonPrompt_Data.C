@@ -474,7 +474,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		      islepL = true;
 		      leppt = ele_pt_[j];
 		      lepeta = ele_eta_[j];
-	        if(ele_mvaid80_[j])  islepT=true;
+	        //if(ele_mvaid80_[j])  islepT=true;
+	        if(ele_promptmva_[j] > 0.9)  islepT=true;
         }
       }
       
@@ -487,7 +488,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		      islepL = true;
 		      leppt = muon_pt_[j];
 		      lepeta = muon_eta_[j];
-		      if(muon_mediumid_[j] && muon_isoscore_[j]<0.15) islepT = true;
+		      //if(muon_mediumid_[j] && muon_isoscore_[j]<0.15) islepT = true;
+		      if(muon_promptmva_[j] > 0.64 && muon_isoscore_[j]<0.15) islepT = true;
         }
       }
 
