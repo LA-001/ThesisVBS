@@ -422,10 +422,13 @@ Bool_t ElectronSelector_FR(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Flo
     weight_num *= ele_SF->evaluate({"2024Prompt","sf","PromptMVA-Tight",eta,pt}); //ID SF
 
     weight_num_newSF *= ele_SF->evaluate({"2024Prompt","sf","wp90iso",eta,pt}); //ID SF
-    float eta_gap = eta;
+    float eta_gap = eta, pt_gap = pt;
     if(eta_gap >= 1.445 && eta_gap <= 1.505) eta_gap = eta_gap - 0.2;
-    elif(eta_gap > 1.505 && eta_gap <= 1.567) eta_gap = eta_gap + 0.2;
-    weight_num_newSF *= ele_promptSF->evaluate({"2024Prompt","sf","PromptMVA-Tight",eta_gap,pt}); //ID SF
+    else if(eta_gap <= -1.445 && eta_gap >= -1.505) eta_gap = eta_gap + 0.2;
+    else if(eta_gap > 1.505 && eta_gap <= 1.567) eta_gap = eta_gap + 0.2;
+    else if(eta_gap < -1.505 && eta_gap >= -1.567) eta_gap = eta_gap - 0.2;
+    if(pt_gap >= 500) pt_gap = 400;
+    weight_num_newSF *= ele_promptSF->evaluate({"2024Prompt","sf","PromptMVA-Tight",eta_gap,pt_gap}); //ID SF
 
     float pt_in = pt;
 
