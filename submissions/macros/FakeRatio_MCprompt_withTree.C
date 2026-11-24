@@ -581,7 +581,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	        //if(ele_mvaid80_[j]){
             if(ele_promptmva_[j] > 0.9){
 	            h_ele_pt_num->Fill(elept, O_eleweight_num);
-                h_ele_pt_num_newSF->Fill(elept, O_eleweight_num_newSF);
+              h_ele_pt_num_newSF->Fill(elept, O_eleweight_num_newSF);
 	            h_ele_eta_num->Fill(ele_eta_[j], O_eleweight_num);
 	            h_ele_2d_num->Fill(elept, abs(ele_eta_[j]), O_eleweight_num);
 	        }
