@@ -90,9 +90,13 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t ele_mvaid90_[128];
   tree->SetBranchAddress("Electron_mvaIso_WP90", &ele_mvaid90_);
 
-  tree->SetBranchStatus("Electron_promptMVA",1);    // wp VT >0.9
+  tree->SetBranchStatus("Electron_promptMVA",1);    // wp T >0.9
   Float_t ele_promptmva_[128];
   tree->SetBranchAddress("Electron_promptMVA", &ele_promptmva_);
+
+  tree->SetBranchStatus("Electron_cutBased",1);    // wp M >= 3
+  UChar_t ele_cutbased_[128];
+  tree->SetBranchAddress("Electron_cutBased", &ele_cutbased_);
 
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
@@ -140,7 +144,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t muon_mediumid_[128];
   tree->SetBranchAddress("Muon_mediumId", &muon_mediumid_);
 
-  tree->SetBranchStatus("Muon_promptMVA",1);    // wp VT >0.64
+  tree->SetBranchStatus("Muon_promptMVA",1);    // wp T >0.64
   Float_t muon_promptmva_[128];
   tree->SetBranchAddress("Muon_promptMVA", &muon_promptmva_);
   

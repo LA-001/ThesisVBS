@@ -215,10 +215,17 @@ Bool_t ElectronSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_
   else return false;  
 }
 
-Bool_t ElectronSelectorPromptMVA(Float_t &pt, Float_t eta, Float_t phi, Float_t id, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight){
-  if(pt>30 && abs(eta)<2.5 && id > 0.9 && abs(dxy)<0.1 && abs(dz)<0.2 && convveto){
+Bool_t ElectronSelectorPromptMVA(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t promptid, Float_t dxy, Float_t dz, Bool_t convveto, Float_t r9, UChar_t gain, UInt_t run, Float_t &weight){
+  if(pt>30 && abs(eta)<2.5 && abs(dxy)<0.1 && abs(dz)<0.2 && convveto && promptid > 0.9 && id){
     weight *= ele_HLT->evaluate({"2024Prompt","sf","HLT_SF_Ele30_MVAiso80ID",eta,pt}); //Trigger SF
-    weight *= ele_SF->evaluate({"2024Prompt","sf","PromptMVA-Tight",eta,pt}); //ID SF
+    weight *= ele_SF->evaluate({"2024Prompt","sf","wp90iso",eta,pt}); //ID SF
+    float eta_gap = eta, pt_gap = pt;
+    if(eta_gap >= 1.4442 && eta_gap <= 1.505)        eta_gap = eta_gap - 0.2;
+    else if(eta_gap <= -1.4442 && eta_gap >= -1.505) eta_gap = eta_gap + 0.2;
+    else if(eta_gap > 1.505 && eta_gap <= 1.566)     eta_gap = eta_gap + 0.2;
+    else if(eta_gap < -1.505 && eta_gap >= -1.566)   eta_gap = eta_gap - 0.2;
+    if(pt_gap >= 500) pt_gap = 400;
+    weight *= ele_promptSF->evaluate({"2024Prompt","sf","PromptMVA-Tight",eta_gap,pt_gap}); //ID SF
 
     if(pt<75) {
       weight *= ele_SF->evaluate({"2024Prompt","sf","Reco20to75",eta,pt}); //reco SF
@@ -271,11 +278,12 @@ Bool_t MuonSelector(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t dx
   else return false;
 }
 
-Bool_t MuonSelectorPromptMVA(Float_t &pt, Float_t eta, Float_t phi, Float_t id, Float_t dxy, Float_t dz, Float_t isoscore, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight){
-  if(pt > 30 && abs(eta) < 2.4 && id > 0.64 && abs(dxy)<0.1 && abs(dz)<0.2 && isoscore<0.15){
+Bool_t MuonSelectorPromptMVA(Float_t &pt, Float_t eta, Float_t phi, Bool_t id, Float_t promptid, Float_t dxy, Float_t dz, Float_t isoscore, Int_t charge, UChar_t tracklayers_char, ULong64_t event, UInt_t ls, Float_t &weight){
+  if(pt > 30 && abs(eta) < 2.4 && abs(dxy)<0.1 && abs(dz)<0.2 && isoscore<0.15 && promptid > 0.64 && id){
+    weight *= muon_SF1den->evaluate({eta,pt,"nominal"});   // ID SF
     weight *= muon_SFprompt->evaluate({eta,pt,"nominal"}); // ID SF
-    weight *= muon_SF2->evaluate({eta,pt,"nominal"}); // ISO SF
-    weight *= muon_HLT_SF->evaluate({eta,pt,"nominal"}); // TRIG SF
+    weight *= muon_SF2->evaluate({eta,pt,"nominal"});      // ISO SF
+    weight *= muon_HLT_SF->evaluate({eta,pt,"nominal"});   // TRIG SF
     float pt_in = pt;
 
     float aMC          = muon_amc->evaluate({eta,phi,"nom"});

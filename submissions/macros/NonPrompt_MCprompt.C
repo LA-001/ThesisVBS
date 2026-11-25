@@ -94,6 +94,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Bool_t ele_mvaid90_[128];
   tree->SetBranchAddress("Electron_mvaIso_WP90", &ele_mvaid90_);
 
+  tree->SetBranchStatus("Electron_promptMVA",1);    // wp T > 0.9
+  Float_t ele_promptmva_[128];
+  tree->SetBranchAddress("Electron_promptMVA", &ele_promptmva_);
+
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
   tree->SetBranchAddress("Electron_r9",&ele_r9_);
@@ -139,6 +143,10 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   tree->SetBranchStatus("Muon_mediumId", 1);
   Bool_t muon_mediumid_[128];
   tree->SetBranchAddress("Muon_mediumId", &muon_mediumid_);
+
+  tree->SetBranchStatus("Muon_promptMVA",1);    // wp T > 0.64
+  Float_t muon_promptmva_[128];
+  tree->SetBranchAddress("Muon_promptMVA", &muon_promptmva_);
   
   tree->SetBranchStatus("Muon_dxy", 1);
   Float_t muon_dxy_[128];
@@ -522,7 +530,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
     	for(int j=0; j<nelectrons_; j++){
           Float_t pt = ele_pt_[j];
-          Bool_t pass = ElectronSelector_FR(pt, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_, fake_weight);        
+          Bool_t pass = ElectronSelector_FR(pt, ele_eta_[j], ele_phi_[j], ele_mvaid90_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_, fake_weight, fake_weight2);        
           
           if(pass){
           weight_ *= ele_HLT->evaluate({"2024Prompt","sf","HLT_SF_Ele30_MVAiso80ID",ele_eta_[j],pt});          
@@ -533,7 +541,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 		      islepL = true;
 		      leppt = pt;
 			    lepeta = ele_eta_[j];
-			    if(ele_mvaid80_[j])  islepT=true;
+			    //if(ele_mvaid80_[j])  islepT=true;
+	        if(ele_promptmva_[j] > 0.9)  islepT=true;
         }
     	}
       
@@ -550,7 +559,8 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 			    islepL = true;
 		      leppt = pt;
 			    lepeta = muon_eta_[j];
-			    if(muon_mediumid_[j] && muon_isoscore_[j]<0.15)  islepT = true;
+			    //if(muon_mediumid_[j] && muon_isoscore_[j]<0.15)  islepT = true;
+		      if(muon_promptmva_[j] > 0.64 && muon_isoscore_[j]<0.15) islepT = true;
         }
     	}
 
