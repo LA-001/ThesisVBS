@@ -94,10 +94,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t ele_promptmva_[128];
   tree->SetBranchAddress("Electron_promptMVA", &ele_promptmva_);
 
-  tree->SetBranchStatus("Electron_cutBased",1);    // wp M >= 3
-  UChar_t ele_cutbased_[128];
-  tree->SetBranchAddress("Electron_cutBased", &ele_cutbased_);
-
   tree->SetBranchStatus("Electron_r9", 1);
   Float_t ele_r9_[128];
   tree->SetBranchAddress("Electron_r9",&ele_r9_);
