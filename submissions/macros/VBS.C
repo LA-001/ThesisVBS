@@ -527,7 +527,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     	for(int j=0; j<nelectrons_; j++){
         Float_t elept = ele_pt_[j];
         //Bool_t pass = ElectronSelector(elept, ele_eta_[j], ele_phi_[j], ele_mvaid80_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
-        Bool_t pass = ElectronSelectorPromptMVA(elept, ele_eta_[j], ele_phi_[j], ele_promptmva_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
+        Bool_t pass = ElectronSelectorPromptMVA(elept, ele_eta_[j], ele_phi_[j], ele_mvaid80_[j], ele_promptmva_[j], ele_dxy_[j], ele_dz_[j], ele_conv_[j], ele_r9_[j], ele_gain_[j], run_, weight_);
         if(pass){
             nelectrons++;
             eleindex=j;
@@ -539,7 +539,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
     	for(int j=0; j<nmuons_; j++){
         Float_t muonpt = muon_pt_[j];
         //Bool_t pass = MuonSelector(muonpt,muon_eta_[j],muon_phi_[j],muon_mediumid_[j],muon_dxy_[j],muon_dz_[j],muon_isoscore_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, weight_);
-        Bool_t pass = MuonSelectorPromptMVA(muonpt,muon_eta_[j],muon_phi_[j],muon_promptmva_[j],muon_dxy_[j],muon_dz_[j],muon_isoscore_[j],muon_charge_[j],muon_ntracklayers_[j], event_, ls_, weight_);        
+        Bool_t pass = MuonSelectorPromptMVA(muonpt, muon_eta_[j], muon_phi_[j], muon_mediumid_[j], muon_promptmva_[j], muon_dxy_[j], muon_dz_[j], muon_isoscore_[j], muon_charge_[j], muon_ntracklayers_[j], event_, ls_, weight_);        
         if(pass){
           nmuons++;
           muindex=j;
