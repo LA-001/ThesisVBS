@@ -237,10 +237,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t jet_mass_[128];
   tree->SetBranchAddress("Jet_mass",&jet_mass_);
 
-  tree->SetBranchStatus("Jet_hadronFlavour", 1);
-  UChar_t jet_flav_[128];
-  tree->SetBranchAddress("Jet_hadronFlavour",&jet_flav_);
-
   tree->SetBranchStatus("Jet_btagUParTAK4B", 1); //Jet_btagUParTAK4B
   Float_t jet_btag_[128];
   tree->SetBranchAddress("Jet_btagUParTAK4B",&jet_btag_);
@@ -351,10 +347,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   Float_t rho_calo_;
   tree->SetBranchAddress("Rho_fixedGridRhoFastjetCentralCalo",&rho_calo_);
   
-  tree->SetBranchStatus("Pileup_nTrueInt", 1);
-  Float_t npu2_;
-  tree->SetBranchAddress("Pileup_nTrueInt",&npu2_);
-
 //-------------------------- MET ---------------------------------------------------------------------------------------
 
   tree->SetBranchStatus("PuppiMET_pt",  1);
@@ -475,8 +467,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	Int_t ele_idx_selected = -1;
 	
 	for(int j=0; j<nelectrons_; j++){
-	  //if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j] && ele_mvaid90_[j]){
-    if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && static_cast<int>(ele_id_[j])>=3){
+	  if(ele_pt_[j]>30 && abs(ele_eta_[j])<2.5 && abs(ele_dxy_[j])<0.1 && abs(ele_dz_[j])<0.2 && ele_conv_[j] && ele_mvaid90_[j]){
 	    neles_candidates++;
       if(ele_idx_selected < 0) ele_idx_selected = j;
     }
@@ -486,11 +477,11 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	  Int_t j = ele_idx_selected;
 	  Float_t mT = m_T(ele_pt_[j], met_pt_, ele_phi_[j], met_phi_);
 	  if(mT <= 50){
-      //if(ele_mvaid90_[j]){
+      if(ele_mvaid90_[j]){
 	      h_ele_pt_den->Fill(ele_pt_[j]);
 	      h_ele_eta_den->Fill(ele_eta_[j]);
 	      h_ele_2d_den->Fill(ele_pt_[j], abs(ele_eta_[j]));
-	    //}
+	    }
 	    //if(ele_mvaid80_[j]){
       if(ele_promptmva_[j] > 0.9){
 	      h_ele_pt_num->Fill(ele_pt_[j]);
