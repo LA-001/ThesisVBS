@@ -399,7 +399,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	TH1F *h_muon_eta_num = new TH1F("h_muon_eta_num","h_muon_eta_num",n_eta1,edge_eta1);
 	TH2F *h_muon_2d_num  = new TH2F("h_muon_2d_num","h_muon_2d_num",n_pt2,edge_pt2,n_eta2,edge_eta2);
 
-  /*
   Float_t O_taupt, O_taueta, O_vsjet;
   Int_t   O_tauDM;
   TTree *outtree = new TTree("outtree", "outtree");
@@ -407,7 +406,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   outtree->Branch("taueta", &O_taueta, "taueta/F");
   outtree->Branch("vsjet",  &O_vsjet,  "vsjet/F");
   outtree->Branch("tauDM",  &O_tauDM,  "tauDM/I");
-  */
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -427,7 +425,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 
 	//-------------------------- TAU ----------------------------------------------------------------
 
-  /*
 	  Int_t ntaus_candidates = 0;
 	  Int_t tau_idx_selected = -1;
 	
@@ -460,7 +457,6 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
 	      }
 	    }
 	  }
-  */
 
 	//-------------------------- ELECTRON -----------------------------------------------------------
 	Int_t neles_candidates = 0;
@@ -528,7 +524,7 @@ void analyze(TString srcfile, int sample, float xsec_, int sampleevents_) {
   h_muon_pt_den->Write();  h_muon_eta_den->Write();  h_muon_2d_den->Write();
   h_muon_pt_num->Write();  h_muon_eta_num->Write();  h_muon_2d_num->Write();
 
-  //outtree->Write();
+  outtree->Write();
 
   f->Close();
   output->Close();
